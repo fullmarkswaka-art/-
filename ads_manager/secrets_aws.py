@@ -47,7 +47,9 @@ KEY_ALIASES = {
 
 def _apply_vars(variables: dict, loaded: list[str]) -> None:
     """取得した変数群を（別名も解決しつつ）未設定の環境変数へ反映する。"""
-    upper = {k.upper(): v for k, v in variables.items() if v}
+    # 貼り付け時に混入しがちな前後の空白・改行は除去する
+    upper = {k.upper(): str(v).strip() for k, v in variables.items()
+             if v and str(v).strip()}
     for key in AD_KEYS:
         if os.getenv(key):
             continue
