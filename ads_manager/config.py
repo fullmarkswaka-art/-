@@ -43,9 +43,13 @@ class GoogleAdsConfig:
 
 
 def load_meta_config() -> MetaConfig:
+    # act_ プレフィックスなしのID（数字のみ）でも受け付ける
+    ad_account_id = os.getenv("META_AD_ACCOUNT_ID", "").strip()
+    if ad_account_id and not ad_account_id.startswith("act_"):
+        ad_account_id = "act_" + ad_account_id
     return MetaConfig(
         access_token=os.getenv("META_ACCESS_TOKEN", ""),
-        ad_account_id=os.getenv("META_AD_ACCOUNT_ID", ""),
+        ad_account_id=ad_account_id,
         api_version=os.getenv("META_API_VERSION", "v23.0"),
     )
 
