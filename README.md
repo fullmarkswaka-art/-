@@ -51,6 +51,12 @@ python -m ads_manager check   # 接続確認
 
 個別のキーを .env に書く代わりに、AWSから自動取得できます。
 
+- **Lambda 関数の環境変数**: 既存の Lambda（例: `ad-routine-check`）の
+  環境変数にキーが入っている場合、`ADS_AWS_LAMBDA_FUNCTION` に関数名を
+  設定すれば自動で読み取ります。
+  必要なIAM権限: `lambda:GetFunctionConfiguration`。
+  キー名が `FB_ACCESS_TOKEN` や `GOOGLE_REFRESH_TOKEN` のような別名でも
+  自動でマッピングされます（`ads_manager/secrets_aws.py` の `KEY_ALIASES` 参照）
 - **Secrets Manager**: 上記キーをまとめた1つのJSONシークレットを作成し、
   `ADS_AWS_SECRET_NAME` にシークレット名を設定
   ```json
