@@ -7,6 +7,14 @@ from dotenv import load_dotenv
 
 load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
+# AWS (Secrets Manager / SSM) が設定されていれば不足分をそこから補完する
+from .secrets_aws import load_secrets_into_env  # noqa: E402
+
+try:
+    load_secrets_into_env()
+except Exception as e:  # AWS側の失敗は警告に留め、環境変数だけでも動かせるようにする
+    print(f"⚠️ AWSからのシークレット取得に失敗: {e}")
+
 
 @dataclass
 class MetaConfig:
