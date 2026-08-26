@@ -1,0 +1,13 @@
+# 認証情報は絶対にコミットしない
+.env
+google-ads.yaml
+*.token.json
+client_secret*.json
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
