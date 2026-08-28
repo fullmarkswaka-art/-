@@ -234,12 +234,13 @@ def catalog_clean(client: MetaAdsClient, catalog_id: str,
             item_type="PRODUCT_ITEM",
             requests=_json.dumps([
                 {"method": "UPDATE",
-                 "retailer_id": r["retailer_id"],
-                 "data": {"availability": "out of stock",
+                 "data": {"id": r["retailer_id"],
+                          "availability": "out of stock",
                           "visibility": "staging"}}
                 for r in chunk]),
         )
-        handles.append(resp.get("handles"))
+        # 成功時は {"handles": [...]}、形式エラー時は {"validation_status": [...]}
+        handles.append(resp.get("handles") or resp)
     result["items_batch_handles"] = handles
     return result
 
