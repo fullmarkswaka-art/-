@@ -157,6 +157,93 @@ def catalog_products(client: MetaAdsClient, container_id: str,
     }
 
 
+def _check_product_url(url: str) -> int | str:
+    """商品URLの最終的なHTTPステータスを返す。503等は間隔を空けて再試行。"""
+    import time
+    last: int | str = "unknown"
+    for attempt in range(3):
+        try:
+            r = requests.head(url, allow_redirects=True, timeout=12)
+            if r.status_code in (405, 501):
+                r = requests.get(url, allow_redirects=True, timeout=12,
+                                 stream=True)
+            last = r.status_code
+            # 429/5xx はレート制限の可能性があるので待って再確認
+            if r.status_code not in (429, 500, 502, 503, 504):
+                return last
+        except requests.RequestException as e:
+            last = type(e).__name__
+        time.sleep(2 * (attempt + 1))
+    return last
+
+
+def catalog_clean(client: MetaAdsClient, catalog_id: str,
+                  apply: bool = False, workers: int = 8) -> dict:
+    """カタログ内のリンク切れ商品を洗い出し、apply=True なら非表示化する。
+
+    非表示化は「在庫なし (out of stock) + 非公開 (staging)」への更新で、
+    削除はしない（誤検出時は published に戻せる）。更新は items_batch で
+    retailer_id 単位に一括投入する。
+    """
+    from concurrent.futures import ThreadPoolExecutor
+
+    products = client.get_all(
+        f"{catalog_id}/products",
+        fields="id,retailer_id,name,url,availability,visibility",
+        limit=100,
+    )
+    with ThreadPoolExecutor(max_workers=workers) as ex:
+        statuses = list(ex.map(
+            lambda p: _check_product_url(p["url"]) if p.get("url") else None,
+            products))
+
+    dead, alive, unknown = [], [], []
+    for p, st in zip(products, statuses):
+        row = {"retailer_id": p.get("retailer_id"), "name": p.get("name"),
+               "url": p.get("url"), "http_status": st,
+               "visibility": p.get("visibility"),
+               "availability": p.get("availability")}
+        if isinstance(st, int) and st >= 400:
+            dead.append(row)
+        elif isinstance(st, int):
+            alive.append(row)
+        else:
+            unknown.append(row)  # URLなし・接続不安定は触らない
+
+    result = {
+        "summary": {
+            "商品数": len(products),
+            "リンク切れ（非表示化対象）": len(dead),
+            "正常": len(alive),
+            "判定不能（変更しない）": len(unknown),
+            "実行モード": "適用" if apply else "ドライラン（--apply で適用）",
+        },
+        "リンク切れ商品": dead,
+        "判定不能": unknown,
+    }
+    if not apply or not dead:
+        return result
+
+    # items_batch は1リクエストで大量更新できる（500件ずつに分割）
+    handles = []
+    for i in range(0, len(dead), 500):
+        chunk = dead[i:i + 500]
+        import json as _json
+        resp = client.post(
+            f"{catalog_id}/items_batch",
+            item_type="PRODUCT_ITEM",
+            requests=_json.dumps([
+                {"method": "UPDATE",
+                 "retailer_id": r["retailer_id"],
+                 "data": {"availability": "out of stock",
+                          "visibility": "staging"}}
+                for r in chunk]),
+        )
+        handles.append(resp.get("handles"))
+    result["items_batch_handles"] = handles
+    return result
+
+
 def meta_audit(client: MetaAdsClient, include_paused: bool = False,
                check_links: bool = True) -> dict:
     """広告を棚卸しし、問題のある広告と原因分類を含むレポートを返す。"""
