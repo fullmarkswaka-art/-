@@ -14,6 +14,7 @@
   python -m ads_manager meta catalog-usage            # 広告セットが参照するカタログ/商品セット
   python -m ads_manager meta catalog-products <ID> [--query 語]  # カタログ内商品の表示状態
   python -m ads_manager meta catalog-clean <カタログID> [--apply] # リンク切れ商品を非表示化
+  python -m ads_manager meta catalog-sync <カタログID> [--apply]  # サイト全商品をカタログへ同期
   python -m ads_manager meta creatives                # 広告の画像・テキスト一覧
   python -m ads_manager meta preview <ad_id>          # 公式プレビューHTMLを保存
   python -m ads_manager google creatives              # 見出し・説明文一覧
@@ -96,6 +97,12 @@ def main(argv=None) -> int:
             cc.add_argument("catalog_id", help="カタログID")
             cc.add_argument("--apply", action="store_true",
                             help="リンク切れ商品を実際に非表示化する（省略時はドライラン）")
+            cs = action_sub.add_parser("catalog-sync")
+            cs.add_argument("catalog_id", help="カタログID")
+            cs.add_argument("--apply", action="store_true",
+                            help="サイトの全商品を実際にカタログへ同期する（省略時はドライラン）")
+            cs.add_argument("--limit", type=int, default=0,
+                            help="テスト用: 先頭N商品だけ処理する")
         pv = action_sub.add_parser("preview")
         pv.add_argument("ad_id")
         if name == "meta":
@@ -134,6 +141,10 @@ def main(argv=None) -> int:
         elif args.action == "catalog-clean":
             from .audit import catalog_clean
             _print(catalog_clean(client, args.catalog_id, apply=args.apply))
+        elif args.action == "catalog-sync":
+            from .catalog_sync import catalog_sync
+            _print(catalog_sync(client, args.catalog_id,
+                                apply=args.apply, limit=args.limit))
         elif args.action == "creatives":
             from .creatives import meta_list_creatives
             _print(meta_list_creatives(client))
