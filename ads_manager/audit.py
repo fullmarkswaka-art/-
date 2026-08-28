@@ -144,8 +144,8 @@ def catalog_products(client: MetaAdsClient, container_id: str,
                     or q in (p.get("retailer_id") or "").lower()
                     or q in (p.get("url") or "").lower()]
     delivering = [p for p in products
-                  if p.get("visibility") == "PUBLISHED"
-                  and (p.get("availability") or "").replace("_", " ")
+                  if (p.get("visibility") or "").lower() == "published"
+                  and (p.get("availability") or "").lower().replace("_", " ")
                   in ("in stock", "available for order", "preorder")]
     return {
         "summary": {
