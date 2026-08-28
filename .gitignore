@@ -4,6 +4,9 @@ google-ads.yaml
 *.token.json
 client_secret*.json
 
+# Claude Code 個人設定
+.claude/settings.local.json
+
 # Python
 __pycache__/
 *.py[cod]
