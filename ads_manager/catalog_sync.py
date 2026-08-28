@@ -110,10 +110,8 @@ def scrape_product(url: str) -> dict | None:
     }
 
 
-def catalog_sync(client: MetaAdsClient, catalog_id: str,
-                 apply: bool = False, workers: int = 8,
-                 limit: int = 0) -> dict:
-    """サイトの全商品をカタログへ同期する。apply=False はドライラン。"""
+def scrape_all_products(workers: int = 8, limit: int = 0) -> tuple[list[dict], list[str]]:
+    """サイト全商品を取得して (成功リスト, 失敗URLリスト) を返す。"""
     urls = list_site_products()
     if limit:
         urls = urls[:limit]
@@ -121,6 +119,53 @@ def catalog_sync(client: MetaAdsClient, catalog_id: str,
         scraped = list(ex.map(scrape_product, urls))
     items = [p for p in scraped if p]
     failed = [u for u, p in zip(urls, scraped) if not p]
+    return items, failed
+
+
+GOOGLE_FEED_COLUMNS = [
+    "id", "title", "description", "link", "image_link",
+    "additional_image_link", "availability", "price", "condition",
+    "mpn", "identifier_exists",
+]
+GOOGLE_AVAILABILITY = {
+    "in stock": "in_stock",
+    "out of stock": "out_of_stock",
+    "available for order": "preorder",
+}
+
+
+def build_google_feed(items: list[dict]) -> str:
+    """Google Merchant Center 用のTSVフィードを組み立てる。
+
+    Merchant Center の「スケジュールされた取得」にこのファイルのURLを
+    登録すれば、API権限なしでカタログを自動更新できる。
+    """
+    lines = ["\t".join(GOOGLE_FEED_COLUMNS)]
+    for p in items:
+        row = {
+            "id": p["id"],
+            "title": p["title"],
+            "description": p["description"][:5000],
+            "link": p["link"],
+            "image_link": p["image_link"],
+            "additional_image_link": ",".join(p.get("additional_image_link") or []),
+            "availability": GOOGLE_AVAILABILITY.get(p["availability"],
+                                                    "out_of_stock"),
+            "price": p["price"],
+            "condition": "new",
+            "mpn": p["mpn"],
+            "identifier_exists": "no",  # GTIN/ブランド情報が無いため
+        }
+        lines.append("\t".join(
+            re.sub(r"[\t\r\n]+", " ", str(row[c])) for c in GOOGLE_FEED_COLUMNS))
+    return "\n".join(lines) + "\n"
+
+
+def catalog_sync(client: MetaAdsClient, catalog_id: str,
+                 apply: bool = False, workers: int = 8,
+                 limit: int = 0) -> dict:
+    """サイトの全商品をカタログへ同期する。apply=False はドライラン。"""
+    items, failed = scrape_all_products(workers=workers, limit=limit)
 
     existing = client.get_all(
         f"{catalog_id}/products",
@@ -133,7 +178,7 @@ def catalog_sync(client: MetaAdsClient, catalog_id: str,
 
     result = {
         "summary": {
-            "サイトの商品数": len(urls),
+            "サイトの商品数": len(items) + len(failed),
             "取得成功": len(items),
             "取得失敗（スキップ）": len(failed),
             "在庫あり": sum(1 for p in items

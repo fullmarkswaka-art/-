@@ -81,6 +81,12 @@ def main(argv=None) -> int:
         bd.add_argument("object_id")
         bd.add_argument("amount", type=float)
         action_sub.add_parser("creatives")
+        if name == "google":
+            fd = action_sub.add_parser("feed")
+            fd.add_argument("--out", default="feeds/google_merchant_feed.tsv",
+                            help="出力先TSVファイルパス")
+            fd.add_argument("--limit", type=int, default=0,
+                            help="テスト用: 先頭N商品だけ処理する")
         if name == "meta":
             au = action_sub.add_parser("audit")
             au.add_argument("--include-paused", action="store_true",
@@ -153,6 +159,16 @@ def main(argv=None) -> int:
             path = meta_generate_preview(client, args.ad_id, args.format)
             print(f"プレビューを保存: {path}")
     else:
+        if args.action == "feed":
+            # Merchant Center用フィード生成はGoogle APIを使わない
+            from pathlib import Path
+            from .catalog_sync import build_google_feed, scrape_all_products
+            items, failed = scrape_all_products(limit=args.limit)
+            out = Path(args.out)
+            out.parent.mkdir(parents=True, exist_ok=True)
+            out.write_text(build_google_feed(items), encoding="utf-8")
+            print(f"フィードを生成: {out} ({len(items)}商品, 取得失敗{len(failed)}件)")
+            return 0
         from .google_ads_client import GoogleAdsClientWrapper
         client = GoogleAdsClientWrapper(load_google_config())
         if args.action == "campaigns":
