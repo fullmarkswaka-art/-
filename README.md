@@ -110,6 +110,12 @@ python -m ads_manager meta audit                      # 配信中の全広告の
 python -m ads_manager meta audit --include-paused     # 停止中も含めて棚卸し
 python -m ads_manager meta audit --no-check-links     # URLの生死確認を省略（高速）
 
+# --- カタログ広告の調査（過去商品がカタログ経由で配信されていないか） ---
+python -m ads_manager meta catalog-usage              # 広告セットが参照するカタログ/商品セットを特定
+python -m ads_manager meta catalog-products <ID> --query daybreak
+                                                      # カタログ/商品セット内の商品の
+                                                      # visibility(公開状態)・availability(在庫)を確認
+
 # --- クリエイティブ確認 ---
 python -m ads_manager meta creatives                  # 画像URL・テキスト一覧
 python -m ads_manager meta preview <広告ID>           # Meta公式プレビューを previews/ に保存

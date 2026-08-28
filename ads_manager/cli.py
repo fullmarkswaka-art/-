@@ -11,6 +11,8 @@
   python -m ads_manager google set-status <id> ENABLED|PAUSED
   python -m ads_manager google set-budget <id> <金額>
   python -m ads_manager meta audit                    # 広告棚卸し（リンク切れ・停止漏れ検出）
+  python -m ads_manager meta catalog-usage            # 広告セットが参照するカタログ/商品セット
+  python -m ads_manager meta catalog-products <ID> [--query 語]  # カタログ内商品の表示状態
   python -m ads_manager meta creatives                # 広告の画像・テキスト一覧
   python -m ads_manager meta preview <ad_id>          # 公式プレビューHTMLを保存
   python -m ads_manager google creatives              # 見出し・説明文一覧
@@ -83,6 +85,12 @@ def main(argv=None) -> int:
                             help="停止中の広告も棚卸しに含める")
             au.add_argument("--no-check-links", action="store_true",
                             help="リンク先URLの生死確認を省略する")
+            action_sub.add_parser("catalog-usage")
+            cp = action_sub.add_parser("catalog-products")
+            cp.add_argument("container_id",
+                            help="カタログID または 商品セットID")
+            cp.add_argument("--query", default="",
+                            help="商品名・retailer_id・URLの部分一致で絞り込み")
         pv = action_sub.add_parser("preview")
         pv.add_argument("ad_id")
         if name == "meta":
@@ -112,6 +120,12 @@ def main(argv=None) -> int:
             _print(meta_audit(client,
                               include_paused=args.include_paused,
                               check_links=not args.no_check_links))
+        elif args.action == "catalog-usage":
+            from .audit import catalog_usage
+            _print(catalog_usage(client))
+        elif args.action == "catalog-products":
+            from .audit import catalog_products
+            _print(catalog_products(client, args.container_id, args.query))
         elif args.action == "creatives":
             from .creatives import meta_list_creatives
             _print(meta_list_creatives(client))

@@ -48,6 +48,18 @@ class MetaAdsClient:
     def get(self, path: str, **params: Any) -> dict:
         return self._request("GET", path, **params)
 
+    def get_all(self, path: str, **params: Any) -> list[dict]:
+        """ページングを辿って一覧APIの全件を取得する。"""
+        items: list[dict] = []
+        body = self.get(path, **params)
+        while True:
+            items.extend(body.get("data", []))
+            paging = body.get("paging", {})
+            after = paging.get("cursors", {}).get("after")
+            if not after or "next" not in paging:
+                return items
+            body = self.get(path, **{**params, "after": after})
+
     def post(self, path: str, **params: Any) -> dict:
         return self._request("POST", path, **params)
 
