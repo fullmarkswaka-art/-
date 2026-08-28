@@ -116,6 +116,11 @@ python -m ads_manager meta catalog-products <ID> --query daybreak
                                                       # カタログ/商品セット内の商品の
                                                       # visibility(公開状態)・availability(在庫)を確認
 
+# --- カタログ同期（サイトの全商品をカタログへ反映） ---
+python -m ads_manager meta catalog-sync <カタログID>           # ドライラン（差分確認）
+python -m ads_manager meta catalog-sync <カタログID> --apply   # サイト全商品を同期
+                                                      # 定期実行でカタログを最新に保つ
+
 # --- クリエイティブ確認 ---
 python -m ads_manager meta creatives                  # 画像URL・テキスト一覧
 python -m ads_manager meta preview <広告ID>           # Meta公式プレビューを previews/ に保存
