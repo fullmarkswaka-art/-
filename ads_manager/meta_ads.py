@@ -28,10 +28,16 @@ class MetaAdsClient:
     def _request(self, method: str, path: str, **params: Any) -> dict:
         url = f"{GRAPH_URL}/{self.config.api_version}/{path}"
         params.setdefault("access_token", self.config.access_token)
-        if method == "GET":
-            resp = requests.get(url, params=params, timeout=30)
-        else:
-            resp = requests.post(url, data=params, timeout=30)
+        try:
+            if method == "GET":
+                resp = requests.get(url, params=params, timeout=30)
+            else:
+                resp = requests.post(url, data=params, timeout=30)
+        except requests.RequestException as e:
+            # 例外メッセージにトークン入りURLが含まれるため、そのまま投げない
+            raise MetaAdsError(
+                f"Meta APIへの接続に失敗 ({type(e).__name__}): "
+                f"{GRAPH_URL} への通信路（プロキシ/ネットワーク許可）を確認してください") from None
         body = resp.json()
         if "error" in body:
             err = body["error"]

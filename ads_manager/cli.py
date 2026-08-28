@@ -10,6 +10,7 @@
   python -m ads_manager google metrics [--days 7]   # Google成果データ
   python -m ads_manager google set-status <id> ENABLED|PAUSED
   python -m ads_manager google set-budget <id> <金額>
+  python -m ads_manager meta audit                    # 広告棚卸し（リンク切れ・停止漏れ検出）
   python -m ads_manager meta creatives                # 広告の画像・テキスト一覧
   python -m ads_manager meta preview <ad_id>          # 公式プレビューHTMLを保存
   python -m ads_manager google creatives              # 見出し・説明文一覧
@@ -76,6 +77,12 @@ def main(argv=None) -> int:
         bd.add_argument("object_id")
         bd.add_argument("amount", type=float)
         action_sub.add_parser("creatives")
+        if name == "meta":
+            au = action_sub.add_parser("audit")
+            au.add_argument("--include-paused", action="store_true",
+                            help="停止中の広告も棚卸しに含める")
+            au.add_argument("--no-check-links", action="store_true",
+                            help="リンク先URLの生死確認を省略する")
         pv = action_sub.add_parser("preview")
         pv.add_argument("ad_id")
         if name == "meta":
@@ -100,6 +107,11 @@ def main(argv=None) -> int:
             _print(client.set_status(args.object_id, args.status))
         elif args.action == "set-budget":
             _print(client.set_daily_budget(args.object_id, int(args.amount)))
+        elif args.action == "audit":
+            from .audit import meta_audit
+            _print(meta_audit(client,
+                              include_paused=args.include_paused,
+                              check_links=not args.no_check_links))
         elif args.action == "creatives":
             from .creatives import meta_list_creatives
             _print(meta_list_creatives(client))

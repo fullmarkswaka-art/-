@@ -104,6 +104,12 @@ python -m ads_manager google set-status <ID> PAUSED   # 配信停止
 python -m ads_manager google set-status <ID> ENABLED  # 配信再開
 python -m ads_manager google set-budget <ID> 5000     # 日予算を5,000円に
 
+# --- 棚卸し（過去商品の広告が残っていないか調査） ---
+python -m ads_manager meta audit                      # 配信中の全広告のリンク先を検査し、
+                                                      # リンク切れ・停止漏れ・カタログ起因を分類
+python -m ads_manager meta audit --include-paused     # 停止中も含めて棚卸し
+python -m ads_manager meta audit --no-check-links     # URLの生死確認を省略（高速）
+
 # --- クリエイティブ確認 ---
 python -m ads_manager meta creatives                  # 画像URL・テキスト一覧
 python -m ads_manager meta preview <広告ID>           # Meta公式プレビューを previews/ に保存
