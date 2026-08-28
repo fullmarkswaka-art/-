@@ -161,6 +161,59 @@ def build_google_feed(items: list[dict]) -> str:
     return "\n".join(lines) + "\n"
 
 
+def register_feed(client: MetaAdsClient, catalog_id: str,
+                  feed_url: str, apply: bool = False) -> dict:
+    """サイト標準のGoogle Shoppingフィードを Meta カタログの
+    定期取得フィードとして登録する。
+
+    以後は Meta が毎日フィードを取得してカタログを自動更新するため、
+    catalog-sync (スクレイプ同期) は不要になる。retailer_id の重複を
+    避けるため、API投入した品番ID商品は先に削除してからフィードに任せる
+    （フィードが同じIDで再作成するので実質的な入れ替え）。
+    """
+    feeds = client.get_all(f"{catalog_id}/product_feeds",
+                           fields="id,name,schedule,latest_upload")
+    already = [f for f in feeds
+               if feed_url in json.dumps(f.get("schedule") or {})]
+    prods = client.get_all(f"{catalog_id}/products",
+                           fields="retailer_id", limit=100)
+    api_items = [p["retailer_id"] for p in prods
+                 if (p.get("retailer_id") or "").isdigit()]
+    result = {
+        "summary": {
+            "既存フィード数": len(feeds),
+            "このURLで登録済み": len(already),
+            "入れ替え対象のAPI投入商品": len(api_items),
+            "実行モード": "適用" if apply else "ドライラン（--apply で適用）",
+        },
+        "既存フィード": feeds,
+    }
+    if not apply or already:
+        return result
+
+    # 1) API投入分を削除（フィードが同じ品番IDで作り直す）
+    for i in range(0, len(api_items), 500):
+        client.post(
+            f"{catalog_id}/items_batch",
+            item_type="PRODUCT_ITEM",
+            requests=json.dumps([
+                {"method": "DELETE", "data": {"id": rid}}
+                for rid in api_items[i:i + 500]]),
+        )
+    # 2) 定期取得フィードを登録（サイト側の生成が昼なので JST 14時 = UTC 5時に取得）
+    feed = client.post(
+        f"{catalog_id}/product_feeds",
+        name="fullmarksstore.jp gsfeed (自動取得)",
+        schedule=json.dumps(
+            {"interval": "DAILY", "url": feed_url, "hour": 5}),
+    )
+    result["created_feed"] = feed
+    # 3) 初回は即時取得
+    result["first_upload"] = client.post(f"{feed['id']}/uploads",
+                                         url=feed_url)
+    return result
+
+
 def catalog_sync(client: MetaAdsClient, catalog_id: str,
                  apply: bool = False, workers: int = 8,
                  limit: int = 0) -> dict:

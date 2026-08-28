@@ -103,6 +103,13 @@ def main(argv=None) -> int:
             cc.add_argument("catalog_id", help="カタログID")
             cc.add_argument("--apply", action="store_true",
                             help="リンク切れ商品を実際に非表示化する（省略時はドライラン）")
+            cf = action_sub.add_parser("catalog-feed")
+            cf.add_argument("catalog_id", help="カタログID")
+            cf.add_argument("--url",
+                            default="https://www.fullmarksstore.jp/gsfeed.xml",
+                            help="Google ShoppingフィードのURL")
+            cf.add_argument("--apply", action="store_true",
+                            help="フィードを実際に登録する（省略時はドライラン）")
             cs = action_sub.add_parser("catalog-sync")
             cs.add_argument("catalog_id", help="カタログID")
             cs.add_argument("--apply", action="store_true",
@@ -147,6 +154,10 @@ def main(argv=None) -> int:
         elif args.action == "catalog-clean":
             from .audit import catalog_clean
             _print(catalog_clean(client, args.catalog_id, apply=args.apply))
+        elif args.action == "catalog-feed":
+            from .catalog_sync import register_feed
+            _print(register_feed(client, args.catalog_id, args.url,
+                                 apply=args.apply))
         elif args.action == "catalog-sync":
             from .catalog_sync import catalog_sync
             _print(catalog_sync(client, args.catalog_id,

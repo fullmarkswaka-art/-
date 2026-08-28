@@ -116,10 +116,12 @@ python -m ads_manager meta catalog-products <ID> --query daybreak
                                                       # カタログ/商品セット内の商品の
                                                       # visibility(公開状態)・availability(在庫)を確認
 
-# --- カタログ同期（サイトの全商品をカタログへ反映） ---
-python -m ads_manager meta catalog-sync <カタログID>           # ドライラン（差分確認）
-python -m ads_manager meta catalog-sync <カタログID> --apply   # サイト全商品を同期
-                                                      # 定期実行でカタログを最新に保つ
+# --- カタログ同期 ---
+python -m ads_manager meta catalog-feed <カタログID> --apply   # サイト標準の gsfeed.xml を
+                                                      # 定期取得フィードとして登録（推奨・以後自動更新）
+python -m ads_manager meta catalog-sync <カタログID> --apply   # 予備: サイトをスクレイプして直接同期
+python -m ads_manager google feed                              # 予備: Merchant Center用TSVを生成
+                                                      # （通常は gsfeed.xml の登録で足りるため不要）
 
 # --- クリエイティブ確認 ---
 python -m ads_manager meta creatives                  # 画像URL・テキスト一覧
