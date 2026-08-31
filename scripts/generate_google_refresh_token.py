@@ -16,7 +16,11 @@ from ads_manager import config  # noqa: E402  (.env を読み込むため)
 
 from google_auth_oauthlib.flow import InstalledAppFlow  # noqa: E402
 
-SCOPES = ["https://www.googleapis.com/auth/adwords"]
+SCOPES = [
+    "https://www.googleapis.com/auth/adwords",
+    # Merchant Center (Content API) も同じトークンで操作できるようにする
+    "https://www.googleapis.com/auth/content",
+]
 
 
 def main() -> None:

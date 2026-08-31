@@ -38,8 +38,14 @@ FULLMARKS（fullmarksstore.jp）の広告運用ツール。Meta/Google広告のA
   ユーザーがAPIセンターで再取得するまでGoogle成果は取得不可。
   週次レポートはGoogle不通時もMetaのみで生成される。
 - Googleのリフレッシュトークンのスコープは `adwords` のみ。
-  Merchant Center (Content API) は操作不可（必要ならスコープを
-  追加してトークン再生成）。
+  Merchant Center (Content API) は操作不可。
+  `scripts/generate_google_refresh_token.py` には content スコープを
+  追加済みなので、次回トークン再生成時から両方使える。
+- 開発者トークン無効の原因は、旧MCC（アカウント切り替え前）に
+  紐づいたトークンの可能性が高い。現行MCCのAPIセンターで再取得し、
+  Lambda環境変数 `GOOGLE_ADS_DEVELOPER_TOKEN` を更新すれば恒久復旧。
+  OAuth同意画面が「本番」でリフレッシュトークンが毎週使われる限り、
+  接続は自動更新で維持される（繋ぎっぱなしになる）。
 
 ## 広告操作の注意
 
