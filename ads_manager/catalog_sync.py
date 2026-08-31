@@ -161,6 +161,41 @@ def build_google_feed(items: list[dict]) -> str:
     return "\n".join(lines) + "\n"
 
 
+def feed_gap(feed_url: str = SITE_BASE + "/gsfeed.xml") -> dict:
+    """サイトに掲載中なのにフィードに含まれていない商品を洗い出す。
+
+    ECプラットフォーム側のフィード掲載設定の漏れを見つけるための
+    読み取り専用チェック。在庫ありの未掲載商品は広告機会の損失になる。
+    """
+    import xml.etree.ElementTree as ET
+    from concurrent.futures import ThreadPoolExecutor
+
+    resp = requests.get(feed_url, timeout=60, headers=HEADERS)
+    resp.raise_for_status()
+    g = "{http://base.google.com/ns/1.0}"
+    atom = "{http://www.w3.org/2005/Atom}"
+    feed_ids = {e.findtext(f"{g}id")
+                for e in ET.fromstring(resp.content).findall(f"{atom}entry")}
+
+    urls = list_site_products()
+    missing = [u for u in urls
+               if ITEM_RE.search(u).group(1) not in feed_ids]
+    with ThreadPoolExecutor(max_workers=8) as ex:
+        scraped = [p for p in ex.map(scrape_product, missing) if p]
+    in_stock = [{"id": p["id"], "title": p["title"], "link": p["link"],
+                 "price": p["price"]}
+                for p in scraped if p["availability"] == "in stock"]
+    return {
+        "summary": {
+            "フィード商品数": len(feed_ids),
+            "サイト商品数": len(urls),
+            "フィード未掲載": len(missing),
+            "うち在庫あり（機会損失）": len(in_stock),
+        },
+        "在庫ありなのにフィード未掲載": in_stock,
+    }
+
+
 def register_feed(client: MetaAdsClient, catalog_id: str,
                   feed_url: str, apply: bool = False) -> dict:
     """サイト標準のGoogle Shoppingフィードを Meta カタログの

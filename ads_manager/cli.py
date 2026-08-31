@@ -82,6 +82,7 @@ def main(argv=None) -> int:
         bd.add_argument("amount", type=float)
         action_sub.add_parser("creatives")
         if name == "google":
+            action_sub.add_parser("feed-gap")
             fd = action_sub.add_parser("feed")
             fd.add_argument("--out", default="feeds/google_merchant_feed.tsv",
                             help="出力先TSVファイルパス")
@@ -170,6 +171,10 @@ def main(argv=None) -> int:
             path = meta_generate_preview(client, args.ad_id, args.format)
             print(f"プレビューを保存: {path}")
     else:
+        if args.action == "feed-gap":
+            from .catalog_sync import feed_gap
+            _print(feed_gap())
+            return 0
         if args.action == "feed":
             # Merchant Center用フィード生成はGoogle APIを使わない
             from pathlib import Path
