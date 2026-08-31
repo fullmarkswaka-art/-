@@ -1,7 +1,7 @@
 {
-  "_comment": "月間運用目標。weekly_report がペース監視に使用する",
-  "monthly_budget_ex_tax": 700000,
+  "_comment": "月間運用目標（FULLMARKS分）。weekly_report がペース監視に使用。年間計画はExcel「広告予算計画_2026-05_2027-04.xlsx」参照",
+  "monthly_budget_ex_tax": 750000,
   "event_reserve": 100000,
-  "event_reserve_note": "シルバーウィークEC企画用の予備費（5〜10万）。通常運用は差引60万ペース",
+  "event_reserve_note": "シルバーウィークEC企画用の予備費。通常運用は差引65万ペース（9月）。10月以降は年間計画のFULLMARKS配分に合わせて毎月見直す",
   "min_roas": 10
 }
