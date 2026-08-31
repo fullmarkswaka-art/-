@@ -1,0 +1,7 @@
+{
+  "_comment": "月間運用目標。weekly_report がペース監視に使用する",
+  "monthly_budget_ex_tax": 700000,
+  "event_reserve": 100000,
+  "event_reserve_note": "シルバーウィークEC企画用の予備費（5〜10万）。通常運用は差引60万ペース",
+  "min_roas": 10
+}

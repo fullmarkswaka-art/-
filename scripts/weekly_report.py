@@ -225,6 +225,42 @@ def google_week(client, since, until):
 
 # ---------------- リンク切れ ----------------
 
+def pacing_section(story, meta_client, google_client, today):
+    """月初来の消化ペースと全体ROASを targets.json の目標と比較する。"""
+    targets_path = Path(__file__).resolve().parent.parent / "targets.json"
+    if not targets_path.exists():
+        return
+    targets = json.loads(targets_path.read_text())
+    month_start = today.replace(day=1)
+    until = today - timedelta(days=1)
+    if until < month_start:  # 月初1日は前月分を対象にしない
+        return
+    m_total, _, _ = meta_week(meta_client, month_start, until)
+    spend, rev = m_total["spend"], m_total["rev"]
+    if google_client is not None:
+        g_total, _, _ = google_week(google_client, month_start, until)
+        spend += g_total["spend"]
+        rev += g_total["rev"]
+    budget = targets["monthly_budget_ex_tax"] - targets.get("event_reserve", 0)
+    days_in_month = (month_start.replace(month=month_start.month % 12 + 1,
+                                         day=1) - timedelta(days=1)).day
+    elapsed = (until - month_start).days + 1
+    pace_target = budget * elapsed / days_in_month
+    roas = rev / spend if spend else 0
+    min_roas = targets.get("min_roas", 0)
+    story.append(Paragraph("月間ペース（通常運用予算に対する進捗）", STYLES["h2"]))
+    story.append(table([
+        ["項目", "実績", "目標", "評価"],
+        [f"消化額 ({month_start}〜{until})", yen(spend),
+         f"{yen(pace_target)}（{elapsed}/{days_in_month}日経過時点）",
+         "順調" if spend >= pace_target * 0.9 else "⚠ 未消化ペース"],
+        ["全体ROAS", f"{roas:.1f}", f"{min_roas:.0f} 以上",
+         "達成" if roas >= min_roas else "⚠ 目標未達"],
+        ["月間予算（税抜）", "", f"{yen(targets['monthly_budget_ex_tax'])}"
+         f"（うち企画予備 {yen(targets.get('event_reserve', 0))}）", ""],
+    ], [52 * mm, 32 * mm, 55 * mm, 22 * mm]))
+
+
 def link_check_section(story, meta_client, google_client):
     story.append(Paragraph("リンク切れチェック", STYLES["h2"]))
     audit = meta_audit(meta_client, check_links=True)
@@ -310,6 +346,7 @@ def main():
             f"（{type(e).__name__}: 認証情報を確認してください）", STYLES["body"]))
         google_client = None
 
+    pacing_section(story, meta_client, google_client, today)
     link_check_section(story, meta_client, google_client)
 
     out = Path(args.out)
