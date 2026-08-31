@@ -70,7 +70,7 @@ def google_list_creatives(client: GoogleAdsClientWrapper) -> list[dict]:
         "ad_group_ad.ad.type, ad_group_ad.ad.final_urls, "
         "ad_group_ad.ad.responsive_search_ad.headlines, "
         "ad_group_ad.ad.responsive_search_ad.descriptions, "
-        "campaign.name, ad_group.name "
+        "campaign.name, campaign.status, ad_group.name, ad_group.status "
         "FROM ad_group_ad WHERE ad_group_ad.status != 'REMOVED'")
     ads = []
     for r in rows:
@@ -79,8 +79,14 @@ def google_list_creatives(client: GoogleAdsClientWrapper) -> list[dict]:
         ads.append({
             "ad_id": ad.id,
             "campaign": r.campaign.name,
+            "campaign_status": r.campaign.status.name,
             "ad_group": r.ad_group.name,
+            "ad_group_status": r.ad_group.status.name,
             "status": r.ad_group_ad.status.name,
+            # キャンペーン・広告グループ・広告すべて有効＝実際に配信されうる
+            "serving": (r.campaign.status.name == "ENABLED"
+                        and r.ad_group.status.name == "ENABLED"
+                        and r.ad_group_ad.status.name == "ENABLED"),
             "type": ad.type_.name,
             "headlines": [h.text for h in rsa.headlines],
             "descriptions": [d.text for d in rsa.descriptions],

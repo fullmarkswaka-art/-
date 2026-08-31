@@ -54,12 +54,18 @@ def load_meta_config() -> MetaConfig:
     )
 
 
+def _env(key: str) -> str:
+    # コピペ由来の空白・改行が混ざると認証エラーになるため必ずトリムする
+    # （実際に GOOGLE_ADS_DEVELOPER_TOKEN の改行で DEVELOPER_TOKEN_INVALID が発生した）
+    return os.getenv(key, "").strip()
+
+
 def load_google_config() -> GoogleAdsConfig:
     return GoogleAdsConfig(
-        developer_token=os.getenv("GOOGLE_ADS_DEVELOPER_TOKEN", ""),
-        client_id=os.getenv("GOOGLE_ADS_CLIENT_ID", ""),
-        client_secret=os.getenv("GOOGLE_ADS_CLIENT_SECRET", ""),
-        refresh_token=os.getenv("GOOGLE_ADS_REFRESH_TOKEN", ""),
-        customer_id=os.getenv("GOOGLE_ADS_CUSTOMER_ID", "").replace("-", ""),
-        login_customer_id=os.getenv("GOOGLE_ADS_LOGIN_CUSTOMER_ID", "").replace("-", ""),
+        developer_token=_env("GOOGLE_ADS_DEVELOPER_TOKEN"),
+        client_id=_env("GOOGLE_ADS_CLIENT_ID"),
+        client_secret=_env("GOOGLE_ADS_CLIENT_SECRET"),
+        refresh_token=_env("GOOGLE_ADS_REFRESH_TOKEN"),
+        customer_id=_env("GOOGLE_ADS_CUSTOMER_ID").replace("-", ""),
+        login_customer_id=_env("GOOGLE_ADS_LOGIN_CUSTOMER_ID").replace("-", ""),
     )

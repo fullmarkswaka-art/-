@@ -184,6 +184,12 @@ def google_sections(story):
             f"（{type(e).__name__}: 開発者トークン/認証情報を確認してください）",
             STYLES["body"]))
         return None
+    # 表示もコストもないキャンペーン（削除済み等）は載せない
+    rows_data = [r for r in rows_data if r["impressions"] or r["cost"]]
+    if not rows_data:
+        story.append(Paragraph("直近7日に配信のあったGoogleキャンペーンはありません。",
+                               STYLES["body"]))
+        return client
     rows = [["キャンペーン", "費用", "表示", "クリック", "CTR", "平均CPC", "CV"]]
     for r in sorted(rows_data, key=lambda r: -r["cost"]):
         rows.append([Paragraph(r["name"], STYLES["cell"]), yen(r["cost"]),
@@ -209,8 +215,9 @@ def link_check_sections(story, meta_client, google_client):
     if google_client is not None:
         try:
             from ads_manager.creatives import google_list_creatives
-            g_ads = [a for a in google_list_creatives(google_client)
-                     if a["status"] == "ENABLED"]
+            g_all = google_list_creatives(google_client)
+            g_ads = [a for a in g_all if a["serving"]]
+            g_dormant = len(g_all) - len(g_ads)
             g_broken = []
             for a in g_ads:
                 for url in a["final_urls"]:
@@ -218,9 +225,14 @@ def link_check_sections(story, meta_client, google_client):
                     if res["status"] is not None and res["status"] >= 400:
                         g_broken.append(f"{a['campaign']} / {a['ad_id']}: "
                                         f"{url} ({res['status']})")
-            lines.append(f"Google: 有効な広告 {len(g_ads)}本を検査 → "
+            lines.append(f"Google: 配信中の広告 {len(g_ads)}本を検査 → "
                          f"リンク切れ {len(g_broken)}件")
             lines += [f"　⚠ {b}" for b in g_broken]
+            if g_dormant:
+                lines.append(
+                    f"（参考）停止中キャンペーン等に残る広告 {g_dormant}本は"
+                    "検査対象外。過去のリンク切れ広告が多数含まれるため、"
+                    "旧キャンペーンを再開する際は必ず事前にリンク確認を行うこと")
         except Exception as e:
             lines.append(f"Google: リンク確認を実行できませんでした ({type(e).__name__})")
     else:

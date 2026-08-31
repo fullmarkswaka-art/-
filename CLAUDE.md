@@ -32,20 +32,29 @@ FULLMARKS（fullmarksstore.jp）の広告運用ツール。Meta/Google広告のA
 - フィード掲載漏れ確認: `python -m ads_manager google feed-gap`
   （在庫があるのにgsfeed.xml未掲載の商品を検出。EC側の設定漏れ）
 
-## 既知の問題
+## 既知の問題（解決済み含む）
 
-- Google Ads API は開発者トークンが無効（DEVELOPER_TOKEN_INVALID）。
-  ユーザーがAPIセンターで再取得するまでGoogle成果は取得不可。
-  週次レポートはGoogle不通時もMetaのみで生成される。
+- 【解決済み 2026-08-31】Google Ads API の DEVELOPER_TOKEN_INVALID は、
+  Lambda環境変数 `GOOGLE_ADS_DEVELOPER_TOKEN` に混入した改行が原因だった。
+  config.py で全認証情報を strip するよう修正済み。トークン自体は有効。
+  Lambda側の環境変数はいずれ改行なしの値に直しておくのが望ましい。
+- Google接続は恒久維持される構成: OAuthアプリは Workspace「内部」
+  （テスト/本番の区別なし、リフレッシュトークン無期限）、
+  アクセストークンはライブラリが自動更新、週次レポートが毎週使うため
+  6ヶ月未使用失効も起きない。
 - Googleのリフレッシュトークンのスコープは `adwords` のみ。
   Merchant Center (Content API) は操作不可。
   `scripts/generate_google_refresh_token.py` には content スコープを
-  追加済みなので、次回トークン再生成時から両方使える。
-- 開発者トークン無効の原因は、旧MCC（アカウント切り替え前）に
-  紐づいたトークンの可能性が高い。現行MCCのAPIセンターで再取得し、
-  Lambda環境変数 `GOOGLE_ADS_DEVELOPER_TOKEN` を更新すれば恒久復旧。
-  OAuth同意画面が「本番」でリフレッシュトークンが毎週使われる限り、
-  接続は自動更新で維持される（繋ぎっぱなしになる）。
+  追加済みなので、次回トークン再生成時から両方使える
+  （内部アプリのため marble.jp.net のアカウントで認証すること）。
+
+## Google側の地雷（Metaと同型）
+
+- Google広告の停止中キャンペーンには過去の広告が800本以上残っており、
+  その大半がリンク切れ（2026-08-31時点の検査で845本）。
+  現在配信中の広告5本は正常。**停止中の旧キャンペーンを安易に再開しない**。
+  再開時は必ず事前にリンク確認（weekly_report のリンク検査か
+  google creatives で final_urls を確認）を行うこと。
 
 ## 広告操作の注意
 
