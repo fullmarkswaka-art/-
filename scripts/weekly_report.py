@@ -4,18 +4,22 @@
 使い方:
   python scripts/weekly_report.py [--out reports/週次レポート.pdf]
 
-内容:
-  1. Meta: 直近7日のサマリー / キャンペーン別 / 広告別 / 日別推移
-  2. Google: 直近7日のキャンペーン別成果（API接続できる場合）
-  3. リンク切れチェック: Meta配信中広告 + Google広告の最終URL
-Google Ads API に接続できない場合（開発者トークン無効など）は
-その旨をレポートに記載してMetaのみで生成する。
+構成（両プラットフォーム対称）:
+  各プラットフォームについて
+    - 週間サマリー（今週 vs 前週の比較）
+    - キャンペーン別成果（前週比付き）
+    - 日別推移
+  共通
+    - リンク切れチェック（配信中の広告のみ）
+  今週 = 昨日までの7日間、前週 = その前の7日間。
+Google Ads API に接続できない場合はその旨を記載してMetaのみで生成する。
 """
 from __future__ import annotations
 
 import argparse
+import json
 import sys
-from datetime import date
+from datetime import date, timedelta
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -48,6 +52,9 @@ STYLES = {
     "cell": ParagraphStyle("c", fontName=FONT, fontSize=8, leading=10),
 }
 
+SUMMARY_COLS = ["", "費用", "表示", "クリック", "CTR", "CPC",
+                "CV", "CV金額", "CPA", "ROAS"]
+
 
 def table(data, widths, align_right_from=1):
     t = Table(data, colWidths=widths, repeatRows=1)
@@ -70,154 +77,168 @@ def yen(v):
     return f"¥{v:,.0f}"
 
 
-def act(row, key):
-    for a in row.get("actions") or []:
-        if a["action_type"] == key:
-            return float(a["value"])
-    return 0.0
+def pct_change(cur, prev):
+    if not prev:
+        return "—" if not cur else "新規"
+    return f"{(cur - prev) / prev * 100:+.0f}%"
 
 
-def actv(row, key):
-    for a in row.get("action_values") or []:
-        if a["action_type"] == key:
-            return float(a["value"])
-    return 0.0
+def derived(m):
+    """spend/imp/clicks/cv/rev から率系の指標を補完する。"""
+    m["ctr"] = m["clicks"] / m["imp"] * 100 if m["imp"] else 0
+    m["cpc"] = m["spend"] / m["clicks"] if m["clicks"] else 0
+    m["cpa"] = m["spend"] / m["cv"] if m["cv"] else 0
+    m["roas"] = m["rev"] / m["spend"] if m["spend"] else 0
+    return m
 
 
-def metrics(r):
-    spend = float(r.get("spend") or 0)
-    imp = int(r.get("impressions") or 0)
-    clicks = int(r.get("clicks") or 0)
-    pur = act(r, "omni_purchase")
-    rev = actv(r, "omni_purchase")
-    return {
-        "spend": spend, "imp": imp, "clicks": clicks,
-        "ctr": (clicks / imp * 100) if imp else 0,
-        "cpc": (spend / clicks) if clicks else 0,
-        "pur": pur, "rev": rev,
-        "cpa": (spend / pur) if pur else 0,
-        "roas": (rev / spend) if spend else 0,
-    }
+def summary_rows(cur, prev):
+    def fmt(m):
+        return [yen(m["spend"]), f"{m['imp']:,}", f"{m['clicks']:,}",
+                f"{m['ctr']:.2f}%", yen(m["cpc"]), f"{m['cv']:.0f}",
+                yen(m["rev"]) if m["rev"] else "—",
+                yen(m["cpa"]) if m["cv"] else "—",
+                f"{m['roas']:.2f}" if m["rev"] else "—"]
+    change = [pct_change(cur["spend"], prev["spend"]),
+              pct_change(cur["imp"], prev["imp"]),
+              pct_change(cur["clicks"], prev["clicks"]),
+              f"{cur['ctr'] - prev['ctr']:+.2f}pt",
+              pct_change(cur["cpc"], prev["cpc"]),
+              pct_change(cur["cv"], prev["cv"]),
+              pct_change(cur["rev"], prev["rev"]),
+              pct_change(cur["cpa"], prev["cpa"]) if cur["cv"] and prev["cv"] else "—",
+              (f"{cur['roas'] - prev['roas']:+.2f}"
+               if cur["rev"] or prev["rev"] else "—")]
+    return [SUMMARY_COLS, ["今週"] + fmt(cur), ["前週"] + fmt(prev),
+            ["前週比"] + change]
 
 
-def meta_sections(story):
-    client = MetaAdsClient(load_meta_config())
-    acct = client.config.ad_account_id
-    common = dict(date_preset="last_7d",
-                  fields="campaign_name,ad_name,impressions,clicks,spend,"
-                         "actions,action_values")
-    camps = client.get(f"{acct}/insights", level="campaign",
-                       **common).get("data", [])
-    ads = client.get(f"{acct}/insights", level="ad", **common).get("data", [])
-    daily = sorted(
-        client.get(f"{acct}/insights", level="account", time_increment=1,
-                   **common).get("data", []),
-        key=lambda r: r["date_start"])
-    period = (f"{daily[0]['date_start']} 〜 {daily[-1]['date_stop']}"
-              if daily else "直近7日")
+SUMMARY_W = [12 * mm, 20 * mm, 18 * mm, 16 * mm, 14 * mm, 15 * mm,
+             11 * mm, 20 * mm, 20 * mm, 13 * mm]
+CAMP_W = [42 * mm, 24 * mm, 15 * mm, 14 * mm, 13 * mm, 10 * mm,
+          18 * mm, 12 * mm, 14 * mm]
 
-    total = metrics({
-        "spend": sum(float(r.get("spend") or 0) for r in daily),
-        "impressions": sum(int(r.get("impressions") or 0) for r in daily),
-        "clicks": sum(int(r.get("clicks") or 0) for r in daily),
-        "actions": [{"action_type": "omni_purchase",
-                     "value": sum(act(r, "omni_purchase") for r in daily)}],
-        "action_values": [{"action_type": "omni_purchase",
-                           "value": sum(actv(r, "omni_purchase") for r in daily)}],
-    })
-    story.append(Paragraph(f"1. Meta 週間サマリー（{period}）", STYLES["h2"]))
-    story.append(table([
-        ["消化金額", "表示回数", "クリック", "CTR", "CPC", "購入", "購入金額", "CPA", "ROAS"],
-        [yen(total["spend"]), f"{total['imp']:,}", f"{total['clicks']:,}",
-         f"{total['ctr']:.2f}%", yen(total["cpc"]), f"{total['pur']:.0f}",
-         yen(total["rev"]), yen(total["cpa"]) if total["pur"] else "—",
-         f"{total['roas']:.2f}" if total["spend"] else "—"],
-    ], [23 * mm, 20 * mm, 17 * mm, 15 * mm, 17 * mm, 12 * mm, 22 * mm,
-        22 * mm, 15 * mm], align_right_from=0))
 
-    story.append(Paragraph("2. Meta キャンペーン別", STYLES["h2"]))
-    rows = [["キャンペーン", "消化金額", "表示", "クリック", "CTR", "CPC", "購入", "購入金額", "ROAS"]]
-    for r in sorted(camps, key=lambda r: -float(r.get("spend") or 0)):
-        m = metrics(r)
-        rows.append([Paragraph(r.get("campaign_name") or "-", STYLES["cell"]),
-                     yen(m["spend"]), f"{m['imp']:,}", f"{m['clicks']:,}",
-                     f"{m['ctr']:.2f}%", yen(m["cpc"]), f"{m['pur']:.0f}",
-                     yen(m["rev"]) if m["rev"] else "—",
-                     f"{m['roas']:.2f}" if m["rev"] else "—"])
-    story.append(table(rows, [46 * mm, 18 * mm, 15 * mm, 14 * mm, 13 * mm,
-                              15 * mm, 10 * mm, 19 * mm, 12 * mm]))
+def campaign_table(cur_rows, prev_rows):
+    """キャンペーン別テーブル。前週比（費用）付き。"""
+    prev_by_id = {r["id"]: r for r in prev_rows}
+    data = [["キャンペーン", "費用 (前週比)", "表示", "クリック", "CTR",
+             "CV", "CV金額", "ROAS", "前週CV"]]
+    for r in sorted(cur_rows, key=lambda r: -r["spend"]):
+        p = prev_by_id.get(r["id"], {"spend": 0, "cv": 0})
+        m = derived(dict(r))
+        data.append([
+            Paragraph(r["name"], STYLES["cell"]),
+            f"{yen(m['spend'])} ({pct_change(m['spend'], p['spend'])})",
+            f"{m['imp']:,}", f"{m['clicks']:,}", f"{m['ctr']:.2f}%",
+            f"{m['cv']:.0f}", yen(m["rev"]) if m["rev"] else "—",
+            f"{m['roas']:.2f}" if m["rev"] else "—",
+            f"{p['cv']:.0f}"])
+    # 今週配信なしでも前週動いていたキャンペーンは示す（停止の影響が見えるように）
+    cur_ids = {r["id"] for r in cur_rows}
+    for p in sorted(prev_rows, key=lambda r: -r["spend"]):
+        if p["id"] not in cur_ids and p["spend"]:
+            data.append([Paragraph(p["name"], STYLES["cell"]),
+                         f"¥0 ({pct_change(0, p['spend'])})",
+                         "0", "0", "—", "0", "—", "—", f"{p['cv']:.0f}"])
+    return table(data, CAMP_W)
 
-    story.append(Paragraph("3. Meta 広告別", STYLES["h2"]))
-    rows = [["広告", "キャンペーン", "消化金額", "クリック", "CTR", "購入", "ROAS"]]
-    for r in sorted(ads, key=lambda r: -float(r.get("spend") or 0)):
-        m = metrics(r)
-        rows.append([Paragraph(r.get("ad_name") or "-", STYLES["cell"]),
-                     Paragraph(r.get("campaign_name") or "-", STYLES["cell"]),
-                     yen(m["spend"]), f"{m['clicks']:,}", f"{m['ctr']:.2f}%",
-                     f"{m['pur']:.0f}",
-                     f"{m['roas']:.2f}" if m["rev"] else "—"])
-    story.append(table(rows, [48 * mm, 44 * mm, 18 * mm, 14 * mm, 13 * mm,
-                              10 * mm, 12 * mm]))
 
-    story.append(Paragraph("4. Meta 日別推移", STYLES["h2"]))
-    rows = [["日付", "消化金額", "表示", "クリック", "CTR", "CPC", "購入", "購入金額"]]
-    for r in daily:
-        m = metrics(r)
-        rows.append([r["date_start"], yen(m["spend"]), f"{m['imp']:,}",
+def daily_table(rows):
+    data = [["日付", "費用", "表示", "クリック", "CTR", "CPC", "CV", "CV金額"]]
+    for r in rows:
+        m = derived(dict(r))
+        data.append([r["date"], yen(m["spend"]), f"{m['imp']:,}",
                      f"{m['clicks']:,}", f"{m['ctr']:.2f}%", yen(m["cpc"]),
-                     f"{m['pur']:.0f}", yen(m["rev"]) if m["rev"] else "—"])
-    story.append(table(rows, [24 * mm, 20 * mm, 17 * mm, 16 * mm, 14 * mm,
-                              17 * mm, 12 * mm, 22 * mm]))
-    return client
+                     f"{m['cv']:.0f}", yen(m["rev"]) if m["rev"] else "—"])
+    return table(data, [24 * mm, 20 * mm, 17 * mm, 16 * mm, 14 * mm,
+                        17 * mm, 12 * mm, 22 * mm])
 
 
-def google_sections(story):
-    """Google成果とリンク確認。接続不可なら注記を返す。"""
-    story.append(Paragraph("5. Google 広告成果", STYLES["h2"]))
-    try:
-        from ads_manager.google_ads_client import GoogleAdsClientWrapper
-        client = GoogleAdsClientWrapper(load_google_config())
-        rows_data = client.get_metrics(days=7)
-    except Exception as e:
-        story.append(Paragraph(
-            "Google Ads API に接続できなかったため今週は掲載できません。"
-            f"（{type(e).__name__}: 開発者トークン/認証情報を確認してください）",
-            STYLES["body"]))
-        return None
-    # 表示もコストもないキャンペーン（削除済み等）は載せない
-    rows_data = [r for r in rows_data if r["impressions"] or r["cost"]]
-    if not rows_data:
-        story.append(Paragraph("直近7日に配信のあったGoogleキャンペーンはありません。",
-                               STYLES["body"]))
-        return client
-    rows = [["キャンペーン", "費用", "表示", "クリック", "CTR", "平均CPC", "CV"]]
-    for r in sorted(rows_data, key=lambda r: -r["cost"]):
-        rows.append([Paragraph(r["name"], STYLES["cell"]), yen(r["cost"]),
-                     f"{r['impressions']:,}", f"{r['clicks']:,}",
-                     f"{r['ctr']:.2f}%", yen(r["avg_cpc"]),
-                     f"{r['conversions']:.0f}"])
-    story.append(table(rows, [56 * mm, 18 * mm, 16 * mm, 15 * mm, 13 * mm,
-                              17 * mm, 12 * mm]))
-    return client
+# ---------------- Meta ----------------
+
+def _meta_actions(row, key, values=False):
+    src = row.get("action_values" if values else "actions") or []
+    for a in src:
+        if a["action_type"] == key:
+            return float(a["value"])
+    return 0.0
 
 
-def link_check_sections(story, meta_client, google_client):
-    story.append(Paragraph("6. リンク切れチェック", STYLES["h2"]))
+def _meta_metrics(row):
+    return {"spend": float(row.get("spend") or 0),
+            "imp": int(row.get("impressions") or 0),
+            "clicks": int(row.get("clicks") or 0),
+            "cv": _meta_actions(row, "omni_purchase"),
+            "rev": _meta_actions(row, "omni_purchase", values=True)}
+
+
+def meta_week(client, since, until):
+    acct = client.config.ad_account_id
+    tr = json.dumps({"since": str(since), "until": str(until)})
+    fields = "campaign_id,campaign_name,impressions,clicks,spend,actions,action_values"
+    total_rows = client.get(f"{acct}/insights", level="account",
+                            time_range=tr, fields=fields).get("data", [])
+    total = derived(_meta_metrics(total_rows[0] if total_rows else {}))
+    camps = []
+    for r in client.get(f"{acct}/insights", level="campaign",
+                        time_range=tr, fields=fields).get("data", []):
+        camps.append({"id": r.get("campaign_id"),
+                      "name": r.get("campaign_name") or "-",
+                      **_meta_metrics(r)})
+    daily = []
+    for r in client.get(f"{acct}/insights", level="account", time_range=tr,
+                        time_increment=1, fields=fields).get("data", []):
+        daily.append({"date": r["date_start"], **_meta_metrics(r)})
+    return total, camps, sorted(daily, key=lambda r: r["date"])
+
+
+# ---------------- Google ----------------
+
+def _g_metrics(m):
+    return {"spend": m.cost_micros / 1_000_000,
+            "imp": m.impressions, "clicks": m.clicks,
+            "cv": m.conversions, "rev": m.conversions_value}
+
+
+def google_week(client, since, until):
+    where = f"segments.date BETWEEN '{since}' AND '{until}'"
+    fields = ("metrics.impressions, metrics.clicks, metrics.cost_micros, "
+              "metrics.conversions, metrics.conversions_value")
+    total = {"spend": 0, "imp": 0, "clicks": 0, "cv": 0, "rev": 0}
+    camps = []
+    for r in client.search(f"SELECT campaign.id, campaign.name, {fields} "
+                           f"FROM campaign WHERE {where}"):
+        m = _g_metrics(r.metrics)
+        if not m["imp"] and not m["spend"]:
+            continue
+        camps.append({"id": r.campaign.id, "name": r.campaign.name, **m})
+        for k in total:
+            total[k] += m[k]
+    daily = []
+    for r in client.search(f"SELECT segments.date, {fields} "
+                           f"FROM customer WHERE {where} "
+                           "ORDER BY segments.date"):
+        daily.append({"date": r.segments.date, **_g_metrics(r.metrics)})
+    return derived(total), camps, daily
+
+
+# ---------------- リンク切れ ----------------
+
+def link_check_section(story, meta_client, google_client):
+    story.append(Paragraph("リンク切れチェック", STYLES["h2"]))
     audit = meta_audit(meta_client, check_links=True)
     broken = [r for r in audit["問題のある広告"]
               if any("リンク切れ" in f or "リダイレクト" in f for f in r["flags"])]
     lines = [f"Meta: 配信中 {audit['summary']['調査対象']}本を検査 → "
              f"リンク切れ {len(broken)}件"]
-    for r in broken:
-        lines.append(f"　⚠ {r['campaign']} / {r['ad_name']}: "
-                     + "; ".join(r["flags"]))
-
+    lines += [f"　⚠ {r['campaign']} / {r['ad_name']}: " + "; ".join(r["flags"])
+              for r in broken]
     if google_client is not None:
         try:
             from ads_manager.creatives import google_list_creatives
             g_all = google_list_creatives(google_client)
             g_ads = [a for a in g_all if a["serving"]]
-            g_dormant = len(g_all) - len(g_ads)
             g_broken = []
             for a in g_ads:
                 for url in a["final_urls"]:
@@ -228,9 +249,10 @@ def link_check_sections(story, meta_client, google_client):
             lines.append(f"Google: 配信中の広告 {len(g_ads)}本を検査 → "
                          f"リンク切れ {len(g_broken)}件")
             lines += [f"　⚠ {b}" for b in g_broken]
-            if g_dormant:
+            dormant = len(g_all) - len(g_ads)
+            if dormant:
                 lines.append(
-                    f"（参考）停止中キャンペーン等に残る広告 {g_dormant}本は"
+                    f"（参考）停止中キャンペーン等に残る広告 {dormant}本は"
                     "検査対象外。過去のリンク切れ広告が多数含まれるため、"
                     "旧キャンペーンを再開する際は必ず事前にリンク確認を行うこと")
         except Exception as e:
@@ -246,15 +268,49 @@ def main():
                         default=f"reports/広告週次レポート_{date.today()}.pdf")
     args = parser.parse_args()
 
+    today = date.today()
+    cur_since, cur_until = today - timedelta(days=7), today - timedelta(days=1)
+    prev_since, prev_until = today - timedelta(days=14), today - timedelta(days=8)
+
     story = [
         Paragraph("広告 週次成果レポート（Meta + Google）", STYLES["title"]),
-        Paragraph(f"作成日: {date.today()}　|　通貨: JPY　|　"
-                  "購入・CVは各プラットフォーム計測に基づく概算", STYLES["sub"]),
+        Paragraph(f"今週: {cur_since} 〜 {cur_until}　|　前週: {prev_since} 〜 {prev_until}　|　"
+                  "通貨: JPY　|　CV・CV金額は各プラットフォーム計測の概算", STYLES["sub"]),
         Spacer(1, 4 * mm),
     ]
-    meta_client = meta_sections(story)
-    google_client = google_sections(story)
-    link_check_sections(story, meta_client, google_client)
+
+    # ---- Meta ----
+    meta_client = MetaAdsClient(load_meta_config())
+    m_cur, m_camps, m_daily = meta_week(meta_client, cur_since, cur_until)
+    m_prev, m_camps_prev, _ = meta_week(meta_client, prev_since, prev_until)
+    story.append(Paragraph("1. Meta 週間サマリー（前週比較）", STYLES["h2"]))
+    story.append(table(summary_rows(m_cur, m_prev), SUMMARY_W))
+    story.append(Paragraph("2. Meta キャンペーン別", STYLES["h2"]))
+    story.append(campaign_table(m_camps, m_camps_prev))
+    story.append(Paragraph("3. Meta 日別推移（今週）", STYLES["h2"]))
+    story.append(daily_table(m_daily))
+
+    # ---- Google ----
+    google_client = None
+    try:
+        from ads_manager.google_ads_client import GoogleAdsClientWrapper
+        google_client = GoogleAdsClientWrapper(load_google_config())
+        g_cur, g_camps, g_daily = google_week(google_client, cur_since, cur_until)
+        g_prev, g_camps_prev, _ = google_week(google_client, prev_since, prev_until)
+        story.append(Paragraph("4. Google 週間サマリー（前週比較）", STYLES["h2"]))
+        story.append(table(summary_rows(g_cur, g_prev), SUMMARY_W))
+        story.append(Paragraph("5. Google キャンペーン別", STYLES["h2"]))
+        story.append(campaign_table(g_camps, g_camps_prev))
+        story.append(Paragraph("6. Google 日別推移（今週）", STYLES["h2"]))
+        story.append(daily_table(g_daily))
+    except Exception as e:
+        story.append(Paragraph("4. Google 広告成果", STYLES["h2"]))
+        story.append(Paragraph(
+            "Google Ads API に接続できなかったため今週は掲載できません。"
+            f"（{type(e).__name__}: 認証情報を確認してください）", STYLES["body"]))
+        google_client = None
+
+    link_check_section(story, meta_client, google_client)
 
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
