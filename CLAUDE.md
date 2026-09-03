@@ -101,3 +101,18 @@ FULLMARKS（fullmarksstore.jp）の広告運用ツール。Meta/Google広告のA
 
 - 配信ON/OFF・予算変更・カタログ書き込みは必ずユーザーの承認を得てから
   実行する。ドライラン（--apply なし）で差分を見せてから適用する。
+
+## ブランディング課題（2026-09-03 発見）
+
+- gsfeed.xml には brand / product_type / custom_label / sale_price が無く、
+  在庫あり1,596件のうち約半数（791件）がアウトレット商品だが、Meta・Googleの
+  カタログ広告はこれを区別できず、アウトレット品が広告に出る。
+  暫定対策: `python scripts/outlet_products.py` でサイトのOUTLETカテゴリから
+  商品IDを抽出し `reports/outlet_supplemental_feed.csv`（id, custom_label_0=outlet,
+  brand）を生成 → Merchant Center 補助フィード / Meta補助フィードとして登録し、
+  custom_label_0=outlet を商品グループ・商品セットで除外する。
+  恒久対策: EC側で gsfeed.xml に brand / product_type / custom_label_0 を追加。
+- 「〇〇を買うならフルマークス」型の文言は、Google指名検索RSA
+  （ノローナ・フーディニ）の見出し/説明文と、Metaカタログ広告テンプレート
+  `{{product.name}} ― アウトドアの正規販売店、FULLMARKSで。` が原因。
+  ブランドトーンに書き換える（承認後に適用）。
