@@ -102,17 +102,38 @@ FULLMARKS（fullmarksstore.jp）の広告運用ツール。Meta/Google広告のA
 - 配信ON/OFF・予算変更・カタログ書き込みは必ずユーザーの承認を得てから
   実行する。ドライラン（--apply なし）で差分を見せてから適用する。
 
-## ブランディング課題（2026-09-03 発見）
+## ブランディング課題（2026-09-03 発見・対応中）
 
 - gsfeed.xml には brand / product_type / custom_label / sale_price が無く、
-  在庫あり1,596件のうち約半数（791件）がアウトレット商品だが、Meta・Googleの
-  カタログ広告はこれを区別できず、アウトレット品が広告に出る。
-  暫定対策: `python scripts/outlet_products.py` でサイトのOUTLETカテゴリから
-  商品IDを抽出し `reports/outlet_supplemental_feed.csv`（id, custom_label_0=outlet,
-  brand）を生成 → Merchant Center 補助フィード / Meta補助フィードとして登録し、
-  custom_label_0=outlet を商品グループ・商品セットで除外する。
-  恒久対策: EC側で gsfeed.xml に brand / product_type / custom_label_0 を追加。
-- 「〇〇を買うならフルマークス」型の文言は、Google指名検索RSA
-  （ノローナ・フーディニ）の見出し/説明文と、Metaカタログ広告テンプレート
+  在庫あり1,596件のうち791件（50%）がアウトレット商品。EC側（アラジン）の
+  フィード改修は約2ヶ月かかるため、当面はサイト巡回で属性を補完する運用。
+- 属性補完の仕組み（実装済み）:
+  - `python -m ads_manager meta catalog-attributes` … サイトのブランド絞り込み
+    カテゴリ（FILTER_BRAND_*）とOUTLETカテゴリを巡回し、全商品に brand /
+    custom_label_0 (outlet|regular) / custom_label_1 (シリーズ) / product_type を
+    付けた `reports/catalog_attributes.csv` を生成（商品ID先頭2桁でもブランド判定可:
+    10 HESTRA / 11 POC / 12 NORRONA / 13 HOUDINI / 14 ACLIMA / 15 SAIL RACING /
+    16 POW / 17 PLUS ONE WORKS / 21 KANG）。
+  - `python -m ads_manager meta catalog-supplement 610915616169358 --apply` …
+    Meta 補助フィード `1098537166224560`（primary=1058904553805180）へCSVを
+    アップロード。**毎週月曜の定例で再実行する**（アウトレット入替に追随）。
+  - Merchant Center (ID 5642612701) には同じCSVを補助フィードとして登録する
+    （Content API 権限が無いためユーザーがUIで登録。id / brand / custom_label_0 /
+    custom_label_1 / product_type の5列）。
+- 除外の実装:
+  - Google: PLA_v2 (24136223642) の商品グループを custom_label_0 で分割済み。
+    outlet=除外、その他=¥20。ルート(SUBDIVISION)の status が API 上 PAUSED と
+    表示されるが仕様（UNIT以外は無意味）。翌日以降のインプレッションで要確認。
+  - Meta: 商品セット「通常価格_*」を作成済み（全ブランド 1061636746673854 /
+    HOUDINI 1066692882884067 / NORRONA 2928671157303376 / POC 924896417345197 /
+    ACLIMA 2252281938679870 / HESTRA 2164694404474862 / NORRONA_falketind
+    2425736481284111 / femund 1724713352166731 / senja 1063318003222881 /
+    lofoten 1477226797547982 / trollveggen 1324032626282004 ほか）。
+    `python -m ads_manager meta swap-catalog-ads 52598939357735 --sets ... --apply`
+    で「すべての商品」広告をブランド/シリーズ別広告へ差し替える（1広告=1ブランド、
+    NORRONAはシリーズ単位。カルーセル内でブランドを混ぜない）。
+- 「〇〇を買うならフルマークス」型の文言は、Google指名検索RSA（ノローナ・
+  フーディニ）の見出し/説明文と、Metaカタログ広告テンプレート
   `{{product.name}} ― アウトドアの正規販売店、FULLMARKSで。` が原因。
-  ブランドトーンに書き換える（承認後に適用）。
+  ユーザー方針: ブランド紹介ではなく「その商品がなぜ良いか」を伝える商品訴求型に
+  する。ブランドを混ぜない。NORRONAはシリーズ（lofoten/falketind等）で分ける。
