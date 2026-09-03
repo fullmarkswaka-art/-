@@ -191,7 +191,9 @@ def meta_supplementary_feed(client: MetaAdsClient, catalog_id: str,
     """補助フィードを（無ければ）作成し、CSV をアップロードする。"""
     feeds = client.get_all(f"{catalog_id}/product_feeds",
                            fields="id,name,primary_feed_ids")
-    existing = next((f for f in feeds if f.get("primary_feed_ids")), None)
+    # primary_feed_ids は読み出しで返らないため、名前で既存の補助フィードを探す
+    existing = next((f for f in feeds if f.get("name") == SUPPLEMENT_FEED_NAME
+                     or f.get("primary_feed_ids")), None)
     plan = {
         "catalog_id": catalog_id,
         "primary_feed_id": primary_feed_id,

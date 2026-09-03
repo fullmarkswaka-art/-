@@ -4,6 +4,7 @@
 """
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any
 
 import requests
@@ -69,7 +70,11 @@ class MetaAdsClient:
         params.setdefault("access_token", self.config.access_token)
         with open(file_path, "rb") as fh:
             try:
-                resp = requests.post(url, data=params, files={"file": fh}, timeout=120)
+                import mimetypes
+                ctype = mimetypes.guess_type(str(file_path))[0] or "text/plain"
+                resp = requests.post(
+                    url, data=params,
+                    files={"file": (Path(file_path).name, fh, ctype)}, timeout=120)
             except requests.RequestException as e:
                 raise MetaAdsError(
                     f"Meta APIへのアップロードに失敗 ({type(e).__name__})") from None
