@@ -146,6 +146,11 @@ FULLMARKS（fullmarksstore.jp）の広告運用ツール。Meta/Google広告のA
   （新広告 52604711975335、旧 52597391295935 は停止）。Google 指名_ノローナ の RSA も
   `google replace-copy`（copy/norrona_google_rsa.json）で差し替え済み（新 823291183637、
   旧 663462201975 停止）。表記は NORRØNA、カタカナ不使用がユーザー方針。
+- 【2026-09-03 実施済み】ユーザー指示「正規販売店FULLMARKSで。は全て無くす」。
+  Meta 静止画（HOUDINI / POC / ACLIMA ×3）を copy/*_meta.json（full-marks.com の
+  公式ブランド紹介文、見出し「ブランド｜Fall / Winter 2026」）で差し替え、Google
+  指名_フーディニ / 指名_ノローナ の RSA も「買うなら」「正規販売店」を含まない文言に
+  差し替え済み。今後の広告文でも「正規販売店FULLMARKSで」「〇〇を買うなら」は使わない。
 - 「〇〇を買うならフルマークス」型の文言は、Google指名検索RSA（ノローナ・
   フーディニ）の見出し/説明文と、Metaカタログ広告テンプレート
   `{{product.name}} ― アウトドアの正規販売店、FULLMARKSで。` が原因。
