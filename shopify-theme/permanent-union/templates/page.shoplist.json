@@ -1,11 +1,49 @@
 {
   "sections": {
-    "main": { "type": "shoplist", "blocks": {
-      "nagano": { "type": "region", "settings": { "title": "Nagano", "subtitle": "長野県" } },
-      "fm": { "type": "shop", "settings": { "name": "FULLMARKS STORE", "address": "長野県松本市", "url": "https://www.fullmarksstore.jp/" } },
-      "online": { "type": "region", "settings": { "title": "Online", "subtitle": "オンラインストア" } },
-      "os": { "type": "shop", "settings": { "name": "PERMANENT UNION Official Online Store", "address": "", "url": "/collections/all" } }
-    }, "block_order": ["nagano", "fm", "online", "os"], "settings": {} }
+    "main": {
+      "type": "shoplist",
+      "blocks": {
+        "nagano": {
+          "type": "region",
+          "settings": {
+            "title": "Nagano",
+            "subtitle": "長野県"
+          }
+        },
+        "fm": {
+          "type": "shop",
+          "settings": {
+            "name": "FULLMARKS STORE",
+            "address": "長野県松本市",
+            "url": "https://www.fullmarksstore.jp/"
+          }
+        },
+        "online": {
+          "type": "region",
+          "settings": {
+            "title": "Online",
+            "subtitle": "オンラインストア"
+          }
+        },
+        "os": {
+          "type": "shop",
+          "settings": {
+            "name": "PERMANENT UNION Official Online Store",
+            "address": "",
+            "url": "/pages/shop"
+          }
+        }
+      },
+      "block_order": [
+        "nagano",
+        "fm",
+        "online",
+        "os"
+      ],
+      "settings": {}
+    }
   },
-  "order": ["main"]
+  "order": [
+    "main"
+  ]
 }

@@ -1,7 +1,9 @@
 {%- liquid
   assign s = section.settings
+  assign photo_asset = s.photo_default_asset | default: 'pu-hero.jpg'
 -%}
-<section class="hero{% if s.height == 'short' %} hero--short{% endif %}" id="hero-{{ section.id }}">
+<section class="hero{% if s.height == 'short' %} hero--short{% endif %}{% if s.photo_enabled %} hero--photo hero--photo-{{ s.photo_layout }} hero--photo-{{ s.photo_position }} hero--photo-mobile-{{ s.photo_mobile }}{% if s.photo_parallax %} hero--parallax{% endif %}{% endif %}" id="hero-{{ section.id }}" style="--photo-size: {{ s.photo_size }}vw; --photo-opacity: {{ s.photo_opacity | divided_by: 100.0 }}; --photo-blend: {{ s.photo_blend }};">
+  {%- comment -%} Layer 1 (bottom): video {%- endcomment -%}
   <div class="hero__media">
     {%- if s.video != blank -%}
       {{ s.video | video_tag: autoplay: true, loop: true, muted: true, controls: false, playsinline: true, preload: 'auto', image_size: '2000x' }}
@@ -17,6 +19,18 @@
   </div>
   <div class="hero__vignette" style="opacity: {{ s.overlay | divided_by: 100.0 }}"></div>
 
+  {%- comment -%} Layer 2 (middle): photo — snow mountain / rider {%- endcomment -%}
+  {%- if s.photo_enabled -%}
+    <div class="hero__photo reveal" data-delay="1" aria-hidden="true">
+      {%- if s.photo_image != blank -%}
+        {{ s.photo_image | image_url: width: 1800 | image_tag: loading: 'eager', sizes: '(max-width: 700px) 70vw, 48vw', widths: '600, 900, 1200, 1800', alt: '' }}
+      {%- else -%}
+        <img src="{{ photo_asset | asset_url }}" alt="" loading="eager" width="2560" height="1707">
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+
+  {%- comment -%} Layer 3 (top): text {%- endcomment -%}
   <div class="hero__inner{% if s.align == 'center' %} hero__inner--center{% endif %}">
     {%- if s.eyebrow != blank -%}<p class="eyebrow hero__eyebrow reveal">{{ s.eyebrow }}</p>{%- endif -%}
     {%- if s.title != blank -%}<h1 class="display hero__title reveal" data-delay="1">{{ s.title }}</h1>{%- endif -%}
@@ -33,24 +47,38 @@
 
 {% schema %}
 {
-  "name": "ヒーロー動画",
+  "name": "ヒーロー（動画 / 写真 / テキスト）",
   "settings": [
-    { "type": "paragraph", "content": "動画は「Shopify 動画」「外部MP4のURL」「画像」の優先順で表示されます。Adobe Stockで購入した動画は、Shopify管理画面 > コンテンツ > ファイル にアップロード後ここで選択してください（推奨: 1920×1080 / 15〜30秒 / 10MB以下 / H.264）。" },
+    { "type": "paragraph", "content": "3層構成: 最背面に動画、その上に写真、最前面にテキスト。動画は「Shopify 動画」「外部MP4のURL」「画像」の優先順で表示されます。" },
+    { "type": "header", "content": "1. 動画（最背面）" },
+    { "type": "paragraph", "content": "Adobe Stockで購入した雪山動画は 1920×1080 / 15〜30秒 / H.264 MP4 / 10MB以下 / 音声なし に書き出し、管理画面 > コンテンツ > ファイル にアップロード後ここで選択してください。候補リストはテーマ同梱の README を参照。" },
     { "type": "video", "id": "video", "label": "動画（Shopify）" },
     { "type": "text", "id": "video_url", "label": "動画URL（MP4）", "default": "https://full-marks.com/permanentunion/wp-content/uploads/sites/16/2025/12/pu-movie-horizon.mp4" },
-    { "type": "image_picker", "id": "image", "label": "画像 / 動画のポスター" },
-    { "type": "select", "id": "height", "label": "高さ", "options": [ { "value": "full", "label": "画面いっぱい" }, { "value": "short", "label": "やや低め" } ], "default": "full" },
+    { "type": "image_picker", "id": "image", "label": "動画のポスター / 動画がない場合の背景画像" },
     { "type": "range", "id": "overlay", "label": "暗さ（オーバーレイ）", "min": 0, "max": 100, "step": 5, "unit": "%", "default": 70 },
+    { "type": "header", "content": "2. 写真（中間レイヤー）" },
+    { "type": "checkbox", "id": "photo_enabled", "label": "写真レイヤーを表示", "default": true },
+    { "type": "image_picker", "id": "photo_image", "label": "写真（雪山 / ライダー）" },
+    { "type": "text", "id": "photo_default_asset", "label": "初期画像（テーマ同梱）", "default": "pu-hero.jpg", "info": "写真未設定時に使うテーマ内画像（pu-riders.jpg も指定可）。実際の雪山 / ライダー写真を設定したら空欄に。" },
+    { "type": "select", "id": "photo_layout", "label": "写真の重ね方", "options": [ { "value": "inset", "label": "額装カード（動画の上に写真を1枚置く）" }, { "value": "overlay", "label": "全面に重ねる（透過 / ブレンド）" } ], "default": "inset" },
+    { "type": "select", "id": "photo_position", "label": "カードの位置（額装時）", "options": [ { "value": "right", "label": "右" }, { "value": "left", "label": "左" } ], "default": "right" },
+    { "type": "range", "id": "photo_size", "label": "カードの幅（額装時）", "min": 30, "max": 70, "step": 2, "unit": "%", "default": 42 },
+    { "type": "range", "id": "photo_opacity", "label": "写真の不透明度", "min": 10, "max": 100, "step": 5, "unit": "%", "default": 90, "info": "全面重ねの場合は 40〜60% 程度が目安" },
+    { "type": "select", "id": "photo_blend", "label": "ブレンド（全面重ね時）", "options": [ { "value": "normal", "label": "通常" }, { "value": "multiply", "label": "乗算" }, { "value": "screen", "label": "スクリーン" }, { "value": "soft-light", "label": "ソフトライト" } ], "default": "normal" },
+    { "type": "select", "id": "photo_mobile", "label": "スマホでの表示", "options": [ { "value": "shrink", "label": "小さく表示" }, { "value": "hide", "label": "非表示" }, { "value": "show", "label": "そのまま表示" } ], "default": "shrink" },
+    { "type": "checkbox", "id": "photo_parallax", "label": "スクロールで写真を少し動かす", "default": true },
+    { "type": "header", "content": "3. テキスト（最前面）" },
+    { "type": "select", "id": "height", "label": "高さ", "options": [ { "value": "full", "label": "画面いっぱい" }, { "value": "short", "label": "やや低め" } ], "default": "full" },
     { "type": "select", "id": "align", "label": "テキスト位置", "options": [ { "value": "left", "label": "左下" }, { "value": "center", "label": "中央" } ], "default": "left" },
-    { "type": "text", "id": "eyebrow", "label": "小見出し", "default": "2026-2027 FW New Collection" },
+    { "type": "text", "id": "eyebrow", "label": "小見出し", "default": "Snow Lifestyle Brand — Since 2013" },
     { "type": "text", "id": "title", "label": "見出し", "default": "Be Awesome In The Mountain" },
     { "type": "text", "id": "subtitle", "label": "サブコピー", "default": "〜 山にいるときこそ最高であれ 〜" },
-    { "type": "text", "id": "button_label", "label": "ボタン1", "default": "View Collection" },
+    { "type": "text", "id": "button_label", "label": "ボタン1", "default": "Our Story" },
     { "type": "url", "id": "button_link", "label": "ボタン1リンク" },
-    { "type": "text", "id": "button2_label", "label": "ボタン2", "default": "Our Story" },
+    { "type": "text", "id": "button2_label", "label": "ボタン2", "default": "Online Store" },
     { "type": "url", "id": "button2_link", "label": "ボタン2リンク" },
     { "type": "checkbox", "id": "show_scroll", "label": "スクロール表示", "default": true }
   ],
-  "presets": [{ "name": "ヒーロー動画" }]
+  "presets": [{ "name": "ヒーロー（動画 / 写真 / テキスト）" }]
 }
 {% endschema %}
