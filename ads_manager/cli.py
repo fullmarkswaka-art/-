@@ -140,6 +140,12 @@ def main(argv=None) -> int:
             sw.add_argument("--message", default=None)
             sw.add_argument("--apply", action="store_true")
         else:
+            mc = action_sub.add_parser(
+                "mc-supplement", help="Merchant Center にAPI補助データソースを作り属性を登録")
+            mc.add_argument("--apply", action="store_true")
+            mc.add_argument("--limit", type=int, default=None)
+            mcp = action_sub.add_parser("mc-product", help="Merchant Center の商品を1件表示")
+            mcp.add_argument("offer_id")
             pl = action_sub.add_parser(
                 "pla-split", help="ショッピング商品グループを custom_label_0 で分割しoutletを除外")
             pl.add_argument("campaign_id")
@@ -227,6 +233,17 @@ def main(argv=None) -> int:
             path = meta_generate_preview(client, args.ad_id, args.format)
             print(f"プレビューを保存: {path}")
     else:
+        if args.action == "mc-supplement":
+            from .catalog_attributes import SUPPLEMENT_CSV
+            from .merchant_api import MerchantClient
+            mc = MerchantClient()
+            _print(mc.ensure_supplemental(apply=args.apply))
+            _print(mc.upsert_attributes(SUPPLEMENT_CSV, apply=args.apply, limit=args.limit))
+            return 0
+        if args.action == "mc-product":
+            from .merchant_api import MerchantClient
+            _print(MerchantClient().get_product(args.offer_id))
+            return 0
         if args.action == "feed-gap":
             from .catalog_sync import feed_gap
             _print(feed_gap())

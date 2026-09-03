@@ -42,11 +42,11 @@ FULLMARKS（fullmarksstore.jp）の広告運用ツール。Meta/Google広告のA
   （テスト/本番の区別なし、リフレッシュトークン無期限）、
   アクセストークンはライブラリが自動更新、週次レポートが毎週使うため
   6ヶ月未使用失効も起きない。
-- Googleのリフレッシュトークンのスコープは `adwords` のみ。
-  Merchant Center (Content API) は操作不可。
-  `scripts/generate_google_refresh_token.py` には content スコープを
-  追加済みなので、次回トークン再生成時から両方使える
-  （内部アプリのため marble.jp.net のアカウントで認証すること）。
+- 【解決済み 2026-09-03】Googleのリフレッシュトークンを adwords + content の
+  両スコープで取り直し、Lambda 環境変数に反映済み。Merchant Center も API 操作可。
+  再取得が必要になったら `scripts/google_oauth_manual.py url` で認可URLを出し、
+  ユーザーがブラウザでログイン後の localhost URL を貼る → `exchange` で交換
+  （PCへのインストール不要。内部アプリのため marble.jp.net のアカウントで認証）。
 
 ## Google側の地雷（Metaと同型）
 
@@ -117,9 +117,12 @@ FULLMARKS（fullmarksstore.jp）の広告運用ツール。Meta/Google広告のA
   - `python -m ads_manager meta catalog-supplement 610915616169358 --apply` …
     Meta 補助フィード `1098537166224560`（primary=1058904553805180）へCSVを
     アップロード。**毎週月曜の定例で再実行する**（アウトレット入替に追随）。
-  - Merchant Center (ID 5642612701) には同じCSVを補助フィードとして登録する
-    （Content API 権限が無いためユーザーがUIで登録。id / brand / custom_label_0 /
-    custom_label_1 / product_type の5列）。
+  - `python -m ads_manager google mc-supplement --apply` … Merchant Center
+    (ID 5642612701) の API 補助データソース `10719929792`（プライマリ
+    `10585554861` = gsfeed.xml 取得、デフォルトルールで連結済み）へ商品ごとに
+    brand / customLabel0 / customLabel1 / productTypes を productInputs として登録。
+    **毎週月曜の定例で再実行する**。Merchant API v1 を使用（Content API は終了予定）。
+    GCPプロジェクト 913768367915 (fullmarks-analytics) は developerRegistration 済み。
 - 除外の実装:
   - Google: PLA_v2 (24136223642) の商品グループを custom_label_0 で分割済み。
     outlet=除外、その他=¥20。ルート(SUBDIVISION)の status が API 上 PAUSED と
