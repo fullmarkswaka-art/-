@@ -72,21 +72,23 @@ YTD_ACT, YTD_BUD, YTD_PREV = "前提!$B$17", "前提!$C$17", "前提!$D$17"
 
 # 月別入力 9〜4月
 ws["A20"] = "月別入力（9〜4月）"; ws["A20"].font = bold
-mh = ["月", "会社予算", "前年同月", "自然売上 成長率", "広告費合計(通常+イベント)", "うちイベント予備費"]
+RAMP = [0.70, 0.85, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00]  # ROAS達成度: 9月は広告刷新直後・10月は新ストア立ち上げ
+mh = ["月", "会社予算", "前年同月", "自然売上 成長率", "広告費合計(通常+イベント)", "うちイベント予備費", "ROAS 達成度"]
 for c, h in enumerate(mh, 1):
     cell = ws.cell(row=21, column=c, value=h); cell.font = wb_; cell.fill = hdr; cell.alignment = center
 M0 = 22
 for i, m in enumerate(MONTHS):
     r = M0 + i
     ws.cell(row=r, column=1, value=m).font = black
-    for c, v, fmt in ((2, COMPANY[i], YEN), (3, PREV[i], YEN), (4, GROWTH[i], "0.00"), (5, AD_TOTAL[i], YEN), (6, EVENT[i], YEN)):
+    for c, v, fmt in ((2, COMPANY[i], YEN), (3, PREV[i], YEN), (4, GROWTH[i], "0.00"), (5, AD_TOTAL[i], YEN), (6, EVENT[i], YEN), (7, RAMP[i], "0.00")):
         cell = ws.cell(row=r, column=c, value=v); cell.font = blue; cell.number_format = fmt
-    ws.cell(row=r, column=4).fill = yellow
+    ws.cell(row=r, column=4).fill = yellow; ws.cell(row=r, column=7).fill = yellow
 ws.cell(row=M0 + 8, column=1, value="計").font = bold
 for c in (2, 3, 5, 6):
     cell = ws.cell(row=M0 + 8, column=c, value=f"=SUM({L(c)}{M0}:{L(c)}{M0+7})"); cell.font = bold; cell.number_format = YEN
-ws["G22"] = ("成長率＝前年同月の自然売上に対する伸び（1.00＝前年並み）。広告費は「広告予算計画_金額確定版」の月額。"
-             "2月は前年6,369万が突出値のため、成長率を下げる判断もあり得る。"); ws["G22"].font = small
+ws["H22"] = ("成長率＝前年同月の自然売上に対する伸び（1.00＝前年並み）。10月は3ストア稼働で1.10、2月は前年6,369万が突出値のため0.75、4月は0.90。"
+             "ROAS達成度＝想定ROASに掛ける係数。9月は広告刷新直後(9/1〜3実績ROAS3.3)のため0.70、10月は新ストア立ち上げで0.85。"
+             "広告費は「広告予算計画_金額確定版」の月額。"); ws["H22"].font = small
 
 # ライン定義
 ws["A33"] = "ライン定義（広告配分比率・ROAS・自然売上シェア）"; ws["A33"].font = bold
@@ -116,7 +118,7 @@ for col, w in zip("ABCDEFGHI", (34, 34, 13, 14, 9, 16, 15, 16, 60)):
 # ============ ストア別ブランド別 ============
 ws2 = wb.create_sheet("ストア別ブランド別")
 ws2["A1"] = "ストア別・ブランド別 月次目標（税抜）＝ 広告費 × ROAS ÷ 1.1 ＋ 自然売上"; ws2["A1"].font = Font(name=F, size=13, bold=True)
-ws2["A2"] = "各月4列: 広告費 / 広告売上 / 自然売上 / 合計。全て「前提」シートの入力値からの数式。"; ws2["A2"].font = small
+ws2["A2"] = "各月4列: 広告費 / 広告売上 / 自然売上 / 合計。広告売上＝広告費×想定ROAS×月別ROAS達成度÷1.1。全て「前提」シートの入力値からの数式。"; ws2["A2"].font = small
 # header rows 3-4
 ws2.cell(row=4, column=1, value="ストア").font = wb_; ws2.cell(row=4, column=2, value="ブランド/枠").font = wb_
 for c in (1, 2): ws2.cell(row=4, column=c).fill = hdr; ws2.cell(row=3, column=c).fill = hdr
@@ -146,7 +148,7 @@ for i, (store, brand, r9, r10, kind, roas, s9, s10, note) in enumerate(LINES):
         else:
             cost = f"=IF({is_sep},0,{normal}*{K_STORE})"
         cA = ws2.cell(row=r, column=c0, value=cost)
-        cB = ws2.cell(row=r, column=c0 + 1, value=f"={L(c0)}{r}*前提!$F${pr}/{K_TAX}")
+        cB = ws2.cell(row=r, column=c0 + 1, value=f"={L(c0)}{r}*前提!$F${pr}*前提!$G${mrow}/{K_TAX}")
         share = f"IF({is_sep},前提!$G${pr},前提!$H${pr})"
         cC = ws2.cell(row=r, column=c0 + 2, value=f"=月別目標!$D${6+mi}*{share}")
         cD = ws2.cell(row=r, column=c0 + 3, value=f"={L(c0+1)}{r}+{L(c0+2)}{r}")
@@ -240,7 +242,7 @@ ws4["A1"] = "シナリオ比較（年間売上・税抜）"; ws4["A1"].font = Fo
 ws4["A2"] = "自然売上とROASの達成度を掛けて年間売上を試算。青字は変更可。"; ws4["A2"].font = small
 for c, h in enumerate(["シナリオ", "自然売上 達成度", "ROAS 達成度", "年間売上", "vs 2.8億", "vs 3.2億", "9〜4月 必要な月平均"], 1):
     cell = ws4.cell(row=4, column=c, value=h); cell.font = wb_; cell.fill = hdr; cell.alignment = center
-for i, (name, og, rk) in enumerate([("保守（前年割れ・ROAS7割）", 0.95, 0.7), ("標準（前提シートどおり）", 1.0, 1.0), ("強気（自然+5%・ROAS1.3倍）", 1.05, 1.3)]):
+for i, (name, og, rk) in enumerate([("保守（前年の広告比率25%相当＝自然売上0.88・ROAS0.8）", 0.88, 0.8), ("標準（前提シートどおり）", 1.0, 1.0), ("強気（自然+5%・ROAS1.2倍）", 1.05, 1.2)]):
     r = 5 + i
     ws4.cell(row=r, column=1, value=name).font = black
     ws4.cell(row=r, column=2, value=og).font = blue; ws4.cell(row=r, column=2).number_format = "0.00"
@@ -249,7 +251,42 @@ for i, (name, og, rk) in enumerate([("保守（前年割れ・ROAS7割）", 0.95
     ws4.cell(row=r, column=5, value=f"=D{r}-{K_BUDGET}").number_format = YEN
     ws4.cell(row=r, column=6, value=f"=D{r}-{K_STRETCH}").number_format = YEN
     ws4.cell(row=r, column=7, value=f"=(D{r}-{YTD_ACT})/8").number_format = YEN
-for c, w in zip("ABCDEFG", (30, 14, 12, 16, 15, 15, 18)): ws4.column_dimensions[c].width = w
+for c, w in zip("ABCDEFG", (46, 14, 12, 16, 15, 15, 18)): ws4.column_dimensions[c].width = w
+ws4["A9"] = "読み方: 保守でも2.8億に届くかが判断基準。届かない場合は10月・12月の広告費増額か、企画で自然売上を上積みする。"; ws4["A9"].font = small
+
+# ============ 月次チェック ============
+ws5 = wb.create_sheet("月次チェック")
+ws5["A1"] = "月次チェック（税抜）― 実績を入れると、2.8億に対する残り必要額が出る"; ws5["A1"].font = Font(name=F, size=13, bold=True)
+ws5["A2"] = "毎月、C列に会社ファイルの売上実績（税抜）を入力。未入力の月は目標値で仮置きして累計を出す。"; ws5["A2"].font = small
+h5 = ["月", "目標", "実績（入力）", "目標差", "累計 目標", "累計 実績/見込", "累計 会社予算", "2.8億まで残り", "残り月の必要月平均", "メモ"]
+for c, h in enumerate(h5, 1):
+    cell = ws5.cell(row=4, column=c, value=h); cell.font = wb_; cell.fill = hdr; cell.alignment = center
+ws5.cell(row=5, column=1, value="5〜8月 実績").font = bold
+ws5.cell(row=5, column=2, value=f"={YTD_BUD}").number_format = YEN
+ws5.cell(row=5, column=3, value=f"={YTD_ACT}").number_format = YEN
+ws5.cell(row=5, column=4, value="=C5-B5").number_format = YEN
+ws5.cell(row=5, column=5, value="=B5").number_format = YEN
+ws5.cell(row=5, column=6, value="=C5").number_format = YEN
+ws5.cell(row=5, column=7, value=f"={YTD_BUD}").number_format = YEN
+ws5.cell(row=5, column=8, value=f"={K_BUDGET}-F5").number_format = YEN
+ws5.cell(row=5, column=9, value="=H5/8").number_format = YEN
+for c in range(1, 11): ws5.cell(row=5, column=c).fill = grey
+for mi, m in enumerate(MONTHS):
+    r = 6 + mi; left = 8 - mi - 1
+    ws5.cell(row=r, column=1, value=m).font = black
+    ws5.cell(row=r, column=2, value=f"=月別目標!G{6+mi}").font = green
+    c3 = ws5.cell(row=r, column=3); c3.font = blue; c3.fill = yellow
+    ws5.cell(row=r, column=4, value=f'=IF(C{r}="","",C{r}-B{r})')
+    ws5.cell(row=r, column=5, value=f"=E{r-1}+B{r}")
+    ws5.cell(row=r, column=6, value=f'=F{r-1}+IF(C{r}="",B{r},C{r})')
+    ws5.cell(row=r, column=7, value=f"=G{r-1}+月別目標!B{6+mi}").font = green
+    ws5.cell(row=r, column=8, value=f"={K_BUDGET}-F{r}")
+    ws5.cell(row=r, column=9, value=(f"=IF({left}=0,0,H{r}/{left})" if left > 0 else "=0"))
+    ws5.cell(row=r, column=10, value=('実績が空欄の月は目標で仮置き' if mi == 0 else '')).font = small
+    for c in range(2, 10): ws5.cell(row=r, column=c).number_format = YEN
+for c, w in zip("ABCDEFGHIJ", (14, 14, 14, 13, 15, 16, 15, 15, 18, 30)): ws5.column_dimensions[c].width = w
+for rr in range(4, 14):
+    for c in range(1, 11): ws5.cell(row=rr, column=c).border = border
 for rr in range(4, 8):
     for c in range(1, 8): ws4.cell(row=rr, column=c).border = border
 
