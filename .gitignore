@@ -15,3 +15,4 @@ venv/
 *.egg-info/
 .pytest_cache/
 previews/
+reports/google_refresh_token.txt
