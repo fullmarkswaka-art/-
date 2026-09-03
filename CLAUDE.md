@@ -132,9 +132,20 @@ FULLMARKS（fullmarksstore.jp）の広告運用ツール。Meta/Google広告のA
     ACLIMA 2252281938679870 / HESTRA 2164694404474862 / NORRONA_falketind
     2425736481284111 / femund 1724713352166731 / senja 1063318003222881 /
     lofoten 1477226797547982 / trollveggen 1324032626282004 ほか）。
-    `python -m ads_manager meta swap-catalog-ads 52598939357735 --sets ... --apply`
-    で「すべての商品」広告をブランド/シリーズ別広告へ差し替える（1広告=1ブランド、
-    NORRONAはシリーズ単位。カルーセル内でブランドを混ぜない）。
+    【2026-09-03 実施済み】`meta swap-catalog-ads ... --sets-json copy/catalog_ads.json`
+    で「すべての商品」広告 52598939357735 を停止し、広告セット 52598939140535 に
+    ブランド/シリーズ別のカタログ広告9本（HOUDINI / POC / ACLIMA / HESTRA /
+    NORRØNA falketind・femund・senja・lofoten・trollveggen）を作成。本文は
+    「<ブランド or シリーズ>｜Fall / Winter 2026」形式（copy/catalog_ads.json）。
+    1広告=1ブランド、NORRØNAはシリーズ単位。カルーセル内でブランドを混ぜない。
+- Meta アプリ「FULLMARKS広告分析」(2559664041137913) は 2026-09-03 に公開モードへ
+  切替済み。広告クリエイティブの新規作成（`meta replace-copy` /
+  `swap-catalog-ads`）は公開モードでないと Meta に拒否される（エラー 1885183）。
+  カタログ広告のクリエイティブ作成には instagram_user_id (17841404773057326) が必要。
+- 【2026-09-03 実施済み】NORRØNA 静止画 RTG 広告を `meta replace-copy` で差し替え
+  （新広告 52604711975335、旧 52597391295935 は停止）。Google 指名_ノローナ の RSA も
+  `google replace-copy`（copy/norrona_google_rsa.json）で差し替え済み（新 823291183637、
+  旧 663462201975 停止）。表記は NORRØNA、カタカナ不使用がユーザー方針。
 - 「〇〇を買うならフルマークス」型の文言は、Google指名検索RSA（ノローナ・
   フーディニ）の見出し/説明文と、Metaカタログ広告テンプレート
   `{{product.name}} ― アウトドアの正規販売店、FULLMARKSで。` が原因。

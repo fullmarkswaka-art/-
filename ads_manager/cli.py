@@ -135,8 +135,10 @@ def main(argv=None) -> int:
             sw = action_sub.add_parser(
                 "swap-catalog-ads", help="全商品のカタログ広告を商品セット別広告へ差し替え")
             sw.add_argument("old_ad_id")
-            sw.add_argument("--sets", required=True,
+            sw.add_argument("--sets", default=None,
                             help="商品セットID:名前 をカンマ区切り (例 123:HOUDINI,456:POC)")
+            sw.add_argument("--sets-json", default=None,
+                            help="[{id, name, message}] のJSONファイル（本文を商品セットごとに指定）")
             sw.add_argument("--message", default=None)
             sw.add_argument("--apply", action="store_true")
         else:
@@ -225,8 +227,12 @@ def main(argv=None) -> int:
             _print(meta_product_sets(client, args.catalog_id, rows, apply=args.apply))
         elif args.action == "swap-catalog-ads":
             from .catalog_attributes import meta_swap_catalog_ads
-            sets = [{"id": x.split(":", 1)[0], "name": x.split(":", 1)[1]}
-                    for x in args.sets.split(",")]
+            if args.sets_json:
+                import json as _json
+                sets = _json.load(open(args.sets_json, encoding="utf-8"))
+            else:
+                sets = [{"id": x.split(":", 1)[0], "name": x.split(":", 1)[1]}
+                        for x in args.sets.split(",")]
             _print(meta_swap_catalog_ads(client, args.old_ad_id, sets,
                                          message=args.message, apply=args.apply))
         elif args.action == "replace-copy":

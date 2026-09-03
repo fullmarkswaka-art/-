@@ -290,7 +290,8 @@ def meta_swap_catalog_ads(client: MetaAdsClient, old_ad_id: str,
     """
     old = client.get(old_ad_id,
                      fields="id,name,status,adset_id,creative{id,object_story_spec,"
-                            "asset_feed_spec,product_set_id}")
+                            "asset_feed_spec,product_set_id,instagram_user_id}")
+    ig_user = old["creative"].get("instagram_user_id")
     spec = old["creative"]["object_story_spec"]
     template = dict(spec.get("template_data", {}))
     if message:
@@ -301,15 +302,19 @@ def meta_swap_catalog_ads(client: MetaAdsClient, old_ad_id: str,
             "new_ads": [], "apply": apply}
     for ps in product_sets:
         name = f"fullmarks-dpa-{ps['name']}"
-        entry = {"name": name, "product_set_id": ps["id"]}
+        tpl = dict(template)
+        if ps.get("message"):
+            tpl["message"] = ps["message"]
+        entry = {"name": name, "product_set_id": ps["id"], "message": tpl.get("message")}
         if apply:
             creative = client.post(
                 f"{client.config.ad_account_id}/adcreatives",
                 name=name,
                 object_story_spec=json.dumps({"page_id": spec["page_id"],
-                                              "template_data": template}),
+                                              "template_data": tpl}),
                 product_set_id=ps["id"],
                 asset_feed_spec=json.dumps(old["creative"].get("asset_feed_spec") or {}),
+                **({"instagram_user_id": ig_user} if ig_user else {}),
             )
             ad = client.post(f"{client.config.ad_account_id}/ads",
                              name=name, adset_id=old["adset_id"],
