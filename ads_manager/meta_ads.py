@@ -63,6 +63,23 @@ class MetaAdsClient:
     def post(self, path: str, **params: Any) -> dict:
         return self._request("POST", path, **params)
 
+    def post_file(self, path: str, file_path, **params: Any) -> dict:
+        """ファイルを multipart でアップロードする（フィードの uploads など）。"""
+        url = f"{GRAPH_URL}/{self.config.api_version}/{path}"
+        params.setdefault("access_token", self.config.access_token)
+        with open(file_path, "rb") as fh:
+            try:
+                resp = requests.post(url, data=params, files={"file": fh}, timeout=120)
+            except requests.RequestException as e:
+                raise MetaAdsError(
+                    f"Meta APIへのアップロードに失敗 ({type(e).__name__})") from None
+        body = resp.json()
+        if "error" in body:
+            err = body["error"]
+            raise MetaAdsError(
+                f"Meta API error {err.get('code')}: {err.get('message')}")
+        return body
+
     # ---- 接続確認 ----
     def check_connection(self) -> dict:
         return self.get(

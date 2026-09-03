@@ -117,6 +117,34 @@ def main(argv=None) -> int:
                             help="サイトの全商品を実際にカタログへ同期する（省略時はドライラン）")
             cs.add_argument("--limit", type=int, default=0,
                             help="テスト用: 先頭N商品だけ処理する")
+        if name == "meta":
+            ca = action_sub.add_parser(
+                "catalog-attributes",
+                help="サイト巡回で brand/outlet/series を補完した補助フィードCSVを生成")
+            ca.add_argument("--feed", help="ローカルの gsfeed.xml（省略時はサイトから取得）")
+            sp = action_sub.add_parser(
+                "catalog-supplement", help="補助フィードを作成しCSVをアップロード")
+            sp.add_argument("catalog_id")
+            sp.add_argument("--primary-feed", default="1058904553805180")
+            sp.add_argument("--csv", default=None)
+            sp.add_argument("--apply", action="store_true")
+            ps_ = action_sub.add_parser(
+                "product-sets", help="通常価格×ブランド(×シリーズ)の商品セットを作成")
+            ps_.add_argument("catalog_id")
+            ps_.add_argument("--apply", action="store_true")
+            sw = action_sub.add_parser(
+                "swap-catalog-ads", help="全商品のカタログ広告を商品セット別広告へ差し替え")
+            sw.add_argument("old_ad_id")
+            sw.add_argument("--sets", required=True,
+                            help="商品セットID:名前 をカンマ区切り (例 123:HOUDINI,456:POC)")
+            sw.add_argument("--message", default=None)
+            sw.add_argument("--apply", action="store_true")
+        else:
+            pl = action_sub.add_parser(
+                "pla-split", help="ショッピング商品グループを custom_label_0 で分割しoutletを除外")
+            pl.add_argument("campaign_id")
+            pl.add_argument("--bid", type=float, default=20.0)
+            pl.add_argument("--apply", action="store_true")
         pv = action_sub.add_parser("preview")
         pv.add_argument("ad_id")
         if name == "meta":
@@ -163,6 +191,34 @@ def main(argv=None) -> int:
             from .catalog_sync import catalog_sync
             _print(catalog_sync(client, args.catalog_id,
                                 apply=args.apply, limit=args.limit))
+        elif args.action == "catalog-attributes":
+            from .catalog_attributes import (build_attribute_rows, summarize_rows,
+                                             write_supplement_csv)
+            rows = build_attribute_rows(args.feed)
+            path = write_supplement_csv(rows)
+            _print({"csv": str(path), **summarize_rows(rows)})
+        elif args.action == "catalog-supplement":
+            from pathlib import Path
+            from .catalog_attributes import SUPPLEMENT_CSV, meta_supplementary_feed
+            _print(meta_supplementary_feed(
+                client, args.catalog_id, args.primary_feed,
+                Path(args.csv) if args.csv else SUPPLEMENT_CSV, apply=args.apply))
+        elif args.action == "product-sets":
+            import csv as _csv
+            from .catalog_attributes import SUPPLEMENT_CSV, load_feed, meta_product_sets
+            feed = load_feed()
+            rows = []
+            with open(SUPPLEMENT_CSV, encoding="utf-8") as fh:
+                for r in _csv.DictReader(fh):
+                    r["availability"] = feed.get(r["id"], {}).get("availability", "")
+                    rows.append(r)
+            _print(meta_product_sets(client, args.catalog_id, rows, apply=args.apply))
+        elif args.action == "swap-catalog-ads":
+            from .catalog_attributes import meta_swap_catalog_ads
+            sets = [{"id": x.split(":", 1)[0], "name": x.split(":", 1)[1]}
+                    for x in args.sets.split(",")]
+            _print(meta_swap_catalog_ads(client, args.old_ad_id, sets,
+                                         message=args.message, apply=args.apply))
         elif args.action == "creatives":
             from .creatives import meta_list_creatives
             _print(meta_list_creatives(client))
@@ -198,6 +254,10 @@ def main(argv=None) -> int:
         elif args.action == "creatives":
             from .creatives import google_list_creatives
             _print(google_list_creatives(client))
+        elif args.action == "pla-split":
+            from .catalog_attributes import google_split_listing_group
+            _print(google_split_listing_group(client, args.campaign_id,
+                                              apply=args.apply, bid_yen=args.bid))
         elif args.action == "preview":
             from .creatives import google_list_creatives, google_render_preview
             ads = [a for a in google_list_creatives(client)
