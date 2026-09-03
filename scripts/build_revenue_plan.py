@@ -24,19 +24,21 @@ ACT = [("2026-05", 10_878_769, 16_500_000, 12_569_387), ("2026-06", 11_689_179, 
        ("2026-07", 31_677_600, 17_000_000, 11_017_920), ("2026-08", 26_669_593, 21_000_000, 21_492_906)]
 # ライン: (ストア, ブランド/枠, 9月配分比率(FULLMARKS通常予算内), 10月〜比率, ストア枠, ROAS税込, 自然シェア9月, 自然シェア10月〜, 備考)
 LINES = [
-    ("FULLMARKS STORE", "HOUDINI",           0.27, 0.20, "FM", 14.0, 0.55, 0.22, "8月ROAS17.3。HOUDINI STORE稼働後は自然売上の一部が移管"),
-    ("FULLMARKS STORE", "NORRØNA",           0.07, 0.06, "FM", 4.0,  0.12, 0.08, "8月ROAS1.1→文言/シリーズ別に刷新。NORRONA STOREへ移管"),
-    ("FULLMARKS STORE", "POC",               0.09, 0.12, "FM", 5.0,  0.10, 0.10, "8月ROAS3.9。専用ストア無しのため強化"),
-    ("FULLMARKS STORE", "ACLIMA",            0.05, 0.06, "FM", 4.0,  0.06, 0.06, "MetaのCLKはROAS6"),
-    ("FULLMARKS STORE", "HESTRA",            0.04, 0.08, "FM", 5.0,  0.07, 0.08, "未広告→指名検索を新設。10〜1月が本番"),
-    ("FULLMARKS STORE", "その他(KANG/PLUS ONE WORKS/POW/SR)", 0.01, 0.02, "FM", 3.0, 0.10, 0.08, "テスト枠"),
-    ("FULLMARKS STORE", "共通: 店舗指名検索", 0.17, 0.18, "FM", 14.0, 0.0, 0.0, "8月ROAS15.8。ブランド横断のため自然売上は配分しない"),
-    ("FULLMARKS STORE", "共通: 商品連動(ショッピング/カタログ)", 0.30, 0.28, "FM", 8.0, 0.0, 0.0, "8月ROAS7.4。アウトレット除外後の水準で要観察"),
-    ("FULLMARKS STORE", "共通: イベント予備費(SW/年末/セール)", None, None, "EV", 5.0, 0.0, 0.0, "EC企画の告知用。月次表の『イベント』列"),
-    ("HOUDINI STORE",   "HOUDINI",           None, None, "ST", 8.0,  0.0, 0.25, "10月稼働。FULLMARKSのHOUDINI売上(71%)の一部が移管"),
-    ("NORRONA STORE",   "NORRØNA",           None, None, "ST", 5.0,  0.0, 0.08, "10月稼働"),
-    ("PU STORE",        "PLUS ONE WORKS",    None, None, "ST", 3.0,  0.0, 0.05, "10月稼働。小規模"),
+    # (ストア, ブランド/枠, 9月配分, 10月〜配分, 枠種別, ROAS税込, 自然シェア9月, 自然シェア10月〜(移管前), 純増率, 備考)
+    ("FULLMARKS STORE", "HOUDINI",           0.27, 0.20, "FM", 14.0, 0.55, 0.55, None, "8月ROAS17.3。HOUDINI STORE開店後、移管分(潜在規模×(1−純増率))を差し引く"),
+    ("FULLMARKS STORE", "NORRØNA",           0.07, 0.06, "FM", 4.0,  0.12, 0.12, None, "8月ROAS1.1→文言/シリーズ別に刷新。NORRONA STORE開店後に移管分を差し引く"),
+    ("FULLMARKS STORE", "POC",               0.09, 0.12, "FM", 5.0,  0.10, 0.10, None, "8月ROAS3.9。専用ストア無しのため強化"),
+    ("FULLMARKS STORE", "ACLIMA",            0.05, 0.06, "FM", 4.0,  0.06, 0.06, None, "MetaのCLKはROAS6"),
+    ("FULLMARKS STORE", "HESTRA",            0.04, 0.08, "FM", 5.0,  0.07, 0.07, None, "未広告→指名検索を新設。10〜1月が本番。フィード未掲載81件の修正が前提"),
+    ("FULLMARKS STORE", "その他(KANG/PLUS ONE WORKS/POW/SR)", 0.01, 0.02, "FM", 3.0, 0.10, 0.10, None, "PU STORE開店後に移管分を差し引く"),
+    ("FULLMARKS STORE", "共通: 店舗指名検索", 0.17, 0.18, "FM", 14.0, 0.0, 0.0, None, "8月ROAS15.8。ブランド横断のため自然売上は配分しない"),
+    ("FULLMARKS STORE", "共通: 商品連動(ショッピング/カタログ)", 0.30, 0.28, "FM", 8.0, 0.0, 0.0, None, "8月ROAS7.4。アウトレット除外後の水準で要観察"),
+    ("FULLMARKS STORE", "共通: イベント予備費(SW/年末/セール)", None, None, "EV", 5.0, 0.0, 0.0, None, "EC企画の告知用。月次表の『イベント』列"),
+    ("HOUDINI STORE",   "HOUDINI",           None, None, "ST", 8.0,  0.0, 0.25, 0.50, "9月末開店。潜在規模＝FULLMARKS自然売上の25%。うち純増50%、残り50%はFULLMARKSからの移管"),
+    ("NORRONA STORE",   "NORRØNA",           None, None, "ST", 5.0,  0.0, 0.08, 0.50, "10月開店。潜在規模8%、純増50%"),
+    ("PU STORE",        "PLUS ONE WORKS",    None, None, "ST", 3.0,  0.0, 0.05, 0.60, "10月開店。潜在規模5%、純増60%（自社ブランドで新規比率高め）"),
 ]
+MIGRATE = {9: 0, 10: 1, 11: 5}  # 新ストア行 → 移管元のFULLMARKS行
 STORE_SHARE = 0.15  # 10月以降、HOUDINI/NORRONA/PU 各15%（FULLMARKS 55%）
 
 wb = Workbook()
@@ -92,33 +94,35 @@ ws["H22"] = ("成長率＝前年同月の自然売上に対する伸び（1.00�
 
 # ライン定義
 ws["A33"] = "ライン定義（広告配分比率・ROAS・自然売上シェア）"; ws["A33"].font = bold
-lh = ["ストア", "ブランド/枠", "9月 配分比率", "10月〜 配分比率", "枠種別", "想定ROAS(税込計測)", "自然売上シェア 9月", "自然売上シェア 10月〜", "備考"]
+lh = ["ストア", "ブランド/枠", "9月 配分比率", "10月〜 配分比率", "枠種別", "想定ROAS(税込計測)", "自然売上シェア 9月", "自然売上シェア 10月〜(FM=移管前 / 新ストア=潜在規模)", "純増率(新ストア)", "備考"]
 for c, h in enumerate(lh, 1):
     cell = ws.cell(row=34, column=c, value=h); cell.font = wb_; cell.fill = hdr; cell.alignment = center
 L0 = 35
-for i, (store, brand, r9, r10, kind, roas, s9, s10, note) in enumerate(LINES):
+for i, (store, brand, r9, r10, kind, roas, s9, s10, newr, note) in enumerate(LINES):
     r = L0 + i
     ws.cell(row=r, column=1, value=store).font = black
     ws.cell(row=r, column=2, value=brand).font = black
-    for c, v, fmt in ((3, r9, PCT), (4, r10, PCT), (6, roas, X), (7, s9, PCT), (8, s10, PCT)):
+    for c, v, fmt in ((3, r9, PCT), (4, r10, PCT), (6, roas, X), (7, s9, PCT), (8, s10, PCT), (9, newr, PCT)):
         cell = ws.cell(row=r, column=c, value=v); cell.font = blue; cell.number_format = fmt
-        if c in (6, 8): cell.fill = yellow
+        if c in (6, 8, 9): cell.fill = yellow
     ws.cell(row=r, column=5, value=kind).font = black
-    ws.cell(row=r, column=9, value=note).font = small
+    ws.cell(row=r, column=10, value=note).font = small
 LR = L0 + len(LINES)
 ws.cell(row=LR, column=1, value="チェック（比率・シェアの合計）").font = bold
-for c in (3, 4, 7, 8):
+for c in (3, 4, 7):
     cell = ws.cell(row=LR, column=c, value=f"=SUM({L(c)}{L0}:{L(c)}{LR-1})"); cell.font = bold; cell.number_format = PCT
-ws.cell(row=LR, column=9, value="配分比率は各100%、自然売上シェアは各100%になること").font = small
+cell = ws.cell(row=LR, column=8, value=f"=SUMIF($E${L0}:$E${LR-1},\"FM\",H{L0}:H{LR-1})"); cell.font = bold; cell.number_format = PCT
+ws.cell(row=LR, column=10, value="配分比率は各100%。自然売上シェアはFULLMARKS行の合計が100%（新ストアの潜在規模は別枠）").font = small
 ws["A48"] = ("想定ROASの根拠: 8月実績（Google 16.1 / Meta 0.5、ブランド別は FULLMARKS内訳シート参照）を、"
              "計測復旧と文言刷新後の水準として保守的に置いた。新ストアは立ち上げ期のため低め。"); ws["A48"].font = small
-for col, w in zip("ABCDEFGHI", (34, 34, 13, 14, 9, 16, 15, 16, 60)):
+for col, w in zip("ABCDEFGHIJ", (34, 34, 13, 14, 9, 16, 15, 22, 12, 60)):
     ws.column_dimensions[col].width = w
 
 # ============ ストア別ブランド別 ============
 ws2 = wb.create_sheet("ストア別ブランド別")
 ws2["A1"] = "ストア別・ブランド別 月次目標（税抜）＝ 広告費 × ROAS ÷ 1.1 ＋ 自然売上"; ws2["A1"].font = Font(name=F, size=13, bold=True)
-ws2["A2"] = "各月4列: 広告費 / 広告売上 / 自然売上 / 合計。広告売上＝広告費×想定ROAS×月別ROAS達成度÷1.1。全て「前提」シートの入力値からの数式。"; ws2["A2"].font = small
+ws2["A2"] = ("各月4列: 広告費 / 広告売上 / 自然売上 / 合計。広告売上＝広告費×想定ROAS×月別ROAS達成度÷1.1。"
+             "新ストアの自然売上＝FULLMARKS自然売上×潜在規模。FULLMARKS側は移管分（潜在規模×(1−純増率)）を差し引く。"); ws2["A2"].font = small
 # header rows 3-4
 ws2.cell(row=4, column=1, value="ストア").font = wb_; ws2.cell(row=4, column=2, value="ブランド/枠").font = wb_
 for c in (1, 2): ws2.cell(row=4, column=c).fill = hdr; ws2.cell(row=3, column=c).fill = hdr
@@ -131,7 +135,7 @@ for i, m in enumerate(MONTHS + ["年間(9〜4月)"]):
         cell = ws2.cell(row=4, column=c0 + j, value=s); cell.font = wb_; cell.fill = hdr; cell.alignment = center
 R0 = 5
 n = len(LINES)
-for i, (store, brand, r9, r10, kind, roas, s9, s10, note) in enumerate(LINES):
+for i, (store, brand, r9, r10, kind, roas, s9, s10, newr, note) in enumerate(LINES):
     r = R0 + i; pr = L0 + i  # 前提シートの行
     ws2.cell(row=r, column=1, value=store).font = black
     ws2.cell(row=r, column=2, value=brand).font = black
@@ -149,8 +153,13 @@ for i, (store, brand, r9, r10, kind, roas, s9, s10, note) in enumerate(LINES):
             cost = f"=IF({is_sep},0,{normal}*{K_STORE})"
         cA = ws2.cell(row=r, column=c0, value=cost)
         cB = ws2.cell(row=r, column=c0 + 1, value=f"={L(c0)}{r}*前提!$F${pr}*前提!$G${mrow}/{K_TAX}")
-        share = f"IF({is_sep},前提!$G${pr},前提!$H${pr})"
-        cC = ws2.cell(row=r, column=c0 + 2, value=f"=月別目標!$D${6+mi}*{share}")
+        pool = f"月別目標!$R${6+mi}"
+        if kind == "ST":
+            org = f"=IF({is_sep},0,{pool}*前提!$H${pr})"
+        else:
+            migr = "".join(f"-IF({is_sep},0,{pool}*前提!$H${L0+si}*(1-前提!$I${L0+si}))" for si, fi in MIGRATE.items() if fi == i)
+            org = f"={pool}*IF({is_sep},前提!$G${pr},前提!$H${pr}){migr}"
+        cC = ws2.cell(row=r, column=c0 + 2, value=org)
         cD = ws2.cell(row=r, column=c0 + 3, value=f"={L(c0+1)}{r}+{L(c0+2)}{r}")
         for cell in (cA, cB, cC): cell.font = green; cell.number_format = YEN
         cD.font = bold; cD.number_format = YEN
@@ -190,7 +199,7 @@ ws3 = wb.create_sheet("月別目標", 1)
 ws3["A1"] = "月別 売上目標（税抜）― 広告費 × ROAS ＋ 自然売上 vs 会社予算2.8億"; ws3["A1"].font = Font(name=F, size=13, bold=True)
 ws3["A2"] = ("自然売上＝前年同月 × (1−前年広告比率) × 成長率。広告売上＝各ラインの広告費×想定ROAS÷1.1の合計（ストア別ブランド別シート）。"
              "目標＝自然売上＋広告売上。"); ws3["A2"].font = small
-h3 = ["月", "会社予算", "前年同月", "自然売上", "広告費", "広告売上", "売上目標", "予算差", "前年比", "広告費率", "累計 目標", "累計 会社予算", "累計 予算差", "備考"]
+h3 = ["月", "会社予算(FM単体)", "前年同月", "自然売上(4ストア計)", "広告費", "広告売上", "売上目標(4ストア計)", "予算差", "前年比", "広告費率", "累計 目標", "累計 会社予算", "累計 予算差", "備考", "FULLMARKS STORE 単体(移管後)", "FM単体 予算差", "新ストア 売上(3店計)", "自然売上プール(FM換算・移管前)"]
 for c, h in enumerate(h3, 1):
     cell = ws3.cell(row=4, column=c, value=h); cell.font = wb_; cell.fill = hdr; cell.alignment = center
 # 実績行（5〜8月まとめ）
@@ -199,7 +208,10 @@ for c, f in ((2, f"={YTD_BUD}"), (3, f"={YTD_PREV}"), (7, f"={YTD_ACT}"), (8, f"
     cell = ws3.cell(row=5, column=c, value=f); cell.font = green if c in (2, 3, 7) else black
     cell.number_format = PCT if c == 9 else YEN
 ws3.cell(row=5, column=14, value="実績。広告売り/自然売りの内訳は計測破損のため省略").font = small
-for c in range(1, 15): ws3.cell(row=5, column=c).fill = grey
+ws3.cell(row=5, column=15, value="=G5").number_format = YEN
+ws3.cell(row=5, column=16, value="=O5-B5").number_format = YEN
+ws3.cell(row=5, column=17, value=0).number_format = YEN
+for c in range(1, 18): ws3.cell(row=5, column=c).fill = grey
 notes = ["SW企画。前年950万は年間最弱月", "3ストア稼働・広告増額。前年1,685万", "繁忙期入り", "年末商戦（予備10万）",
          "冬物実需", "冬セール（予備25万）。前年6,369万は突出値", "端境期（予備5万）", "調整月"]
 for mi, m in enumerate(MONTHS):
@@ -207,7 +219,8 @@ for mi, m in enumerate(MONTHS):
     ws3.cell(row=r, column=1, value=m).font = black
     ws3.cell(row=r, column=2, value=f"=前提!B{mrow}").font = green
     ws3.cell(row=r, column=3, value=f"=前提!C{mrow}").font = green
-    ws3.cell(row=r, column=4, value=f"=C{r}*(1-{K_ADSHARE})*前提!D{mrow}").font = black
+    ws3.cell(row=r, column=18, value=f"=C{r}*(1-{K_ADSHARE})*前提!D{mrow}").font = black
+    ws3.cell(row=r, column=4, value=f"=ストア別ブランド別!{L(3+mi*4+2)}{RT}").font = green
     ws3.cell(row=r, column=5, value=f"=ストア別ブランド別!{COST_COL(mi)}{RT}").font = green
     ws3.cell(row=r, column=6, value=f"=ストア別ブランド別!{ADREV_COL(mi)}{RT}").font = green
     ws3.cell(row=r, column=7, value=f"=D{r}+F{r}").font = bold
@@ -218,12 +231,16 @@ for mi, m in enumerate(MONTHS):
     ws3.cell(row=r, column=12, value=f"=L{r-1}+B{r}").font = black
     ws3.cell(row=r, column=13, value=f"=K{r}-L{r}").font = black
     ws3.cell(row=r, column=14, value=notes[mi]).font = small
-    for c in range(2, 14):
+    ws3.cell(row=r, column=15, value=f"=ストア別ブランド別!{L(3+mi*4+3)}{RT+3}").font = green
+    ws3.cell(row=r, column=16, value=f"=O{r}-B{r}").font = black
+    ws3.cell(row=r, column=17, value=f"=G{r}-O{r}").font = black
+    for c in list(range(2, 14)) + [15, 16, 17, 18]:
         ws3.cell(row=r, column=c).number_format = PCT if c in (9, 10) else YEN
 RY = 14
 ws3.cell(row=RY, column=1, value="年間 合計").font = bold
 for c, f in ((2, "=B5+SUM(B6:B13)"), (3, "=C5+SUM(C6:C13)"), (4, "=SUM(D6:D13)"), (5, "=SUM(E6:E13)"), (6, "=SUM(F6:F13)"),
-             (7, "=G5+SUM(G6:G13)"), (8, f"=G{RY}-B{RY}"), (9, f"=G{RY}/C{RY}"), (10, f"=E{RY}/G{RY}")):
+             (7, "=G5+SUM(G6:G13)"), (8, f"=G{RY}-B{RY}"), (9, f"=G{RY}/C{RY}"), (10, f"=E{RY}/G{RY}"),
+             (15, "=O5+SUM(O6:O13)"), (16, f"=O{RY}-B{RY}"), (17, "=SUM(Q6:Q13)"), (18, "=SUM(R6:R13)")):
     cell = ws3.cell(row=RY, column=c, value=f); cell.font = bold; cell.number_format = PCT if c in (9, 10) else YEN; cell.fill = sub
 ws3.cell(row=RY + 2, column=1, value="年間目標 vs 会社予算2.8億").font = bold
 ws3.cell(row=RY + 2, column=7, value=f"=G{RY}-{K_BUDGET}").number_format = YEN
@@ -231,16 +248,22 @@ ws3.cell(row=RY + 3, column=1, value="年間目標 vs ストレッチ3.2億").fo
 ws3.cell(row=RY + 3, column=7, value=f"=G{RY}-{K_STRETCH}").number_format = YEN
 ws3.cell(row=RY + 4, column=1, value="年間 広告売上ROAS（税抜）").font = bold
 ws3.cell(row=RY + 4, column=7, value=f"=F{RY}/E{RY}").number_format = X
-for c, w in zip("ABCDEFGHIJKLMN", (14, 14, 14, 14, 12, 14, 14, 13, 9, 9, 15, 15, 14, 40)):
+ws3.cell(row=RY + 5, column=1, value="FULLMARKS STORE 単体 vs 会社予算2.8億").font = bold
+ws3.cell(row=RY + 5, column=7, value=f"=O{RY}-{K_BUDGET}").number_format = YEN
+ws3.cell(row=RY + 6, column=1, value="新ストア 売上（年間・3店計）").font = bold
+ws3.cell(row=RY + 6, column=7, value=f"=Q{RY}").number_format = YEN
+ws3["A2"] = ("会社予算2.8億はFULLMARKS STORE単体の予算。売上目標(4ストア計)＝FULLMARKS単体＋新ストアの純増。"
+             "自然売上＝前年同月×(1−前年広告比率)×成長率。広告売上＝広告費×想定ROAS×ROAS達成度÷1.1。")
+for c, w in zip("ABCDEFGHIJKLMNOPQR", (14, 15, 14, 15, 12, 14, 15, 13, 9, 9, 15, 15, 14, 36, 17, 14, 14, 18)):
     ws3.column_dimensions[c].width = w
 for rr in range(4, RY + 1):
-    for c in range(1, 15): ws3.cell(row=rr, column=c).border = border
+    for c in range(1, 19): ws3.cell(row=rr, column=c).border = border
 
 # ============ シナリオ ============
 ws4 = wb.create_sheet("シナリオ")
 ws4["A1"] = "シナリオ比較（年間売上・税抜）"; ws4["A1"].font = Font(name=F, size=13, bold=True)
 ws4["A2"] = "自然売上とROASの達成度を掛けて年間売上を試算。青字は変更可。"; ws4["A2"].font = small
-for c, h in enumerate(["シナリオ", "自然売上 達成度", "ROAS 達成度", "年間売上", "vs 2.8億", "vs 3.2億", "9〜4月 必要な月平均"], 1):
+for c, h in enumerate(["シナリオ", "自然売上 達成度", "ROAS 達成度", "年間売上(4ストア計)", "vs 2.8億", "vs 3.2億", "9〜4月 必要な月平均", "FULLMARKS単体(年間)", "FM単体 vs 2.8億"], 1):
     cell = ws4.cell(row=4, column=c, value=h); cell.font = wb_; cell.fill = hdr; cell.alignment = center
 for i, (name, og, rk) in enumerate([("保守（前年の広告比率25%相当＝自然売上0.88・ROAS0.8）", 0.88, 0.8), ("標準（前提シートどおり）", 1.0, 1.0), ("強気（自然+5%・ROAS1.2倍）", 1.05, 1.2)]):
     r = 5 + i
@@ -251,7 +274,9 @@ for i, (name, og, rk) in enumerate([("保守（前年の広告比率25%相当＝
     ws4.cell(row=r, column=5, value=f"=D{r}-{K_BUDGET}").number_format = YEN
     ws4.cell(row=r, column=6, value=f"=D{r}-{K_STRETCH}").number_format = YEN
     ws4.cell(row=r, column=7, value=f"=(D{r}-{YTD_ACT})/8").number_format = YEN
-for c, w in zip("ABCDEFG", (46, 14, 12, 16, 15, 15, 18)): ws4.column_dimensions[c].width = w
+    ws4.cell(row=r, column=8, value=f"={YTD_ACT}+(ストア別ブランド別!AK{RT+3})*B{r}+(ストア別ブランド別!AJ{RT+3})*C{r}").number_format = YEN
+    ws4.cell(row=r, column=9, value=f"=H{r}-{K_BUDGET}").number_format = YEN
+for c, w in zip("ABCDEFGHI", (46, 14, 12, 18, 15, 15, 18, 18, 15)): ws4.column_dimensions[c].width = w
 ws4["A9"] = "読み方: 保守でも2.8億に届くかが判断基準。届かない場合は10月・12月の広告費増額か、企画で自然売上を上積みする。"; ws4["A9"].font = small
 
 # ============ 月次チェック ============
@@ -288,7 +313,7 @@ for c, w in zip("ABCDEFGHIJ", (14, 14, 14, 13, 15, 16, 15, 15, 18, 30)): ws5.col
 for rr in range(4, 14):
     for c in range(1, 11): ws5.cell(row=rr, column=c).border = border
 for rr in range(4, 8):
-    for c in range(1, 8): ws4.cell(row=rr, column=c).border = border
+    for c in range(1, 10): ws4.cell(row=rr, column=c).border = border
 
 import sys
 out = sys.argv[1] if len(sys.argv) > 1 else "reports/売上目標_再設定_2026-09.xlsx"
