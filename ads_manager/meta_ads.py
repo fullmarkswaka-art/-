@@ -42,8 +42,9 @@ class MetaAdsClient:
         body = resp.json()
         if "error" in body:
             err = body["error"]
+            detail = " ".join(str(err.get(k)) for k in ("error_subcode", "error_user_title", "error_user_msg") if err.get(k))
             raise MetaAdsError(
-                f"Meta API error {err.get('code')}: {err.get('message')}")
+                f"Meta API error {err.get('code')}: {err.get('message')} {detail}".strip())
         return body
 
     def get(self, path: str, **params: Any) -> dict:

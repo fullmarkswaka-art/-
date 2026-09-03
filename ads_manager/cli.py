@@ -151,6 +151,10 @@ def main(argv=None) -> int:
             pl.add_argument("campaign_id")
             pl.add_argument("--bid", type=float, default=20.0)
             pl.add_argument("--apply", action="store_true")
+        rp = action_sub.add_parser("replace-copy", help="広告文を差し替え（JSON指定、旧広告は停止）")
+        rp.add_argument("ad_id")
+        rp.add_argument("--json", required=True, help="Meta: {message, headline, description} / Google: {headlines[], descriptions[], path1, path2}")
+        rp.add_argument("--apply", action="store_true")
         pv = action_sub.add_parser("preview")
         pv.add_argument("ad_id")
         if name == "meta":
@@ -225,6 +229,13 @@ def main(argv=None) -> int:
                     for x in args.sets.split(",")]
             _print(meta_swap_catalog_ads(client, args.old_ad_id, sets,
                                          message=args.message, apply=args.apply))
+        elif args.action == "replace-copy":
+            import json as _json
+            from .ad_copy import meta_replace_link_ad
+            spec = _json.load(open(args.json, encoding="utf-8"))
+            _print(meta_replace_link_ad(client, args.ad_id, spec["message"],
+                                        spec.get("headline"), spec.get("description"),
+                                        apply=args.apply))
         elif args.action == "creatives":
             from .creatives import meta_list_creatives
             _print(meta_list_creatives(client))
@@ -271,6 +282,13 @@ def main(argv=None) -> int:
         elif args.action == "creatives":
             from .creatives import google_list_creatives
             _print(google_list_creatives(client))
+        elif args.action == "replace-copy":
+            import json as _json
+            from .ad_copy import google_replace_rsa
+            spec = _json.load(open(args.json, encoding="utf-8"))
+            _print(google_replace_rsa(client, args.ad_id, spec["headlines"],
+                                      spec["descriptions"], spec.get("path1"),
+                                      spec.get("path2"), apply=args.apply))
         elif args.action == "pla-split":
             from .catalog_attributes import google_split_listing_group
             _print(google_split_listing_group(client, args.campaign_id,
