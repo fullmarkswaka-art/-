@@ -1,0 +1,38 @@
+{%- comment -%} Usage: render 'product-card', product: product, index: forloop.index {%- endcomment -%}
+{%- liquid
+  assign img = product.featured_media
+  assign hover = null
+  if product.media.size > 1
+    assign hover = product.media[1]
+  endif
+-%}
+<a href="{{ product.url }}" class="product-card reveal" data-delay="{{ index | default: 0 | modulo: 4 }}">
+  <div class="product-card__media">
+    {%- if img -%}
+      {{ img | image_url: width: 1200 | image_tag: loading: 'lazy', sizes: '(max-width: 900px) 50vw, 33vw', widths: '400, 600, 800, 1200', alt: product.title }}
+      {%- if hover and settings.card_hover_image -%}
+        {{ hover | image_url: width: 1200 | image_tag: loading: 'lazy', sizes: '(max-width: 900px) 50vw, 33vw', widths: '400, 600, 800, 1200', class: 'is-hover', alt: '' }}
+      {%- endif -%}
+    {%- else -%}
+      {{ 'product-apparel-1' | placeholder_svg_tag: 'cover-media' }}
+    {%- endif -%}
+    {%- if product.available == false -%}
+      <span class="product-card__badge">{{ 'products.product.sold_out' | t }}</span>
+    {%- elsif product.tags contains 'new' or product.tags contains 'NEW' -%}
+      <span class="product-card__badge">{{ 'products.product.new' | t }}</span>
+    {%- elsif product.compare_at_price > product.price -%}
+      <span class="product-card__badge">{{ 'products.product.on_sale' | t }}</span>
+    {%- endif -%}
+  </div>
+  <div class="product-card__body">
+    <div>
+      <h3 class="product-card__title">{{ product.title }}</h3>
+      {%- if settings.card_show_meta -%}
+        <p class="product-card__meta">
+          {%- if product.metafields.custom.color_name != blank -%}{{ product.metafields.custom.color_name }}{%- elsif product.options_by_name['Color'] -%}{{ product.options_by_name['Color'].values.size }} colors{%- else -%}{{ product.type }}{%- endif -%}
+        </p>
+      {%- endif -%}
+    </div>
+    {% render 'price', product: product, show_range: true %}
+  </div>
+</a>

@@ -1,0 +1,179 @@
+{%- assign s = section.settings -%}
+{%- assign current = product.selected_or_first_available_variant -%}
+<section class="container container--wide" data-product>
+  <script type="application/json" data-product-json>{{ product | json }}</script>
+  <div class="product">
+    <div class="product__gallery{% if s.gallery_layout == '2col' %} product__gallery--2col{% endif %}" data-gallery>
+      {%- for media in product.media -%}
+        <div class="media" data-media-id="{{ media.id }}">
+          {%- case media.media_type -%}
+            {%- when 'image' -%}
+              {%- if forloop.first -%}{%- assign ld = 'eager' -%}{%- else -%}{%- assign ld = 'lazy' -%}{%- endif -%}
+              {{ media | image_url: width: 1800 | image_tag: loading: ld, sizes: '(max-width: 900px) 90vw, 55vw', widths: '600, 900, 1200, 1800', alt: media.alt | default: product.title }}
+            {%- when 'video' -%}
+              {{ media | video_tag: autoplay: true, loop: true, muted: true, controls: false, playsinline: true }}
+            {%- when 'external_video' -%}
+              {{ media | external_video_tag }}
+            {%- else -%}
+              {{ media | media_tag }}
+          {%- endcase -%}
+        </div>
+      {%- else -%}
+        <div class="media">{{ 'product-apparel-1' | placeholder_svg_tag: 'cover-media' }}</div>
+      {%- endfor -%}
+    </div>
+
+    <div class="product__info">
+      {%- for block in section.blocks -%}
+        {%- case block.type -%}
+          {%- when 'vendor' -%}
+            <p class="eyebrow product__vendor" {{ block.shopify_attributes }}>{{ product.vendor }}{% if product.type != blank %} — {{ product.type }}{% endif %}</p>
+          {%- when 'title' -%}
+            <h1 class="product__title" {{ block.shopify_attributes }}>{{ product.title }}</h1>
+            {%- if product.metafields.custom.subtitle != blank -%}<p class="product__subtitle">{{ product.metafields.custom.subtitle }}</p>{%- endif -%}
+          {%- when 'price' -%}
+            <div class="product__price" data-price data-tax-label="{{ 'products.product.tax_included' | t }}" {{ block.shopify_attributes }}>
+              {% render 'price', product: product, show_tax_label: true %}
+            </div>
+          {%- when 'buy' -%}
+            <div class="product__form" {{ block.shopify_attributes }}>
+              {%- assign ajax = 'true' -%}{%- if settings.cart_type == 'page' -%}{%- assign ajax = 'false' -%}{%- endif -%}
+              {% form 'product', product, data-product-form: 'true', data-ajax-cart: ajax %}
+                <input type="hidden" name="id" value="{{ current.id }}">
+                {%- unless product.has_only_default_variant -%}
+                  {%- for option in product.options_with_values -%}
+                    {%- liquid
+                      assign lower = option.name | downcase
+                      assign is_color = false
+                      if lower == 'color' or lower == 'colour' or lower == 'カラー' or lower == '色'
+                        assign is_color = true
+                      endif
+                    -%}
+                    <fieldset class="option" data-option-index="{{ forloop.index0 }}">
+                      <legend class="option__label"><span>{{ option.name }}</span><b data-option-value>{{ option.selected_value }}</b></legend>
+                      <div class="option__values{% if is_color and block.settings.color_swatches %} option__values--swatch{% endif %}">
+                        {%- for value in option.values -%}
+                          {%- assign id = 'opt-' | append: section.id | append: '-' | append: forloop.parentloop.index0 | append: '-' | append: forloop.index0 -%}
+                          <input type="radio" id="{{ id }}" name="options[{{ option.name | escape }}]" value="{{ value | escape }}" data-option-input {% if value == option.selected_value %}checked{% endif %}>
+                          <label for="{{ id }}" {% if is_color and block.settings.color_swatches %}style="--swatch: {{ value | handle | replace: '-', '' }}" title="{{ value }}"{% endif %}>{{ value }}</label>
+                        {%- endfor -%}
+                      </div>
+                    </fieldset>
+                  {%- endfor -%}
+                {%- endunless -%}
+
+                {%- if block.settings.show_quantity -%}
+                  <div class="option">
+                    <label class="option__label" for="Quantity-{{ section.id }}"><span>{{ 'products.product.quantity' | t }}</span></label>
+                    <div class="qty">
+                      <button type="button" data-qty-change="-1" aria-label="{{ 'sections.cart.decrease' | t }}">−</button>
+                      <input type="number" id="Quantity-{{ section.id }}" name="quantity" value="1" min="1">
+                      <button type="button" data-qty-change="1" aria-label="{{ 'sections.cart.increase' | t }}">+</button>
+                    </div>
+                  </div>
+                {%- endif -%}
+
+                <div class="product__buy">
+                  <button type="submit" class="button" data-add-button {% unless current.available %}disabled{% endunless %}>
+                    <span>{%- if current.available -%}{{ 'products.product.add_to_cart' | t }}{%- else -%}{{ 'products.product.sold_out' | t }}{%- endif -%}</span>
+                  </button>
+                </div>
+                {%- if block.settings.show_dynamic_checkout -%}{{ form | payment_button }}{%- endif -%}
+              {% endform %}
+              {%- if block.settings.note != blank -%}<p class="product__note">{{ block.settings.note }}</p>{%- endif -%}
+            </div>
+          {%- when 'description' -%}
+            <div class="product__desc rte body-copy" {{ block.shopify_attributes }}>{{ product.description }}</div>
+          {%- when 'accordion' -%}
+            {%- liquid
+              assign content = block.settings.content
+              if block.settings.metafield != blank
+                assign parts = block.settings.metafield | split: '.'
+                assign mf = product.metafields[parts[0]][parts[1]]
+                if mf != blank
+                  assign content = mf | metafield_tag
+                endif
+              endif
+            -%}
+            {%- if content != blank -%}
+              <div class="accordion" {{ block.shopify_attributes }}>
+                <details {% if block.settings.open %}open{% endif %}>
+                  <summary>{{ block.settings.title }} {% render 'icon', name: 'plus' %}</summary>
+                  <div class="accordion__body rte">{{ content }}</div>
+                </details>
+              </div>
+            {%- endif -%}
+          {%- when 'specs' -%}
+            <div class="accordion" {{ block.shopify_attributes }}>
+              <details {% if block.settings.open %}open{% endif %}>
+                <summary>{{ block.settings.title }} {% render 'icon', name: 'plus' %}</summary>
+                <div class="accordion__body">
+                  <table class="spec-table">
+                    {%- if product.metafields.custom.material != blank -%}<tr><th>{{ 'products.product.material' | t }}</th><td>{{ product.metafields.custom.material }}</td></tr>{%- endif -%}
+                    {%- if product.metafields.custom.waterproof != blank -%}<tr><th>{{ 'products.product.waterproof' | t }}</th><td>{{ product.metafields.custom.waterproof }}</td></tr>{%- endif -%}
+                    {%- if product.metafields.custom.breathability != blank -%}<tr><th>{{ 'products.product.breathability' | t }}</th><td>{{ product.metafields.custom.breathability }}</td></tr>{%- endif -%}
+                    {%- if product.metafields.custom.weight != blank -%}<tr><th>{{ 'products.product.weight' | t }}</th><td>{{ product.metafields.custom.weight }}</td></tr>{%- endif -%}
+                    {%- if product.metafields.custom.made_in != blank -%}<tr><th>{{ 'products.product.made_in' | t }}</th><td>{{ product.metafields.custom.made_in }}</td></tr>{%- endif -%}
+                    {%- unless product.has_only_default_variant -%}
+                      {%- for option in product.options_with_values -%}<tr><th>{{ option.name }}</th><td>{{ option.values | join: ' / ' }}</td></tr>{%- endfor -%}
+                    {%- endunless -%}
+                    {%- if block.settings.extra != blank -%}<tr><td colspan="2">{{ block.settings.extra }}</td></tr>{%- endif -%}
+                  </table>
+                </div>
+              </details>
+            </div>
+          {%- when 'share' -%}
+            <p class="product__note" {{ block.shopify_attributes }}><a href="https://twitter.com/intent/tweet?url={{ shop.url }}{{ product.url }}" target="_blank" rel="noopener">Share</a> / <a href="{{ settings.social_instagram }}" target="_blank" rel="noopener">Instagram</a></p>
+        {%- endcase -%}
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+{%- if s.show_story and product.metafields.custom.story != blank -%}
+  <section class="section">
+    <div class="container container--wide product-story">
+      <div class="media media--4x5 reveal">
+        {%- if product.media.size > 1 -%}{{ product.media[1] | image_url: width: 1400 | image_tag: loading: 'lazy', alt: product.title }}{%- else -%}<img src="{{ 'pu-hero.jpg' | asset_url }}" alt="" loading="lazy" width="2560" height="1707">{%- endif -%}
+      </div>
+      <div class="reveal" data-delay="1">
+        <p class="eyebrow">Story</p>
+        <div class="lead mt-3">{{ product.metafields.custom.story | metafield_tag }}</div>
+      </div>
+    </div>
+  </section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "商品ページ",
+  "settings": [
+    { "type": "select", "id": "gallery_layout", "label": "ギャラリー", "options": [ { "value": "stack", "label": "縦1列" }, { "value": "2col", "label": "1枚目大 + 2列" } ], "default": "stack" },
+    { "type": "checkbox", "id": "show_story", "label": "ストーリーセクション（メタフィールド custom.story）を表示", "default": true }
+  ],
+  "blocks": [
+    { "type": "vendor", "name": "ブランド / タイプ", "limit": 1 },
+    { "type": "title", "name": "商品名", "limit": 1 },
+    { "type": "price", "name": "価格", "limit": 1 },
+    { "type": "buy", "name": "購入フォーム", "limit": 1, "settings": [
+      { "type": "checkbox", "id": "color_swatches", "label": "カラーを丸スウォッチで表示", "default": false, "info": "カラー名がCSSカラー名の場合のみ色が付きます" },
+      { "type": "checkbox", "id": "show_quantity", "label": "数量を表示", "default": true },
+      { "type": "checkbox", "id": "show_dynamic_checkout", "label": "スピードチェックアウトを表示", "default": false },
+      { "type": "text", "id": "note", "label": "補足テキスト", "default": "全国一律送料 ¥900（税込）／ ¥30,000以上で送料無料" }
+    ] },
+    { "type": "description", "name": "商品説明", "limit": 1 },
+    { "type": "specs", "name": "スペック表", "limit": 1, "settings": [
+      { "type": "text", "id": "title", "label": "見出し", "default": "Spec" },
+      { "type": "checkbox", "id": "open", "label": "初期状態で開く", "default": true },
+      { "type": "richtext", "id": "extra", "label": "追記" }
+    ] },
+    { "type": "accordion", "name": "アコーディオン", "settings": [
+      { "type": "text", "id": "title", "label": "見出し", "default": "Features" },
+      { "type": "richtext", "id": "content", "label": "内容" },
+      { "type": "text", "id": "metafield", "label": "メタフィールド（例: custom.features）", "info": "設定するとメタフィールドの内容を優先します" },
+      { "type": "checkbox", "id": "open", "label": "初期状態で開く", "default": false }
+    ] },
+    { "type": "share", "name": "シェア", "limit": 1 }
+  ]
+}
+{% endschema %}

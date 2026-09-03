@@ -1,0 +1,85 @@
+{%- assign s = section.settings -%}
+<section class="container container--wide">
+  <div class="page-title">
+    <nav class="breadcrumbs reveal"><a href="{{ routes.root_url }}">Home</a><span>/</span><a href="{{ routes.collections_url }}">Products</a><span>/</span><span>{{ collection.title }}</span></nav>
+    <h1 class="display mt-3 reveal" data-delay="1">{{ collection.title }}</h1>
+    {%- if collection.description != blank and s.show_description -%}<div class="page-title__desc body-copy reveal" data-delay="2">{{ collection.description }}</div>{%- endif -%}
+  </div>
+
+  {%- paginate collection.products by s.per_page -%}
+  <div class="collection-toolbar">
+    <div>
+      {%- if s.show_filters and collection.filters.size > 0 -%}<button type="button" class="facets__toggle" data-facets-toggle>{{ 'collections.filter' | t }} +</button>{%- endif -%}
+      <span class="collection-toolbar__count">{{ 'collections.product_count' | t: count: collection.products_count }}</span>
+    </div>
+    <label>
+      <span class="visually-hidden">{{ 'collections.sort' | t }}</span>
+      <select data-sort-by>
+        {%- for option in collection.sort_options -%}
+          <option value="{{ option.value }}" {% if option.value == collection.sort_by %}selected{% endif %}>{{ option.name }}</option>
+        {%- endfor -%}
+      </select>
+    </label>
+  </div>
+
+  <div class="collection-layout{% unless s.show_filters and collection.filters.size > 0 %} collection-layout--full{% endunless %}">
+    {%- if s.show_filters and collection.filters.size > 0 -%}
+      <aside class="facets">
+        <form data-facet-form method="get">
+          <input type="hidden" name="sort_by" value="{{ collection.sort_by }}">
+          {%- assign active = 0 -%}
+          {%- for filter in collection.filters -%}{%- assign active = active | plus: filter.active_values.size -%}{%- endfor -%}
+          {%- if active > 0 -%}
+            <div class="facets__active">
+              {%- for filter in collection.filters -%}
+                {%- for v in filter.active_values -%}<a href="{{ v.url_to_remove }}">{{ v.label }} ×</a>{%- endfor -%}
+              {%- endfor -%}
+              <a href="{{ collection.url }}">{{ 'collections.clear_all' | t }}</a>
+            </div>
+          {%- endif -%}
+          {%- for filter in collection.filters -%}
+            <details class="facet" {% if filter.active_values.size > 0 or forloop.index <= 2 %}open{% endif %}>
+              <summary>{{ filter.label }}</summary>
+              {%- case filter.type -%}
+                {%- when 'list' -%}
+                  <div class="facet__list">
+                    {%- for v in filter.values -%}
+                      <label><input type="checkbox" name="{{ v.param_name }}" value="{{ v.value }}" {% if v.active %}checked{% endif %} {% if v.count == 0 and v.active == false %}disabled{% endif %}> {{ v.label }} <span class="muted">({{ v.count }})</span></label>
+                    {%- endfor -%}
+                  </div>
+                {%- when 'price_range' -%}
+                  <div class="facet__price">
+                    <input type="number" name="{{ filter.min_value.param_name }}" placeholder="Min" min="0" value="{{ filter.min_value.value | money_without_currency | replace: ',', '' }}">
+                    <input type="number" name="{{ filter.max_value.param_name }}" placeholder="Max" min="0" value="{{ filter.max_value.value | money_without_currency | replace: ',', '' }}">
+                  </div>
+              {%- endcase -%}
+            </details>
+          {%- endfor -%}
+        </form>
+      </aside>
+    {%- endif -%}
+
+    <div>
+      {%- if collection.products.size > 0 -%}
+        <div class="product-grid" style="--cols: {{ s.columns }}">
+          {%- for product in collection.products -%}{% render 'product-card', product: product, index: forloop.index0 %}{%- endfor -%}
+        </div>
+      {%- else -%}
+        <div class="empty-state"><p class="lead">{{ 'collections.empty' | t }}</p></div>
+      {%- endif -%}
+      {% render 'pagination', paginate: paginate %}
+    </div>
+  </div>
+  {%- endpaginate -%}
+</section>
+{% schema %}
+{
+  "name": "コレクションページ",
+  "settings": [
+    { "type": "checkbox", "id": "show_description", "label": "説明文を表示", "default": true },
+    { "type": "checkbox", "id": "show_filters", "label": "フィルターを表示", "default": true },
+    { "type": "range", "id": "columns", "label": "列数（PC）", "min": 2, "max": 4, "step": 1, "default": 3 },
+    { "type": "range", "id": "per_page", "label": "1ページの表示数", "min": 8, "max": 48, "step": 4, "default": 24 }
+  ]
+}
+{% endschema %}

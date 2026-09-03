@@ -1,0 +1,58 @@
+{%- assign s = section.settings -%}
+<section class="section section--flush{% if s.scheme == 'dark' %} section--dark{% elsif s.scheme == 'sand' %} section--sand{% endif %}">
+  <div class="iwt{% if s.reverse %} iwt--reverse{% endif %}">
+    <div class="iwt__media reveal">
+      {%- if s.video != blank -%}
+        {{ s.video | video_tag: autoplay: true, loop: true, muted: true, controls: false, playsinline: true, image_size: '1400x' }}
+      {%- elsif s.video_url != blank -%}
+        <video autoplay muted loop playsinline preload="metadata"><source src="{{ s.video_url }}" type="video/mp4"></video>
+      {%- elsif s.image != blank -%}
+        {{ s.image | image_url: width: 1600 | image_tag: loading: 'lazy', sizes: '(max-width: 800px) 100vw, 50vw', widths: '600, 900, 1200, 1600', alt: s.image.alt | default: s.title }}
+      {%- elsif s.default_asset != blank -%}
+        <img src="{{ s.default_asset | asset_url }}" alt="{{ s.title }}" loading="lazy" width="1600" height="2000">
+      {%- else -%}
+        {{ 'lifestyle-1' | placeholder_svg_tag: 'cover-media' }}
+      {%- endif -%}
+    </div>
+    <div class="iwt__body">
+      <p class="section-number reveal">{{ s.number }}</p>
+      <p class="eyebrow mt-2 reveal">{{ s.eyebrow }}</p>
+      <h2 class="h2 iwt__title reveal" data-delay="1">{{ s.title }}</h2>
+      <div class="body-copy reveal" data-delay="2">{{ s.text }}</div>
+      {%- if s.stat1_value != blank or s.stat2_value != blank or s.stat3_value != blank -%}
+        <div class="iwt__stats reveal" data-delay="3">
+          {%- if s.stat1_value != blank -%}<div class="iwt__stat"><b>{{ s.stat1_value }}</b><span>{{ s.stat1_label }}</span></div>{%- endif -%}
+          {%- if s.stat2_value != blank -%}<div class="iwt__stat"><b>{{ s.stat2_value }}</b><span>{{ s.stat2_label }}</span></div>{%- endif -%}
+          {%- if s.stat3_value != blank -%}<div class="iwt__stat"><b>{{ s.stat3_value }}</b><span>{{ s.stat3_label }}</span></div>{%- endif -%}
+        </div>
+      {%- endif -%}
+      {%- if s.button_label != blank -%}<div class="iwt__cta reveal" data-delay="3"><a class="link-line" href="{{ s.button_link }}">{{ s.button_label }} {% render 'icon', name: 'arrow' %}</a></div>{%- endif -%}
+    </div>
+  </div>
+</section>
+{% schema %}
+{
+  "name": "画像 + テキスト",
+  "settings": [
+    { "type": "image_picker", "id": "image", "label": "画像" },
+    { "type": "video", "id": "video", "label": "動画（任意・画像より優先）" },
+    { "type": "text", "id": "video_url", "label": "動画URL（MP4・任意）" },
+    { "type": "text", "id": "default_asset", "label": "初期画像（テーマ同梱）", "default": "pu-hero.jpg" },
+    { "type": "checkbox", "id": "reverse", "label": "画像を右側に", "default": false },
+    { "type": "text", "id": "number", "label": "番号", "default": "(03)" },
+    { "type": "text", "id": "eyebrow", "label": "小見出し", "default": "Our Commitment" },
+    { "type": "text", "id": "title", "label": "見出し", "default": "必要なものを、必要な分だけ。" },
+    { "type": "richtext", "id": "text", "label": "本文", "default": "<p>日本のバックカントリーシーンやゲレンデシーンで必要な機能は何か？設立当初よりあらゆる面において「必要なものを必要な分だけ」をコンセプトに、PU SPECIALIZED 3 LAYER FABRICを開発しました。</p><p>あえてC6撥水を施したこの生地は、余程のことでは破けない厚さと強度、長く使用するための撥水能力を持ち、永く愛用してもらえることを前提に作られています。そう簡単に処分されないようなクオリティとデザインを考え、量産すること。それが勿体ない文化の日本人によるモノづくりの責任だと考えています。</p>" },
+    { "type": "text", "id": "stat1_value", "label": "数値1", "default": "20,000mm" },
+    { "type": "text", "id": "stat1_label", "label": "ラベル1", "default": "Waterproof" },
+    { "type": "text", "id": "stat2_value", "label": "数値2", "default": "10,000g" },
+    { "type": "text", "id": "stat2_label", "label": "ラベル2", "default": "Breathability / m²・24h" },
+    { "type": "text", "id": "stat3_value", "label": "数値3", "default": "3 Layer" },
+    { "type": "text", "id": "stat3_label", "label": "ラベル3", "default": "PU Specialized Fabric" },
+    { "type": "text", "id": "button_label", "label": "リンクテキスト", "default": "Read More" },
+    { "type": "url", "id": "button_link", "label": "リンク先" },
+    { "type": "select", "id": "scheme", "label": "配色", "options": [ { "value": "light", "label": "ライト" }, { "value": "sand", "label": "サンド" }, { "value": "dark", "label": "ダーク" } ], "default": "light" }
+  ],
+  "presets": [{ "name": "画像 + テキスト" }]
+}
+{% endschema %}

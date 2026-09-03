@@ -1,0 +1,48 @@
+{
+  "accessibility": { "skip_to_text": "Skip to content", "close": "Close", "open_menu": "Open menu", "main_menu": "Main menu" },
+  "general": {
+    "meta": { "tags": "Tagged \"{{ tags }}\"", "page": "Page {{ page }}" },
+    "continue_shopping": "Continue shopping",
+    "view_all": "View all",
+    "pagination": { "label": "Pagination", "previous": "Previous", "next": "Next" },
+    "search": { "search": "Search", "placeholder": "Search", "results": "{{ count }} results for \"{{ terms }}\"", "no_results": "No results found." },
+    "newsletter": { "placeholder": "Email address", "submit": "Subscribe", "success": "Thanks for subscribing." },
+    "password_page": { "opening_soon": "Our online store is opening soon.", "login_form_password_label": "Password", "login_form_password_placeholder": "Password", "login_form_submit": "Enter" },
+    "404": { "title": "Page not found", "text": "The page you are looking for may have been moved or removed.", "back": "Back to home" }
+  },
+  "products": {
+    "product": {
+      "add_to_cart": "Add to cart", "sold_out": "Sold out", "unavailable": "Unavailable", "added_to_cart": "Added to cart", "quantity": "Quantity",
+      "tax_included": "tax incl.", "from_price": "From {{ price }}", "new": "New", "on_sale": "Sale", "sample": "Sample product",
+      "material": "Material", "waterproof": "Waterproof", "breathability": "Breathability", "weight": "Weight", "made_in": "Made in"
+    }
+  },
+  "collections": { "filter": "Filter", "sort": "Sort", "clear_all": "Clear all", "product_count": "{{ count }} items", "empty": "No products in this collection yet." },
+  "sections": {
+    "cart": {
+      "title": "Cart", "empty": "Your cart is empty.", "subtotal": "Subtotal", "total": "Total", "checkout": "Checkout", "view_cart": "View cart", "remove": "Remove",
+      "quantity": "Quantity", "decrease": "Decrease quantity", "increase": "Increase quantity", "note": "Order note",
+      "taxes_and_shipping": "Shipping calculated at checkout.", "error": "Could not update the cart. Please try again."
+    },
+    "journal": { "sample": "Your article title will appear here" }
+  },
+  "blogs": { "empty": "No articles yet.", "previous": "Previous", "next": "Next", "back": "Back to journal" },
+  "contact": { "name": "Name", "email": "Email", "phone": "Phone", "message": "Message", "send": "Send", "success": "Thanks for contacting us. We'll get back to you soon." },
+  "customer": {
+    "email": "Email", "password": "Password", "password_confirm": "Confirm password", "first_name": "First name", "last_name": "Last name", "logout": "Log out",
+    "login": { "title": "Log in", "submit": "Log in", "forgot": "Forgot your password?" },
+    "recover": { "title": "Reset your password", "submit": "Send reset email", "success": "We've sent you an email with a link to reset your password." },
+    "register": { "title": "Create account", "text": "Create an account to check your order history and save addresses.", "submit": "Create account" },
+    "account": { "title": "Account", "details": "Account details", "back": "Back to account" },
+    "orders": { "title": "Order history", "order": "Order", "date": "Date", "status": "Status", "total": "Total", "none": "You haven't placed any orders yet." },
+    "order": { "product": "Product", "quantity": "Qty", "total": "Total", "shipping": "Shipping", "shipping_address": "Shipping address", "billing_address": "Billing address" },
+    "addresses": {
+      "title": "Addresses", "add": "Add address", "saved": "Saved addresses", "default": "Default", "none": "No saved addresses.",
+      "zip": "Postal code", "country": "Country", "province": "Province", "city": "City", "address1": "Address 1", "address2": "Address 2", "phone": "Phone",
+      "set_default": "Set as default address", "delete": "Delete", "delete_confirm": "Delete this address?"
+    },
+    "activate": { "title": "Activate account", "submit": "Activate", "decline": "Decline" },
+    "reset": { "title": "Reset password", "submit": "Reset password" }
+  },
+  "gift_cards": { "issued": { "title": "Here's your {{ value }} gift card for {{ shop }}", "subtext": "Gift card", "expired": "Expired", "shop_link": "Visit the shop" } }
+}

@@ -1,0 +1,15 @@
+<section class="container section">
+  <div class="customer__box" style="max-width:560px">
+    <h1 class="h2">{{ 'customer.register.title' | t }}</h1>
+    {% form 'create_customer', class: 'form' %}
+      {%- if form.errors -%}<div class="form__errors">{{ form.errors | default_errors }}</div>{%- endif -%}
+      <div class="field"><label for="RegLast">{{ 'customer.last_name' | t }}</label><input type="text" id="RegLast" name="customer[last_name]" autocomplete="family-name"></div>
+      <div class="field"><label for="RegFirst">{{ 'customer.first_name' | t }}</label><input type="text" id="RegFirst" name="customer[first_name]" autocomplete="given-name"></div>
+      <div class="field"><label for="RegEmail">{{ 'customer.email' | t }}</label><input type="email" id="RegEmail" name="customer[email]" autocomplete="email" required></div>
+      <div class="field"><label for="RegPassword">{{ 'customer.password' | t }}</label><input type="password" id="RegPassword" name="customer[password]" autocomplete="new-password" required></div>
+      <div><button type="submit" class="button">{{ 'customer.register.submit' | t }}</button></div>
+      <div class="form__links"><a href="{{ routes.account_login_url }}">{{ 'customer.login.title' | t }}</a></div>
+    {% endform %}
+  </div>
+</section>
+{% schema %}{ "name": "新規登録", "settings": [] }{% endschema %}

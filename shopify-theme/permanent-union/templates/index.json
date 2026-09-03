@@ -1,0 +1,81 @@
+{
+  "sections": {
+    "hero": {
+      "type": "hero-video",
+      "settings": {
+        "eyebrow": "2026-2027 FW New Collection",
+        "title": "Be Awesome In The Mountain",
+        "subtitle": "〜 山にいるときこそ最高であれ 〜",
+        "button_label": "View Collection",
+        "button_link": "/collections/all",
+        "button2_label": "Our Story",
+        "button2_link": "/pages/about",
+        "overlay": 70,
+        "show_scroll": true
+      }
+    },
+    "statement": {
+      "type": "brand-statement",
+      "settings": {
+        "number": "(01)",
+        "eyebrow": "Our Philosophy",
+        "title": "自然は、素晴らしい。",
+        "button_label": "About Permanent Union",
+        "button_link": "/pages/about",
+        "layout": "center"
+      }
+    },
+    "marquee": { "type": "marquee", "settings": {} },
+    "showcase": {
+      "type": "collection-showcase",
+      "blocks": {
+        "gin": { "type": "item", "settings": { "name": "GIN JACKET", "color": "Slate Blue", "default_asset": "pu-gin-jacket.jpg", "specs": "3-Layer | 20,000mm 耐水 | 10,000g/m²/24h 透湿 | ¥85,800 (税込)", "text": "<p>前見頃がアシンメトリーなファスナーになっているデザイン性豊かなジャケット。PERMANENT UNIONの象徴の“縄”をイメージしたコードを各ポケット、そして袖に施し、機能よりも面白さを追求しました。</p>" } },
+        "noten": { "type": "item", "settings": { "name": "NO TEN JACKET", "color": "Kakishibu", "default_asset": "pu-noten-jacket.jpg", "specs": "3-Layer | 20,000mm 耐水 | 10,000g/m²/24h 透湿 | ¥89,100 (税込)", "text": "<p>少し長めの丈と程よい身幅の細さがシルエットを綺麗に見せる、スタイリッシュで洗練されたマウンテンパーカータイプ。PERMANENT UNIONで一番丈の長い細身のジャケットです。</p>" } },
+        "koval": { "type": "item", "settings": { "name": "KOVAL JACKET", "color": "Wakaba", "default_asset": "pu-koval-jacket.jpg", "specs": "3-Layer | 20,000mm 耐水 | 10,000g/m²/24h 透湿 | ¥85,800 (税込)", "text": "<p>前身頃のレザーが特徴的な3Layerジャケット。ブルゾンのような強い印象を持たせ、アパレル的な着こなしも楽しめる一着。</p>" } },
+        "eyguebelle": { "type": "item", "settings": { "name": "EYGUEBELLE JACKET", "color": "Muku", "default_asset": "pu-eyguebelle-jacket.jpg", "specs": "3-Layer | 20,000mm 耐水 | 10,000g/m²/24h 透湿 | ¥86,900 (税込)", "text": "<p>脱ぎ着のしやすさにこだわったアノラック3Layerジャケット。「必要なものを必要な分だけ」というコンセプトのもと、日本のバックカントリーシーンを想定して開発。</p>" } },
+        "bib": { "type": "item", "settings": { "name": "KOVAL BIB PANTS", "color": "Midnight", "default_asset": "pu-koval-bib-pants.jpg", "specs": "3-Layer | 20,000mm 耐水 | 8 Pockets | ¥85,800 (税込)", "text": "<p>日本人の体型に合わせたパターンと、前後のバランス・調整可能なストラップで肩への負担を最小限に。8つのポケットとベンチレーションを備えたビブパンツ。</p>" } }
+      },
+      "block_order": ["gin", "noten", "koval", "eyguebelle", "bib"],
+      "settings": { "number": "(02)", "eyebrow": "Our Collections", "title": "2026-2027 FW Collection", "link_label": "View All", "link": "/collections/all", "show_price": true }
+    },
+    "commitment": {
+      "type": "image-with-text",
+      "settings": { "number": "(03)", "eyebrow": "Our Commitment", "reverse": true, "default_asset": "pu-hero.jpg", "scheme": "sand", "button_link": "/pages/about" }
+    },
+    "categories": {
+      "type": "category-tiles",
+      "blocks": {
+        "shell": { "type": "tile", "settings": { "title": "Shell", "subtitle": "シェルジャケット", "default_asset": "pu-gin-jacket.jpg" } },
+        "tops": { "type": "tile", "settings": { "title": "Tops", "subtitle": "トップス", "default_asset": "pu-koval-jacket.jpg" } },
+        "bottoms": { "type": "tile", "settings": { "title": "Bottoms", "subtitle": "ボトムス", "default_asset": "pu-koval-bib-pants.jpg" } },
+        "acc": { "type": "tile", "settings": { "title": "Accessories", "subtitle": "アクセサリー", "default_asset": "pu-eyguebelle-jacket.jpg" } }
+      },
+      "block_order": ["shell", "tops", "bottoms", "acc"],
+      "settings": { "number": "(04)", "eyebrow": "Shop by Category", "title": "Products", "link_label": "All Products", "link": "/collections/all" }
+    },
+    "riders": {
+      "type": "riders",
+      "blocks": {
+        "r1": { "type": "rider", "settings": { "name": "山内 一志", "name_en": "Kazushi Yamauchi", "role": "Snowboarder" } },
+        "r2": { "type": "rider", "settings": { "name": "舎川 朋弘", "name_en": "Tomohiro Tonegawa", "role": "Skier" } },
+        "r3": { "type": "rider", "settings": { "name": "永島 秀之", "name_en": "Hideyuki Nagashima", "role": "Telemark Skier" } },
+        "r4": { "type": "rider", "settings": { "name": "石川 睦", "name_en": "Makoto Ishikawa", "role": "Skier" } },
+        "r5": { "type": "rider", "settings": { "name": "畔田 正志", "name_en": "Masashi Kuroda", "role": "Snowboarder" } },
+        "r6": { "type": "rider", "settings": { "name": "上村 愛子", "name_en": "Aiko Uemura", "role": "Skier" } },
+        "r7": { "type": "rider", "settings": { "name": "立花 透", "name_en": "Toru Tachibana", "role": "Skier" } },
+        "r8": { "type": "rider", "settings": { "name": "笹田 知里", "name_en": "Chisato Sasada", "role": "Skier" } }
+      },
+      "block_order": ["r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8"],
+      "settings": { "number": "(05)", "eyebrow": "Riders", "scheme": "dark", "button_link": "/pages/riders" }
+    },
+    "journal": { "type": "journal", "settings": { "blog": "news", "number": "(06)", "eyebrow": "Journal", "title": "News" } },
+    "follow": {
+      "type": "follow",
+      "blocks": { "i1": { "type": "image" }, "i2": { "type": "image" }, "i3": { "type": "image" }, "i4": { "type": "image" }, "i5": { "type": "image" }, "i6": { "type": "image" } },
+      "block_order": ["i1", "i2", "i3", "i4", "i5", "i6"],
+      "settings": { "eyebrow": "Follow us", "handle": "@permanentunion" }
+    },
+    "newsletter": { "type": "newsletter", "settings": { "scheme": "sand" } }
+  },
+  "order": ["hero", "statement", "marquee", "showcase", "commitment", "categories", "riders", "journal", "follow", "newsletter"]
+}

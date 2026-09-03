@@ -1,0 +1,33 @@
+{%- assign s = section.settings -%}
+<section class="section{% if s.scheme == 'sand' %} section--sand{% endif %}">
+  <div class="container container--wide follow">
+    <p class="eyebrow reveal">{{ s.eyebrow }}</p>
+    <a class="follow__handle reveal" data-delay="1" href="{{ settings.social_instagram }}" target="_blank" rel="noopener">{{ s.handle }}</a>
+    {%- if section.blocks.size > 0 -%}
+      <div class="follow__grid">
+        {%- for block in section.blocks -%}
+          <a class="media reveal" data-delay="{{ forloop.index0 | modulo: 4 }}" href="{{ block.settings.link | default: settings.social_instagram }}" target="_blank" rel="noopener" {{ block.shopify_attributes }}>
+            {%- if block.settings.image != blank -%}{{ block.settings.image | image_url: width: 600 | image_tag: loading: 'lazy', alt: '' }}{%- else -%}{{ 'image' | placeholder_svg_tag: 'cover-media' }}{%- endif -%}
+          </a>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+{% schema %}
+{
+  "name": "Instagram / Follow",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "小見出し", "default": "Follow us" },
+    { "type": "text", "id": "handle", "label": "アカウント名", "default": "@permanentunion" },
+    { "type": "select", "id": "scheme", "label": "配色", "options": [ { "value": "light", "label": "ライト" }, { "value": "sand", "label": "サンド" } ], "default": "light" }
+  ],
+  "blocks": [
+    { "type": "image", "name": "画像", "limit": 12, "settings": [
+      { "type": "image_picker", "id": "image", "label": "画像" },
+      { "type": "url", "id": "link", "label": "リンク" }
+    ] }
+  ],
+  "presets": [{ "name": "Instagram / Follow", "blocks": [ { "type": "image" }, { "type": "image" }, { "type": "image" }, { "type": "image" }, { "type": "image" }, { "type": "image" } ] }]
+}
+{% endschema %}

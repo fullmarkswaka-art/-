@@ -1,0 +1,22 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-product",
+      "blocks": {
+        "vendor": { "type": "vendor" },
+        "title": { "type": "title" },
+        "price": { "type": "price" },
+        "buy": { "type": "buy", "settings": { "show_quantity": true, "show_dynamic_checkout": false } },
+        "description": { "type": "description" },
+        "specs": { "type": "specs", "settings": { "title": "Spec", "open": true } },
+        "features": { "type": "accordion", "settings": { "title": "Features", "metafield": "custom.features" } },
+        "shipping": { "type": "accordion", "settings": { "title": "Shipping & Returns", "content": "<p>全国一律送料 ¥900（税込）。1回のご購入合計金額が ¥30,000以上（税込）の場合は送料無料。ご注文から通常2〜4営業日以内に発送いたします。</p><p>商品到着後7日以内、未使用・タグ付きの商品に限り返品・交換を承ります。商品不良を除く返品・交換の往復送料はお客様負担となります。</p>" } },
+        "share": { "type": "share" }
+      },
+      "block_order": ["vendor", "title", "price", "buy", "description", "specs", "features", "shipping", "share"],
+      "settings": { "gallery_layout": "stack", "show_story": true }
+    },
+    "related": { "type": "related-products", "settings": {} }
+  },
+  "order": ["main", "related"]
+}

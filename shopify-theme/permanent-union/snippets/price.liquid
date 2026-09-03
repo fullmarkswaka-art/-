@@ -1,0 +1,14 @@
+{%- comment -%} Usage: render 'price', product: product (or variant: variant) {%- endcomment -%}
+{%- liquid
+  assign target = product.selected_or_first_available_variant | default: variant
+  if target == blank
+    assign target = product
+  endif
+  assign price = target.price
+  assign compare = target.compare_at_price
+-%}
+<span class="price{% if compare > price %} price--sale{% endif %}">
+  {%- if compare > price -%}<span class="price__regular">{{ compare | money }}</span>{%- endif -%}
+  {%- assign money_price = price | money -%}{%- if product.price_varies and show_range -%}{{ 'products.product.from_price' | t: price: money_price }}{%- else -%}{{ money_price }}{%- endif -%}
+  {%- if show_tax_label -%}<span class="price__unit">{{ 'products.product.tax_included' | t }}</span>{%- endif -%}
+</span>

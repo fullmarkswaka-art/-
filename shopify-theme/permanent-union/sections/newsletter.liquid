@@ -1,0 +1,32 @@
+{%- assign s = section.settings -%}
+<section class="section section--tight{% if s.scheme == 'dark' %} section--dark{% elsif s.scheme == 'sand' %} section--sand{% endif %}">
+  <div class="container newsletter">
+    <p class="eyebrow reveal">{{ s.eyebrow }}</p>
+    <h2 class="h2 mt-2 reveal" data-delay="1">{{ s.title }}</h2>
+    {%- if s.text != blank -%}<div class="body-copy mt-2 reveal" data-delay="2">{{ s.text }}</div>{%- endif -%}
+    {% form 'customer', class: 'reveal' %}
+      <input type="hidden" name="contact[tags]" value="newsletter">
+      {%- if form.posted_successfully? -%}
+        <p class="newsletter__msg">{{ 'general.newsletter.success' | t }}</p>
+      {%- else -%}
+        {{ form.errors | default_errors }}
+        <div class="newsletter__form">
+          <input type="email" name="contact[email]" required placeholder="{{ 'general.newsletter.placeholder' | t }}" aria-label="{{ 'general.newsletter.placeholder' | t }}">
+          <button type="submit">{{ 'general.newsletter.submit' | t }}</button>
+        </div>
+      {%- endif -%}
+    {% endform %}
+  </div>
+</section>
+{% schema %}
+{
+  "name": "ニュースレター",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "小見出し", "default": "Newsletter" },
+    { "type": "text", "id": "title", "label": "見出し", "default": "新作・入荷情報をお届けします" },
+    { "type": "richtext", "id": "text", "label": "本文" },
+    { "type": "select", "id": "scheme", "label": "配色", "options": [ { "value": "light", "label": "ライト" }, { "value": "sand", "label": "サンド" }, { "value": "dark", "label": "ダーク" } ], "default": "sand" }
+  ],
+  "presets": [{ "name": "ニュースレター" }]
+}
+{% endschema %}

@@ -1,0 +1,20 @@
+{
+  "current": {
+    "color_background": "#F4F2EE",
+    "color_text": "#1C1A18",
+    "color_muted": "#6E6862",
+    "color_line": "#D9D3CA",
+    "color_accent": "#5D6D7E",
+    "color_dark": "#15171A",
+    "color_dark_text": "#F1EEE8",
+    "load_google_fonts": true,
+    "page_width": 1280,
+    "button_radius": 0,
+    "card_hover_image": true,
+    "card_show_meta": true,
+    "cart_type": "drawer",
+    "social_instagram": "https://www.instagram.com/permanentunion/",
+    "social_facebook": "",
+    "social_youtube": ""
+  }
+}

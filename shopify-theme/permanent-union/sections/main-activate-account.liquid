@@ -1,0 +1,10 @@
+<section class="container section"><div class="customer__box" style="max-width:520px">
+  <h1 class="h2">{{ 'customer.activate.title' | t }}</h1>
+  {% form 'activate_customer_password', class: 'form' %}
+    {%- if form.errors -%}<div class="form__errors">{{ form.errors | default_errors }}</div>{%- endif -%}
+    <div class="field"><label for="ActPassword">{{ 'customer.password' | t }}</label><input type="password" id="ActPassword" name="customer[password]" required></div>
+    <div class="field"><label for="ActConfirm">{{ 'customer.password_confirm' | t }}</label><input type="password" id="ActConfirm" name="customer[password_confirmation]" required></div>
+    <div><button type="submit" class="button">{{ 'customer.activate.submit' | t }}</button> <button type="submit" name="decline" class="button button--outline">{{ 'customer.activate.decline' | t }}</button></div>
+  {% endform %}
+</div></section>
+{% schema %}{ "name": "アカウント有効化", "settings": [] }{% endschema %}

@@ -1,0 +1,28 @@
+<section class="container section">
+  <div class="page-title" style="padding-top:0"><p class="eyebrow">My Page</p><h1 class="display mt-2">{{ 'customer.account.title' | t }}</h1><p class="mt-2"><a class="link-line" href="{{ routes.account_logout_url }}">{{ 'customer.logout' | t }}</a></p></div>
+  <div class="customer">
+    <div class="customer__box">
+      <h2 class="h3">{{ 'customer.orders.title' | t }}</h2>
+      {%- paginate customer.orders by 20 -%}
+        {%- if customer.orders.size > 0 -%}
+          <table class="orders-table">
+            <thead><tr><th>{{ 'customer.orders.order' | t }}</th><th>{{ 'customer.orders.date' | t }}</th><th>{{ 'customer.orders.status' | t }}</th><th>{{ 'customer.orders.total' | t }}</th></tr></thead>
+            <tbody>
+              {%- for order in customer.orders -%}
+                <tr><td><a href="{{ order.customer_url }}" style="text-decoration:underline">{{ order.name }}</a></td><td>{{ order.created_at | date: '%Y.%m.%d' }}</td><td>{{ order.financial_status_label }} / {{ order.fulfillment_status_label }}</td><td>{{ order.total_price | money }}</td></tr>
+              {%- endfor -%}
+            </tbody>
+          </table>
+        {%- else -%}<p class="body-copy">{{ 'customer.orders.none' | t }}</p>{%- endif -%}
+        {% render 'pagination', paginate: paginate %}
+      {%- endpaginate -%}
+    </div>
+    <div class="customer__box">
+      <h2 class="h3">{{ 'customer.account.details' | t }}</h2>
+      <p class="body-copy">{{ customer.name }}<br>{{ customer.email }}</p>
+      {%- if customer.default_address -%}<div class="address-card mt-3">{{ customer.default_address | format_address }}</div>{%- endif -%}
+      <a class="link-line mt-3" href="{{ routes.account_addresses_url }}">{{ 'customer.addresses.title' | t }} ({{ customer.addresses_count }})</a>
+    </div>
+  </div>
+</section>
+{% schema %}{ "name": "アカウント", "settings": [] }{% endschema %}

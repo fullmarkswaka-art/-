@@ -1,0 +1,39 @@
+{%- assign s = section.settings -%}
+{%- assign col = s.collection -%}
+<section class="section">
+  <div class="container container--wide">
+    <div class="section-head reveal">
+      <div class="section-head__title">
+        <span class="section-number">{{ s.number }}</span>
+        <div><p class="eyebrow">{{ s.eyebrow }}</p><h2 class="h1 mt-1">{{ s.title | default: col.title }}</h2></div>
+      </div>
+      {%- if col != blank -%}<a class="link-line section-head__link" href="{{ col.url }}">{{ s.link_label }} {% render 'icon', name: 'arrow' %}</a>{%- endif -%}
+    </div>
+    <div class="product-grid" style="--cols: {{ s.columns }}">
+      {%- if col != blank and col.products.size > 0 -%}
+        {%- for product in col.products limit: s.limit -%}
+          {% render 'product-card', product: product, index: forloop.index0 %}
+        {%- endfor -%}
+      {%- else -%}
+        {%- for i in (1..s.limit) -%}
+          <div class="product-card"><div class="product-card__media">{{ 'product-apparel-' | append: forloop.index | placeholder_svg_tag: 'cover-media' }}</div><div class="product-card__body"><h3 class="product-card__title">{{ 'products.product.sample' | t }}</h3><span class="price">¥85,800</span></div></div>
+        {%- endfor -%}
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+{% schema %}
+{
+  "name": "おすすめ商品",
+  "settings": [
+    { "type": "collection", "id": "collection", "label": "コレクション" },
+    { "type": "text", "id": "number", "label": "番号", "default": "(05)" },
+    { "type": "text", "id": "eyebrow", "label": "小見出し", "default": "New Arrivals" },
+    { "type": "text", "id": "title", "label": "見出し（空欄ならコレクション名）" },
+    { "type": "text", "id": "link_label", "label": "リンクテキスト", "default": "View All" },
+    { "type": "range", "id": "limit", "label": "表示数", "min": 2, "max": 12, "step": 1, "default": 4 },
+    { "type": "range", "id": "columns", "label": "列数（PC）", "min": 2, "max": 4, "step": 1, "default": 4 }
+  ],
+  "presets": [{ "name": "おすすめ商品" }]
+}
+{% endschema %}

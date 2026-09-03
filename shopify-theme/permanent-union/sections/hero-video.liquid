@@ -1,0 +1,56 @@
+{%- liquid
+  assign s = section.settings
+-%}
+<section class="hero{% if s.height == 'short' %} hero--short{% endif %}" id="hero-{{ section.id }}">
+  <div class="hero__media">
+    {%- if s.video != blank -%}
+      {{ s.video | video_tag: autoplay: true, loop: true, muted: true, controls: false, playsinline: true, preload: 'auto', image_size: '2000x' }}
+    {%- elsif s.video_url != blank -%}
+      <video autoplay muted loop playsinline preload="auto" {% if s.image != blank %}poster="{{ s.image | image_url: width: 1800 }}"{% else %}poster="{{ 'pu-hero.jpg' | asset_url }}"{% endif %}>
+        <source src="{{ s.video_url }}" type="video/mp4">
+      </video>
+    {%- elsif s.image != blank -%}
+      {{ s.image | image_url: width: 2800 | image_tag: loading: 'eager', fetchpriority: 'high', sizes: '100vw', widths: '800, 1200, 1600, 2000, 2800', alt: s.image.alt | default: shop.name }}
+    {%- else -%}
+      <img src="{{ 'pu-hero.jpg' | asset_url }}" alt="{{ shop.name }}" loading="eager" fetchpriority="high" width="2560" height="1707">
+    {%- endif -%}
+  </div>
+  <div class="hero__vignette" style="opacity: {{ s.overlay | divided_by: 100.0 }}"></div>
+
+  <div class="hero__inner{% if s.align == 'center' %} hero__inner--center{% endif %}">
+    {%- if s.eyebrow != blank -%}<p class="eyebrow hero__eyebrow reveal">{{ s.eyebrow }}</p>{%- endif -%}
+    {%- if s.title != blank -%}<h1 class="display hero__title reveal" data-delay="1">{{ s.title }}</h1>{%- endif -%}
+    {%- if s.subtitle != blank -%}<p class="hero__sub reveal" data-delay="2">{{ s.subtitle }}</p>{%- endif -%}
+    {%- if s.button_label != blank or s.button2_label != blank -%}
+      <div class="hero__actions reveal" data-delay="3">
+        {%- if s.button_label != blank -%}<a class="button button--light" href="{{ s.button_link }}">{{ s.button_label }}</a>{%- endif -%}
+        {%- if s.button2_label != blank -%}<a class="button button--ghost" href="{{ s.button2_link }}">{{ s.button2_label }}</a>{%- endif -%}
+      </div>
+    {%- endif -%}
+  </div>
+  {%- if s.show_scroll -%}<div class="hero__scroll" aria-hidden="true">Scroll</div>{%- endif -%}
+</section>
+
+{% schema %}
+{
+  "name": "ヒーロー動画",
+  "settings": [
+    { "type": "paragraph", "content": "動画は「Shopify 動画」「外部MP4のURL」「画像」の優先順で表示されます。Adobe Stockで購入した動画は、Shopify管理画面 > コンテンツ > ファイル にアップロード後ここで選択してください（推奨: 1920×1080 / 15〜30秒 / 10MB以下 / H.264）。" },
+    { "type": "video", "id": "video", "label": "動画（Shopify）" },
+    { "type": "text", "id": "video_url", "label": "動画URL（MP4）", "default": "https://full-marks.com/permanentunion/wp-content/uploads/sites/16/2025/12/pu-movie-horizon.mp4" },
+    { "type": "image_picker", "id": "image", "label": "画像 / 動画のポスター" },
+    { "type": "select", "id": "height", "label": "高さ", "options": [ { "value": "full", "label": "画面いっぱい" }, { "value": "short", "label": "やや低め" } ], "default": "full" },
+    { "type": "range", "id": "overlay", "label": "暗さ（オーバーレイ）", "min": 0, "max": 100, "step": 5, "unit": "%", "default": 70 },
+    { "type": "select", "id": "align", "label": "テキスト位置", "options": [ { "value": "left", "label": "左下" }, { "value": "center", "label": "中央" } ], "default": "left" },
+    { "type": "text", "id": "eyebrow", "label": "小見出し", "default": "2026-2027 FW New Collection" },
+    { "type": "text", "id": "title", "label": "見出し", "default": "Be Awesome In The Mountain" },
+    { "type": "text", "id": "subtitle", "label": "サブコピー", "default": "〜 山にいるときこそ最高であれ 〜" },
+    { "type": "text", "id": "button_label", "label": "ボタン1", "default": "View Collection" },
+    { "type": "url", "id": "button_link", "label": "ボタン1リンク" },
+    { "type": "text", "id": "button2_label", "label": "ボタン2", "default": "Our Story" },
+    { "type": "url", "id": "button2_link", "label": "ボタン2リンク" },
+    { "type": "checkbox", "id": "show_scroll", "label": "スクロール表示", "default": true }
+  ],
+  "presets": [{ "name": "ヒーロー動画" }]
+}
+{% endschema %}

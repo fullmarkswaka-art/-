@@ -1,0 +1,123 @@
+{
+  "accessibility": {
+    "skip_to_text": "コンテンツへスキップ",
+    "close": "閉じる",
+    "open_menu": "メニューを開く",
+    "main_menu": "メインメニュー"
+  },
+  "general": {
+    "meta": { "tags": "タグ: {{ tags }}", "page": "ページ {{ page }}" },
+    "continue_shopping": "買い物を続ける",
+    "view_all": "すべて見る",
+    "pagination": { "label": "ページ送り", "previous": "前へ", "next": "次へ" },
+    "search": {
+      "search": "検索",
+      "placeholder": "キーワードを入力",
+      "results": "「{{ terms }}」の検索結果: {{ count }}件",
+      "no_results": "該当する商品が見つかりませんでした。"
+    },
+    "newsletter": {
+      "placeholder": "メールアドレス",
+      "submit": "登録",
+      "success": "ご登録ありがとうございます。次回の配信まで今しばらくお待ちください。"
+    },
+    "password_page": {
+      "opening_soon": "オンラインストアは近日公開予定です。",
+      "login_form_password_label": "パスワード",
+      "login_form_password_placeholder": "パスワード",
+      "login_form_submit": "入る"
+    },
+    "404": {
+      "title": "ページが見つかりません",
+      "text": "お探しのページは移動または削除された可能性があります。",
+      "back": "トップへ戻る"
+    }
+  },
+  "products": {
+    "product": {
+      "add_to_cart": "カートに入れる",
+      "sold_out": "Sold Out",
+      "unavailable": "選択できません",
+      "added_to_cart": "カートに追加しました",
+      "quantity": "数量",
+      "tax_included": "税込",
+      "from_price": "{{ price }}〜",
+      "new": "New",
+      "on_sale": "Sale",
+      "sample": "サンプル商品",
+      "material": "素材",
+      "waterproof": "耐水性",
+      "breathability": "透湿性",
+      "weight": "重量",
+      "made_in": "生産国"
+    }
+  },
+  "collections": {
+    "filter": "絞り込み",
+    "sort": "並び替え",
+    "clear_all": "すべて解除",
+    "product_count": "{{ count }} items",
+    "empty": "現在このカテゴリーに商品はありません。"
+  },
+  "sections": {
+    "cart": {
+      "title": "Cart",
+      "empty": "カートに商品はありません。",
+      "subtotal": "小計",
+      "total": "合計",
+      "checkout": "ご購入手続きへ",
+      "view_cart": "カートを見る",
+      "remove": "削除",
+      "quantity": "数量",
+      "decrease": "数量を減らす",
+      "increase": "数量を増やす",
+      "note": "備考・ご要望",
+      "taxes_and_shipping": "送料はご購入手続き時に計算されます。",
+      "error": "カートの更新に失敗しました。もう一度お試しください。"
+    },
+    "journal": { "sample": "記事のタイトルがここに表示されます" }
+  },
+  "blogs": {
+    "empty": "記事はまだありません。",
+    "previous": "前の記事",
+    "next": "次の記事",
+    "back": "一覧へ"
+  },
+  "contact": {
+    "name": "お名前",
+    "email": "メールアドレス",
+    "phone": "電話番号",
+    "message": "お問い合わせ内容",
+    "send": "送信する",
+    "success": "お問い合わせを受け付けました。担当者よりご連絡いたします。"
+  },
+  "customer": {
+    "email": "メールアドレス",
+    "password": "パスワード",
+    "password_confirm": "パスワード（確認）",
+    "first_name": "名",
+    "last_name": "姓",
+    "logout": "ログアウト",
+    "login": { "title": "ログイン", "submit": "ログイン", "forgot": "パスワードをお忘れですか？" },
+    "recover": { "title": "パスワードの再設定", "submit": "再設定メールを送る", "success": "パスワード再設定のメールをお送りしました。" },
+    "register": { "title": "新規会員登録", "text": "会員登録いただくと、ご注文履歴の確認やお届け先の保存ができます。", "submit": "会員登録" },
+    "account": { "title": "マイページ", "details": "アカウント情報", "back": "マイページへ戻る" },
+    "orders": { "title": "ご注文履歴", "order": "注文番号", "date": "日付", "status": "ステータス", "total": "合計", "none": "ご注文履歴はありません。" },
+    "order": { "product": "商品", "quantity": "数量", "total": "合計", "shipping": "送料", "shipping_address": "お届け先", "billing_address": "ご請求先" },
+    "addresses": {
+      "title": "お届け先", "add": "お届け先を追加", "saved": "登録済みのお届け先", "default": "デフォルト", "none": "登録済みのお届け先はありません。",
+      "zip": "郵便番号", "country": "国", "province": "都道府県", "city": "市区町村", "address1": "住所1", "address2": "住所2（建物名など）", "phone": "電話番号",
+      "set_default": "デフォルトのお届け先にする", "delete": "削除", "delete_confirm": "このお届け先を削除しますか？"
+    },
+    "activate": { "title": "アカウントの有効化", "submit": "有効化する", "decline": "辞退する" },
+    "reset": { "title": "パスワードの再設定", "submit": "パスワードを変更" }
+  },
+  "gift_cards": {
+    "issued": {
+      "title": "{{ shop }} の {{ value }} ギフトカード",
+      "subtext": "ギフトカード",
+      "expired": "有効期限切れ",
+      "shop_link": "ショップへ"
+    }
+  }
+}

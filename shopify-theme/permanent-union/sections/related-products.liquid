@@ -1,0 +1,26 @@
+{%- assign s = section.settings -%}
+<section class="section section--sand">
+  <div class="container container--wide">
+    <div class="section-head reveal">
+      <div class="section-head__title"><div><p class="eyebrow">{{ s.eyebrow }}</p><h2 class="h2 mt-1">{{ s.title }}</h2></div></div>
+      <a class="link-line section-head__link" href="{{ routes.all_products_collection_url }}">{{ 'general.view_all' | t }} {% render 'icon', name: 'arrow' %}</a>
+    </div>
+    <div class="product-grid" style="--cols: 4">
+      {%- if recommendations.performed and recommendations.products_count > 0 -%}
+        {%- for p in recommendations.products limit: s.limit -%}{% render 'product-card', product: p, index: forloop.index0 %}{%- endfor -%}
+      {%- else -%}
+        {%- for p in collections.all.products limit: s.limit -%}{%- unless p.id == product.id -%}{% render 'product-card', product: p, index: forloop.index0 %}{%- endunless -%}{%- endfor -%}
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+{% schema %}
+{
+  "name": "関連商品",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "小見出し", "default": "You may also like" },
+    { "type": "text", "id": "title", "label": "見出し", "default": "関連アイテム" },
+    { "type": "range", "id": "limit", "label": "表示数", "min": 2, "max": 8, "step": 1, "default": 4 }
+  ]
+}
+{% endschema %}

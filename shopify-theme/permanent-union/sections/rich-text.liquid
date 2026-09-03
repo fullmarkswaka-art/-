@@ -1,0 +1,26 @@
+{%- assign s = section.settings -%}
+<section class="section{% if s.scheme == 'dark' %} section--dark{% elsif s.scheme == 'sand' %} section--sand{% endif %}">
+  <div class="container container--narrow{% if s.center %} text-center{% endif %}">
+    {%- if s.number != blank -%}<p class="section-number reveal">{{ s.number }}</p>{%- endif -%}
+    {%- if s.eyebrow != blank -%}<p class="eyebrow mt-2 reveal">{{ s.eyebrow }}</p>{%- endif -%}
+    {%- if s.title != blank -%}<h2 class="h1 mt-3 reveal" data-delay="1">{{ s.title }}</h2>{%- endif -%}
+    {%- if s.text != blank -%}<div class="lead mt-4 reveal" data-delay="2">{{ s.text }}</div>{%- endif -%}
+    {%- if s.button_label != blank -%}<div class="mt-4 reveal" data-delay="3"><a class="button button--outline" href="{{ s.button_link }}">{{ s.button_label }}</a></div>{%- endif -%}
+  </div>
+</section>
+{% schema %}
+{
+  "name": "テキスト",
+  "settings": [
+    { "type": "text", "id": "number", "label": "番号" },
+    { "type": "text", "id": "eyebrow", "label": "小見出し" },
+    { "type": "text", "id": "title", "label": "見出し" },
+    { "type": "richtext", "id": "text", "label": "本文", "default": "<p>自然は時に美しく、時に過酷な試練を私たちに与えます。けれど、高機能素材の進化は、世界中の人々が存分にその環境を楽しむことを可能にしてくれました。</p>" },
+    { "type": "checkbox", "id": "center", "label": "中央揃え", "default": true },
+    { "type": "text", "id": "button_label", "label": "ボタン" },
+    { "type": "url", "id": "button_link", "label": "ボタンリンク" },
+    { "type": "select", "id": "scheme", "label": "配色", "options": [ { "value": "light", "label": "ライト" }, { "value": "sand", "label": "サンド" }, { "value": "dark", "label": "ダーク" } ], "default": "light" }
+  ],
+  "presets": [{ "name": "テキスト" }]
+}
+{% endschema %}

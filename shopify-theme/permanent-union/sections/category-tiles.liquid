@@ -1,0 +1,71 @@
+{%- assign s = section.settings -%}
+<section class="section section--tight">
+  <div class="container container--wide">
+    <div class="section-head reveal">
+      <div class="section-head__title">
+        <span class="section-number">{{ s.number }}</span>
+        <div><p class="eyebrow">{{ s.eyebrow }}</p><h2 class="h1 mt-1">{{ s.title }}</h2></div>
+      </div>
+      {%- if s.link_label != blank -%}<a class="link-line section-head__link" href="{{ s.link | default: routes.collections_url }}">{{ s.link_label }} {% render 'icon', name: 'arrow' %}</a>{%- endif -%}
+    </div>
+    <div class="cats">
+      {%- for block in section.blocks -%}
+        {%- liquid
+          assign b = block.settings
+          assign col = b.collection
+          assign title = b.title | default: col.title
+          assign url = col.url | default: '#'
+        -%}
+        <a class="cat reveal" data-delay="{{ forloop.index0 }}" href="{{ url }}" {{ block.shopify_attributes }}>
+          {%- if b.image != blank -%}
+            {{ b.image | image_url: width: 900 | image_tag: loading: 'lazy', sizes: '(max-width: 900px) 50vw, 25vw', alt: title }}
+          {%- elsif col.featured_image -%}
+            {{ col.featured_image | image_url: width: 900 | image_tag: loading: 'lazy', sizes: '(max-width: 900px) 50vw, 25vw', alt: title }}
+          {%- elsif b.default_asset != blank -%}
+            <img src="{{ b.default_asset | asset_url }}" alt="{{ title }}" loading="lazy" width="1440" height="2160">
+          {%- endif -%}
+          <div class="cat__body">
+            <span class="cat__num">({{ forloop.index | prepend: '0' | slice: -2, 2 }})</span>
+            <span class="cat__title">{{ title }}</span>
+            {%- if b.subtitle != blank -%}<span class="cat__sub">{{ b.subtitle }}</span>{%- endif -%}
+          </div>
+        </a>
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+{% schema %}
+{
+  "name": "カテゴリータイル",
+  "settings": [
+    { "type": "text", "id": "number", "label": "番号", "default": "(04)" },
+    { "type": "text", "id": "eyebrow", "label": "小見出し", "default": "Shop by Category" },
+    { "type": "text", "id": "title", "label": "見出し", "default": "Products" },
+    { "type": "text", "id": "link_label", "label": "リンクテキスト", "default": "All Products" },
+    { "type": "url", "id": "link", "label": "リンク先" }
+  ],
+  "blocks": [
+    {
+      "type": "tile", "name": "カテゴリー", "limit": 8,
+      "settings": [
+        { "type": "collection", "id": "collection", "label": "コレクション" },
+        { "type": "text", "id": "title", "label": "表示名（空欄ならコレクション名）" },
+        { "type": "text", "id": "subtitle", "label": "サブテキスト" },
+        { "type": "image_picker", "id": "image", "label": "画像（空欄ならコレクション画像）" },
+        { "type": "text", "id": "default_asset", "label": "初期画像（テーマ同梱）" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "カテゴリータイル",
+      "blocks": [
+        { "type": "tile", "settings": { "title": "Shell", "subtitle": "シェルジャケット", "default_asset": "pu-gin-jacket.jpg" } },
+        { "type": "tile", "settings": { "title": "Tops", "subtitle": "トップス", "default_asset": "pu-koval-jacket.jpg" } },
+        { "type": "tile", "settings": { "title": "Bottoms", "subtitle": "ボトムス", "default_asset": "pu-koval-bib-pants.jpg" } },
+        { "type": "tile", "settings": { "title": "Accessories", "subtitle": "アクセサリー", "default_asset": "pu-eyguebelle-jacket.jpg" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

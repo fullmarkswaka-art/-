@@ -1,0 +1,22 @@
+<section class="container section">
+  <article class="article">
+    <div class="article__meta"><span>{{ article.published_at | date: '%Y.%m.%d' }}</span>{%- if article.tags.size > 0 -%}<span>{{ article.tags | join: ' / ' }}</span>{%- endif -%}{%- if section.settings.show_author -%}<span>{{ article.author }}</span>{%- endif -%}</div>
+    <h1 class="h1 article__title">{{ article.title }}</h1>
+    {%- if article.image and section.settings.show_image -%}<div class="media article__hero">{{ article.image | image_url: width: 1600 | image_tag: loading: 'eager', alt: article.title }}</div>{%- endif -%}
+    <div class="rte article__body">{{ article.content }}</div>
+    <div class="article__nav">
+      {%- if blog.previous_article -%}<a class="link-line" href="{{ blog.previous_article.url }}">← {{ 'blogs.previous' | t }}</a>{%- else -%}<span></span>{%- endif -%}
+      <a class="link-line" href="{{ blog.url }}">{{ 'blogs.back' | t }}</a>
+      {%- if blog.next_article -%}<a class="link-line" href="{{ blog.next_article.url }}">{{ 'blogs.next' | t }} →</a>{%- else -%}<span></span>{%- endif -%}
+    </div>
+  </article>
+</section>
+{% schema %}
+{
+  "name": "記事",
+  "settings": [
+    { "type": "checkbox", "id": "show_image", "label": "アイキャッチを表示", "default": true },
+    { "type": "checkbox", "id": "show_author", "label": "著者を表示", "default": false }
+  ]
+}
+{% endschema %}

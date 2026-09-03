@@ -1,0 +1,15 @@
+{
+  "sections": {
+    "main": { "type": "riders-grid", "blocks": {
+      "r1": { "type": "rider", "settings": { "name": "山内 一志", "name_en": "Kazushi Yamauchi", "role": "Snowboarder" } },
+      "r2": { "type": "rider", "settings": { "name": "舎川 朋弘", "name_en": "Tomohiro Tonegawa", "role": "Skier" } },
+      "r3": { "type": "rider", "settings": { "name": "永島 秀之", "name_en": "Hideyuki Nagashima", "role": "Telemark Skier" } },
+      "r4": { "type": "rider", "settings": { "name": "石川 睦", "name_en": "Makoto Ishikawa", "role": "Skier" } },
+      "r5": { "type": "rider", "settings": { "name": "畔田 正志", "name_en": "Masashi Kuroda", "role": "Snowboarder" } },
+      "r6": { "type": "rider", "settings": { "name": "上村 愛子", "name_en": "Aiko Uemura", "role": "Skier" } },
+      "r7": { "type": "rider", "settings": { "name": "立花 透", "name_en": "Toru Tachibana", "role": "Skier" } },
+      "r8": { "type": "rider", "settings": { "name": "笹田 知里", "name_en": "Chisato Sasada", "role": "Skier" } }
+    }, "block_order": ["r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8"], "settings": {} }
+  },
+  "order": ["main"]
+}

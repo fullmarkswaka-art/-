@@ -1,0 +1,45 @@
+{%- assign s = section.settings -%}
+<section class="section{% if s.scheme == 'dark' %} section--dark{% elsif s.scheme == 'sand' %} section--sand{% endif %}">
+  <div class="container">
+    {%- if s.layout == 'split' -%}
+      <div class="statement statement--split">
+        <div class="reveal">
+          <p class="section-number">{{ s.number }}</p>
+          <p class="eyebrow mt-2">{{ s.eyebrow }}</p>
+          <h2 class="h1 mt-3">{{ s.title }}</h2>
+        </div>
+        <div class="reveal" data-delay="1">
+          <div class="lead statement__text">{{ s.text }}</div>
+          {%- if s.button_label != blank -%}<div class="statement__cta"><a class="link-line" href="{{ s.button_link }}">{{ s.button_label }} {% render 'icon', name: 'arrow' %}</a></div>{%- endif -%}
+        </div>
+      </div>
+    {%- else -%}
+      <div class="statement">
+        <div class="statement__inner">
+          <p class="section-number reveal">{{ s.number }}</p>
+          <p class="eyebrow mt-2 reveal">{{ s.eyebrow }}</p>
+          <h2 class="h1 statement__title reveal" data-delay="1">{{ s.title }}</h2>
+          <div class="lead statement__text{% if s.center_text %} is-center{% endif %} reveal" data-delay="2">{{ s.text }}</div>
+          {%- if s.button_label != blank -%}<div class="statement__cta reveal" data-delay="3"><a class="link-line" href="{{ s.button_link }}">{{ s.button_label }} {% render 'icon', name: 'arrow' %}</a></div>{%- endif -%}
+        </div>
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+{% schema %}
+{
+  "name": "ブランドステートメント",
+  "settings": [
+    { "type": "text", "id": "number", "label": "番号", "default": "(01)" },
+    { "type": "text", "id": "eyebrow", "label": "小見出し", "default": "Our Philosophy" },
+    { "type": "text", "id": "title", "label": "見出し", "default": "自然は、素晴らしい。" },
+    { "type": "richtext", "id": "text", "label": "本文", "default": "<p>森に抱かれ、山で遊ぶ時間は、私たちにとって至福のものです。だからこそ、自分らしいウェアを身に纏いたいのです。</p><p>〜山にいるときこそ最高であれ〜 をコンセプトに、2013年に誕生したスノーライフスタイルブランド。山岳ガイドやスキーヤー、スノーボーダーの意見をもとに雪山に対応する機能性と、街でも違和感なく着ることができるデザインを兼ね備えたプロダクトを配信しています。</p>" },
+    { "type": "select", "id": "layout", "label": "レイアウト", "options": [ { "value": "center", "label": "中央" }, { "value": "split", "label": "2カラム" } ], "default": "center" },
+    { "type": "checkbox", "id": "center_text", "label": "本文も中央揃え", "default": false },
+    { "type": "text", "id": "button_label", "label": "リンクテキスト", "default": "About Permanent Union" },
+    { "type": "url", "id": "button_link", "label": "リンク先" },
+    { "type": "select", "id": "scheme", "label": "配色", "options": [ { "value": "light", "label": "ライト" }, { "value": "sand", "label": "サンド" }, { "value": "dark", "label": "ダーク" } ], "default": "light" }
+  ],
+  "presets": [{ "name": "ブランドステートメント" }]
+}
+{% endschema %}

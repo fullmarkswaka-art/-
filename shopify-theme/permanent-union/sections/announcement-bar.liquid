@@ -1,0 +1,15 @@
+{%- if section.settings.text != blank -%}
+<div class="announcement">
+  {%- if section.settings.link != blank -%}<a href="{{ section.settings.link }}">{{ section.settings.text }}</a>{%- else -%}{{ section.settings.text }}{%- endif -%}
+</div>
+{%- endif -%}
+{% schema %}
+{
+  "name": "お知らせバー",
+  "settings": [
+    { "type": "text", "id": "text", "label": "テキスト", "default": "2026-2027 FW New Collection — 全国一律送料 ¥900 / ¥30,000以上で送料無料" },
+    { "type": "url", "id": "link", "label": "リンク" }
+  ],
+  "presets": [{ "name": "お知らせバー" }]
+}
+{% endschema %}

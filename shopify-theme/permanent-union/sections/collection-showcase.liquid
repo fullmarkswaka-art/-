@@ -1,0 +1,112 @@
+{%- comment -%}
+  Editorial "Our Collections" list (jibie-varied style): one large image + numbered copy per item.
+  Each block links to a product; if the product has no image yet, the block image / bundled default is used.
+{%- endcomment -%}
+{%- assign s = section.settings -%}
+<section class="section{% if s.scheme == 'dark' %} section--dark{% elsif s.scheme == 'sand' %} section--sand{% endif %}" id="collection-{{ section.id }}">
+  <div class="container container--wide">
+    <div class="section-head reveal">
+      <div class="section-head__title">
+        <span class="section-number">{{ s.number }}</span>
+        <div>
+          <p class="eyebrow">{{ s.eyebrow }}</p>
+          <h2 class="h1 mt-1">{{ s.title }}</h2>
+        </div>
+      </div>
+      {%- if s.link_label != blank -%}<a class="link-line section-head__link" href="{{ s.link }}">{{ s.link_label }} {% render 'icon', name: 'arrow' %}</a>{%- endif -%}
+    </div>
+
+    <div class="showcase__list">
+      {%- for block in section.blocks -%}
+        {%- liquid
+          assign b = block.settings
+          assign product = b.product
+          assign name = b.name
+          if name == blank and product != blank
+            assign name = product.title
+          endif
+          assign url = b.link
+          if url == blank and product != blank
+            assign url = product.url
+          endif
+        -%}
+        <article class="showcase-item reveal" {{ block.shopify_attributes }}>
+          <a class="showcase-item__media" href="{{ url | default: '#' }}">
+            <div class="media">
+              {%- if b.image != blank -%}
+                {{ b.image | image_url: width: 1600 | image_tag: loading: 'lazy', sizes: '(max-width: 800px) 100vw, 55vw', widths: '600, 900, 1200, 1600', alt: name }}
+              {%- elsif product != blank and product.featured_media -%}
+                {{ product.featured_media | image_url: width: 1600 | image_tag: loading: 'lazy', sizes: '(max-width: 800px) 100vw, 55vw', widths: '600, 900, 1200, 1600', alt: name }}
+              {%- elsif b.default_asset != blank -%}
+                <img src="{{ b.default_asset | asset_url }}" alt="{{ name }}" loading="lazy" width="1440" height="2160">
+              {%- else -%}
+                {{ 'product-apparel-2' | placeholder_svg_tag: 'cover-media' }}
+              {%- endif -%}
+            </div>
+          </a>
+          <div class="showcase-item__body">
+            <p class="section-number showcase-item__number">({{ forloop.index | prepend: '0' | slice: -2, 2 }})</p>
+            <h3 class="showcase-item__name"><a href="{{ url | default: '#' }}">{{ name }}</a></h3>
+            {%- if b.color != blank -%}<p class="showcase-item__color">{{ b.color }}</p>{%- endif -%}
+            {%- if b.text != blank -%}<div class="body-copy showcase-item__desc">{{ b.text }}</div>{%- endif -%}
+            {%- if b.specs != blank -%}
+              <ul class="showcase-item__specs">
+                {%- assign specs = b.specs | split: '|' -%}
+                {%- for spec in specs -%}<li>{{ spec | strip }}</li>{%- endfor -%}
+              </ul>
+            {%- endif -%}
+            {%- if product != blank and s.show_price -%}
+              <p class="showcase-item__price">{% render 'price', product: product, show_tax_label: true %}</p>
+            {%- endif -%}
+            <div class="showcase-item__cta">
+              <a class="link-line" href="{{ url | default: '#' }}">{{ b.cta_label | default: s.item_cta }} {% render 'icon', name: 'arrow' %}</a>
+            </div>
+          </div>
+        </article>
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+{% schema %}
+{
+  "name": "コレクション紹介（編集型）",
+  "settings": [
+    { "type": "text", "id": "number", "label": "番号", "default": "(02)" },
+    { "type": "text", "id": "eyebrow", "label": "小見出し", "default": "Our Collections" },
+    { "type": "text", "id": "title", "label": "見出し", "default": "2026-2027 FW Collection" },
+    { "type": "text", "id": "link_label", "label": "右上リンクテキスト", "default": "View All" },
+    { "type": "url", "id": "link", "label": "右上リンク先" },
+    { "type": "text", "id": "item_cta", "label": "各アイテムのリンクテキスト", "default": "View Product" },
+    { "type": "checkbox", "id": "show_price", "label": "価格を表示", "default": true },
+    { "type": "select", "id": "scheme", "label": "配色", "options": [ { "value": "light", "label": "ライト" }, { "value": "sand", "label": "サンド" }, { "value": "dark", "label": "ダーク" } ], "default": "light" }
+  ],
+  "blocks": [
+    {
+      "type": "item", "name": "アイテム",
+      "settings": [
+        { "type": "product", "id": "product", "label": "商品" },
+        { "type": "text", "id": "name", "label": "表示名（空欄なら商品名）" },
+        { "type": "text", "id": "color", "label": "カラー名 / サブテキスト" },
+        { "type": "image_picker", "id": "image", "label": "画像（空欄なら商品画像）" },
+        { "type": "text", "id": "default_asset", "label": "初期画像（テーマ同梱）", "info": "商品・画像未設定時に使うテーマ内画像ファイル名。設定後は空欄にしてください。" },
+        { "type": "richtext", "id": "text", "label": "説明文" },
+        { "type": "text", "id": "specs", "label": "スペック（| 区切り）", "default": "3-Layer | 20,000mm 耐水 | 10,000g/m²/24h 透湿" },
+        { "type": "text", "id": "cta_label", "label": "リンクテキスト" },
+        { "type": "url", "id": "link", "label": "リンク先（空欄なら商品ページ）" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "コレクション紹介（編集型）",
+      "blocks": [
+        { "type": "item", "settings": { "name": "GIN JACKET", "color": "Slate Blue", "default_asset": "pu-gin-jacket.jpg", "text": "<p>前見頃がアシンメトリーなファスナーになっているデザイン性豊かなジャケット。PERMANENT UNIONの象徴の“縄”をイメージしたコードを各ポケット、そして袖に施し、機能よりも面白さを追求しました。</p>" } },
+        { "type": "item", "settings": { "name": "NO TEN JACKET", "color": "Kakishibu", "default_asset": "pu-noten-jacket.jpg", "text": "<p>少し長めの丈と程よい身幅の細さがシルエットを綺麗に見せる、スタイリッシュで洗練されたマウンテンパーカータイプ。PERMANENT UNIONで一番丈の長い細身のジャケットです。</p>" } },
+        { "type": "item", "settings": { "name": "KOVAL JACKET", "color": "Wakaba", "default_asset": "pu-koval-jacket.jpg", "text": "<p>前身頃のレザーが特徴的な3Layerジャケット。ブルゾンのような強い印象を持たせ、アパレル的な着こなしも楽しめる一着。</p>" } },
+        { "type": "item", "settings": { "name": "EYGUEBELLE JACKET", "color": "Muku", "default_asset": "pu-eyguebelle-jacket.jpg", "text": "<p>脱ぎ着のしやすさにこだわったアノラック3Layerジャケット。「必要なものを必要な分だけ」というコンセプトのもと、日本のバックカントリーシーンを想定して開発。</p>" } },
+        { "type": "item", "settings": { "name": "KOVAL BIB PANTS", "color": "Midnight", "default_asset": "pu-koval-bib-pants.jpg", "text": "<p>日本人の体型に合わせたパターンと、前後のバランス・調整可能なストラップで肩への負担を最小限に。8つのポケットとベンチレーションを備えたビブパンツ。</p>" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

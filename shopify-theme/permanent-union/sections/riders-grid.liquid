@@ -1,0 +1,61 @@
+{%- assign s = section.settings -%}
+<section class="section">
+  <div class="container container--wide">
+    <div class="page-title" style="padding-top:0">
+      <p class="eyebrow reveal">{{ s.eyebrow }}</p>
+      <h1 class="display mt-2 reveal" data-delay="1">{{ s.title }}</h1>
+      {%- if s.text != blank -%}<div class="page-title__desc lead reveal" data-delay="2">{{ s.text }}</div>{%- endif -%}
+    </div>
+    <div class="riders-grid">
+      {%- for block in section.blocks -%}
+        <article class="rider-card reveal" data-delay="{{ forloop.index0 | modulo: 4 }}" {{ block.shopify_attributes }}>
+          <div class="media rider-card__media">
+            {%- if block.settings.image != blank -%}{{ block.settings.image | image_url: width: 900 | image_tag: loading: 'lazy', alt: block.settings.name }}{%- else -%}{{ 'image' | placeholder_svg_tag: 'cover-media' }}{%- endif -%}
+          </div>
+          <div class="rider-card__body">
+            <p class="rider__role">{{ block.settings.role }}</p>
+            <h2 class="rider__name mt-1">{{ block.settings.name }}<small>{{ block.settings.name_en }}</small></h2>
+            {%- if block.settings.bio != blank -%}<div class="body-copy mt-2">{{ block.settings.bio }}</div>{%- endif -%}
+            <div class="rider__links mt-2">
+              {%- if block.settings.instagram != blank -%}<a href="{{ block.settings.instagram }}" target="_blank" rel="noopener">Instagram</a>{%- endif -%}
+              {%- if block.settings.facebook != blank -%}<a href="{{ block.settings.facebook }}" target="_blank" rel="noopener">Facebook</a>{%- endif -%}
+              {%- if block.settings.website != blank -%}<a href="{{ block.settings.website }}" target="_blank" rel="noopener">Website</a>{%- endif -%}
+            </div>
+          </div>
+        </article>
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+{% schema %}
+{
+  "name": "ライダー一覧",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "小見出し", "default": "Riders" },
+    { "type": "text", "id": "title", "label": "見出し", "default": "Permanent Union Riders" },
+    { "type": "richtext", "id": "text", "label": "本文", "default": "<p>フィールドで活動するスペシャリストたち。彼らの気づきと智慧が、プロダクトに息づいています。</p>" }
+  ],
+  "blocks": [
+    { "type": "rider", "name": "ライダー", "settings": [
+      { "type": "image_picker", "id": "image", "label": "写真" },
+      { "type": "text", "id": "name", "label": "名前", "default": "山内 一志" },
+      { "type": "text", "id": "name_en", "label": "英語表記", "default": "Kazushi Yamauchi" },
+      { "type": "text", "id": "role", "label": "種目", "default": "Snowboarder" },
+      { "type": "richtext", "id": "bio", "label": "プロフィール" },
+      { "type": "url", "id": "instagram", "label": "Instagram" },
+      { "type": "url", "id": "facebook", "label": "Facebook" },
+      { "type": "url", "id": "website", "label": "Website" }
+    ] }
+  ],
+  "presets": [{ "name": "ライダー一覧", "blocks": [
+    { "type": "rider", "settings": { "name": "山内 一志", "name_en": "Kazushi Yamauchi", "role": "Snowboarder" } },
+    { "type": "rider", "settings": { "name": "舎川 朋弘", "name_en": "Tomohiro Tonegawa", "role": "Skier" } },
+    { "type": "rider", "settings": { "name": "永島 秀之", "name_en": "Hideyuki Nagashima", "role": "Telemark Skier" } },
+    { "type": "rider", "settings": { "name": "石川 睦", "name_en": "Makoto Ishikawa", "role": "Skier" } },
+    { "type": "rider", "settings": { "name": "畔田 正志", "name_en": "Masashi Kuroda", "role": "Snowboarder" } },
+    { "type": "rider", "settings": { "name": "上村 愛子", "name_en": "Aiko Uemura", "role": "Skier" } },
+    { "type": "rider", "settings": { "name": "立花 透", "name_en": "Toru Tachibana", "role": "Skier" } },
+    { "type": "rider", "settings": { "name": "笹田 知里", "name_en": "Chisato Sasada", "role": "Skier" } }
+  ] }]
+}
+{% endschema %}

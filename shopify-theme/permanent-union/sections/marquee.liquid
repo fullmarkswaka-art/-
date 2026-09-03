@@ -1,0 +1,17 @@
+{%- assign s = section.settings -%}
+<div class="marquee" aria-hidden="true">
+  <div class="marquee__track">
+    {%- for i in (1..2) -%}<span>{{ s.text }} <i></i> {{ s.text2 }} <i></i> {{ s.text3 }} <i></i></span>{%- endfor -%}
+  </div>
+</div>
+{% schema %}
+{
+  "name": "流れるテキスト",
+  "settings": [
+    { "type": "text", "id": "text", "label": "テキスト1", "default": "Be Awesome In The Mountain" },
+    { "type": "text", "id": "text2", "label": "テキスト2", "default": "山にいるときこそ最高であれ" },
+    { "type": "text", "id": "text3", "label": "テキスト3", "default": "Permanent Union — Since 2013" }
+  ],
+  "presets": [{ "name": "流れるテキスト" }]
+}
+{% endschema %}

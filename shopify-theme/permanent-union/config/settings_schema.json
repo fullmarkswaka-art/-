@@ -1,0 +1,65 @@
+[
+  {
+    "name": "theme_info",
+    "theme_name": "Permanent Union",
+    "theme_version": "1.0.0",
+    "theme_author": "FULLMARKS",
+    "theme_documentation_url": "https://full-marks.com/permanentunion/",
+    "theme_support_url": "https://full-marks.com/permanentunion/"
+  },
+  {
+    "name": "カラー",
+    "settings": [
+      { "type": "color", "id": "color_background", "label": "背景", "default": "#F4F2EE" },
+      { "type": "color", "id": "color_text", "label": "テキスト", "default": "#1C1A18" },
+      { "type": "color", "id": "color_muted", "label": "サブテキスト", "default": "#6E6862" },
+      { "type": "color", "id": "color_line", "label": "罫線", "default": "#D9D3CA" },
+      { "type": "color", "id": "color_accent", "label": "アクセント（Slate Blue）", "default": "#5D6D7E" },
+      { "type": "color", "id": "color_dark", "label": "ダーク背景（Midnight）", "default": "#15171A" },
+      { "type": "color", "id": "color_dark_text", "label": "ダーク背景のテキスト", "default": "#F1EEE8" }
+    ]
+  },
+  {
+    "name": "タイポグラフィ",
+    "settings": [
+      { "type": "paragraph", "content": "見出し・本文は明朝（Shippori Mincho）、英文は Cormorant Garamond、UIは DM Sans を使用します。Google Fonts から読み込みます。" },
+      { "type": "checkbox", "id": "load_google_fonts", "label": "Google Fonts を読み込む", "default": true }
+    ]
+  },
+  {
+    "name": "レイアウト",
+    "settings": [
+      { "type": "range", "id": "page_width", "label": "コンテンツ最大幅", "min": 1000, "max": 1800, "step": 20, "unit": "px", "default": 1280 },
+      { "type": "range", "id": "button_radius", "label": "ボタン角丸", "min": 0, "max": 30, "step": 1, "unit": "px", "default": 0 }
+    ]
+  },
+  {
+    "name": "商品カード",
+    "settings": [
+      { "type": "checkbox", "id": "card_hover_image", "label": "ホバーで2枚目の画像を表示", "default": true },
+      { "type": "checkbox", "id": "card_show_meta", "label": "カラー数 / タイプを表示", "default": true }
+    ]
+  },
+  {
+    "name": "カート",
+    "settings": [
+      { "type": "select", "id": "cart_type", "label": "カートの表示", "options": [ { "value": "drawer", "label": "ドロワー" }, { "value": "page", "label": "カートページへ移動" }, { "value": "notification", "label": "通知のみ" } ], "default": "drawer" }
+    ]
+  },
+  {
+    "name": "SNS",
+    "settings": [
+      { "type": "url", "id": "social_instagram", "label": "Instagram", "default": "https://www.instagram.com/permanentunion/" },
+      { "type": "url", "id": "social_facebook", "label": "Facebook" },
+      { "type": "url", "id": "social_youtube", "label": "YouTube" }
+    ]
+  },
+  {
+    "name": "ファビコン / OGP",
+    "settings": [
+      { "type": "image_picker", "id": "favicon", "label": "ファビコン", "info": "64×64px 推奨" },
+      { "type": "image_picker", "id": "share_image", "label": "OGP画像", "info": "1200×630px 推奨" },
+      { "type": "image_picker", "id": "password_image", "label": "パスワードページ背景" }
+    ]
+  }
+]

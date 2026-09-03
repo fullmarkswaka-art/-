@@ -1,0 +1,64 @@
+{%- assign s = section.settings -%}
+<section class="section{% if s.scheme == 'dark' %} section--dark{% elsif s.scheme == 'sand' %} section--sand{% endif %}">
+  <div class="container container--wide">
+    <div class="riders">
+      <div class="riders__media reveal">
+        {%- if s.image != blank -%}
+          {{ s.image | image_url: width: 1400 | image_tag: loading: 'lazy', sizes: '(max-width: 800px) 100vw, 50vw', alt: s.title }}
+        {%- else -%}
+          <img src="{{ 'pu-riders.jpg' | asset_url }}" alt="{{ s.title }}" loading="lazy" width="1000" height="500">
+        {%- endif -%}
+      </div>
+      <div>
+        <p class="section-number reveal">{{ s.number }}</p>
+        <p class="eyebrow mt-2 reveal">{{ s.eyebrow }}</p>
+        <h2 class="h2 mt-3 reveal" data-delay="1">{{ s.title }}</h2>
+        <div class="body-copy mt-3 reveal" data-delay="2">{{ s.text }}</div>
+        <ul class="riders__list reveal" data-delay="2">
+          {%- for block in section.blocks -%}
+            <li class="rider" {{ block.shopify_attributes }}>
+              <span class="rider__num">{{ forloop.index | prepend: '0' | slice: -2, 2 }}</span>
+              <span class="rider__name">{{ block.settings.name }}{% if block.settings.name_en != blank %}<small>{{ block.settings.name_en }}</small>{% endif %}</span>
+              <span class="rider__role">{{ block.settings.role }}</span>
+            </li>
+          {%- endfor -%}
+        </ul>
+        {%- if s.button_label != blank -%}<div class="mt-4 reveal" data-delay="3"><a class="link-line" href="{{ s.button_link }}">{{ s.button_label }} {% render 'icon', name: 'arrow' %}</a></div>{%- endif -%}
+      </div>
+    </div>
+  </div>
+</section>
+{% schema %}
+{
+  "name": "ライダー",
+  "settings": [
+    { "type": "image_picker", "id": "image", "label": "画像" },
+    { "type": "text", "id": "number", "label": "番号", "default": "(06)" },
+    { "type": "text", "id": "eyebrow", "label": "小見出し", "default": "Riders" },
+    { "type": "text", "id": "title", "label": "見出し", "default": "フィールドの声から、生まれる。" },
+    { "type": "richtext", "id": "text", "label": "本文", "default": "<p>フィールドで活動するスペシャリストたちの気づきと智慧に耳を傾けながら、美しく、そして過酷な自然を楽しむためのプロダクトを発信します。</p>" },
+    { "type": "text", "id": "button_label", "label": "リンクテキスト", "default": "Meet the Riders" },
+    { "type": "url", "id": "button_link", "label": "リンク先" },
+    { "type": "select", "id": "scheme", "label": "配色", "options": [ { "value": "light", "label": "ライト" }, { "value": "sand", "label": "サンド" }, { "value": "dark", "label": "ダーク" } ], "default": "dark" }
+  ],
+  "blocks": [
+    { "type": "rider", "name": "ライダー", "settings": [
+      { "type": "text", "id": "name", "label": "名前", "default": "山内 一志" },
+      { "type": "text", "id": "name_en", "label": "英語表記", "default": "Kazushi Yamauchi" },
+      { "type": "text", "id": "role", "label": "種目", "default": "Snowboarder" }
+    ] }
+  ],
+  "presets": [
+    { "name": "ライダー", "blocks": [
+      { "type": "rider", "settings": { "name": "山内 一志", "name_en": "Kazushi Yamauchi", "role": "Snowboarder" } },
+      { "type": "rider", "settings": { "name": "舎川 朋弘", "name_en": "Tomohiro Tonegawa", "role": "Skier" } },
+      { "type": "rider", "settings": { "name": "永島 秀之", "name_en": "Hideyuki Nagashima", "role": "Telemark Skier" } },
+      { "type": "rider", "settings": { "name": "石川 睦", "name_en": "Makoto Ishikawa", "role": "Skier" } },
+      { "type": "rider", "settings": { "name": "畔田 正志", "name_en": "Masashi Kuroda", "role": "Snowboarder" } },
+      { "type": "rider", "settings": { "name": "上村 愛子", "name_en": "Aiko Uemura", "role": "Skier" } },
+      { "type": "rider", "settings": { "name": "立花 透", "name_en": "Toru Tachibana", "role": "Skier" } },
+      { "type": "rider", "settings": { "name": "笹田 知里", "name_en": "Chisato Sasada", "role": "Skier" } }
+    ] }
+  ]
+}
+{% endschema %}

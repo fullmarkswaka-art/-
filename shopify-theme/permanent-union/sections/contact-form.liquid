@@ -1,0 +1,26 @@
+<section class="container container--narrow section">
+  <div class="page-title" style="padding-top:0">
+    <p class="eyebrow reveal">{{ section.settings.eyebrow }}</p>
+    <h1 class="display mt-2 reveal" data-delay="1">{{ section.settings.title | default: page.title }}</h1>
+    {%- if page.content != blank -%}<div class="page-title__desc body-copy reveal" data-delay="2">{{ page.content }}</div>{%- endif -%}
+  </div>
+  {% form 'contact', class: 'form' %}
+    {%- if form.posted_successfully? -%}<p class="form__success">{{ 'contact.success' | t }}</p>{%- endif -%}
+    {%- if form.errors -%}<div class="form__errors">{{ form.errors | default_errors }}</div>{%- endif -%}
+    <div class="field"><label for="ContactName">{{ 'contact.name' | t }}</label><input type="text" id="ContactName" name="contact[name]" value="{{ form.name }}" required></div>
+    <div class="field"><label for="ContactEmail">{{ 'contact.email' | t }}</label><input type="email" id="ContactEmail" name="contact[email]" value="{{ form.email }}" required></div>
+    <div class="field"><label for="ContactPhone">{{ 'contact.phone' | t }}</label><input type="tel" id="ContactPhone" name="contact[phone]" value="{{ form.phone }}"></div>
+    <div class="field"><label for="ContactBody">{{ 'contact.message' | t }}</label><textarea id="ContactBody" name="contact[body]" required>{{ form.body }}</textarea></div>
+    <div><button type="submit" class="button">{{ 'contact.send' | t }}</button></div>
+  {% endform %}
+</section>
+{% schema %}
+{
+  "name": "お問い合わせフォーム",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "小見出し", "default": "Contact" },
+    { "type": "text", "id": "title", "label": "見出し" }
+  ],
+  "presets": [{ "name": "お問い合わせフォーム" }]
+}
+{% endschema %}

@@ -1,0 +1,47 @@
+{%- assign s = section.settings -%}
+<section class="section">
+  <div class="container">
+    <div class="page-title" style="padding-top:0">
+      <p class="eyebrow reveal">{{ s.eyebrow }}</p>
+      <h1 class="display mt-2 reveal" data-delay="1">{{ s.title }}</h1>
+      {%- if s.text != blank -%}<div class="page-title__desc body-copy reveal" data-delay="2">{{ s.text }}</div>{%- endif -%}
+    </div>
+    <div class="shoplist">
+    {%- for block in section.blocks -%}
+      {%- if block.type == 'region' -%}
+        <h2 class="shoplist__region reveal" {{ block.shopify_attributes }}>{{ block.settings.title }}<small>{{ block.settings.subtitle }}</small></h2>
+      {%- else -%}
+        <div class="shop reveal" {{ block.shopify_attributes }}>
+          <div><p class="shop__name">{{ block.settings.name }}</p><p class="shop__meta">{{ block.settings.address }}</p></div>
+          <div class="shop__meta">{{ block.settings.tel }}{% if block.settings.hours != blank %}<br>{{ block.settings.hours }}{% endif %}</div>
+          <div class="shop__link">{%- if block.settings.url != blank -%}<a href="{{ block.settings.url }}" target="_blank" rel="noopener">Website</a>{%- endif -%}</div>
+        </div>
+      {%- endif -%}
+    {%- endfor -%}
+    </div>
+  </div>
+</section>
+{% schema %}
+{
+  "name": "ショップリスト",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "小見出し", "default": "Shop List" },
+    { "type": "text", "id": "title", "label": "見出し", "default": "取扱店舗" },
+    { "type": "richtext", "id": "text", "label": "本文", "default": "<p>PERMANENT UNIONの製品は、以下の店舗およびオンラインストアでお取り扱いしています。在庫状況は各店舗へお問い合わせください。</p>" }
+  ],
+  "blocks": [
+    { "type": "region", "name": "地域見出し", "settings": [
+      { "type": "text", "id": "title", "label": "地域名", "default": "Nagano" },
+      { "type": "text", "id": "subtitle", "label": "サブ表記", "default": "長野県" }
+    ] },
+    { "type": "shop", "name": "店舗", "settings": [
+      { "type": "text", "id": "name", "label": "店舗名", "default": "FULLMARKS STORE" },
+      { "type": "text", "id": "address", "label": "住所" },
+      { "type": "text", "id": "tel", "label": "電話番号" },
+      { "type": "text", "id": "hours", "label": "営業時間" },
+      { "type": "url", "id": "url", "label": "URL" }
+    ] }
+  ],
+  "presets": [{ "name": "ショップリスト", "blocks": [ { "type": "region" }, { "type": "shop" } ] }]
+}
+{% endschema %}

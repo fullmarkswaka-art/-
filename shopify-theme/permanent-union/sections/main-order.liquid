@@ -1,0 +1,28 @@
+<section class="container section">
+  <div class="page-title" style="padding-top:0"><p class="eyebrow">Order</p><h1 class="display mt-2">{{ order.name }}</h1><p class="muted mt-2">{{ order.created_at | date: '%Y.%m.%d' }}</p></div>
+  <div class="customer">
+    <div class="customer__box">
+      <table class="orders-table">
+        <thead><tr><th>{{ 'customer.order.product' | t }}</th><th>{{ 'customer.order.quantity' | t }}</th><th>{{ 'customer.order.total' | t }}</th></tr></thead>
+        <tbody>
+          {%- for line in order.line_items -%}<tr><td>{{ line.title }}{% if line.variant.title != 'Default Title' %}<br><span class="muted">{{ line.variant.title }}</span>{% endif %}</td><td>{{ line.quantity }}</td><td>{{ line.final_line_price | money }}</td></tr>{%- endfor -%}
+        </tbody>
+        <tfoot>
+          <tr><td colspan="2">{{ 'sections.cart.subtotal' | t }}</td><td>{{ order.line_items_subtotal_price | money }}</td></tr>
+          {%- for d in order.cart_level_discount_applications -%}<tr><td colspan="2">{{ d.title }}</td><td>-{{ d.total_allocated_amount | money }}</td></tr>{%- endfor -%}
+          {%- for s in order.shipping_methods -%}<tr><td colspan="2">{{ 'customer.order.shipping' | t }} ({{ s.title }})</td><td>{{ s.price | money }}</td></tr>{%- endfor -%}
+          {%- for t in order.tax_lines -%}<tr><td colspan="2">{{ t.title }} {{ t.rate | times: 100 }}%</td><td>{{ t.price | money }}</td></tr>{%- endfor -%}
+          <tr><td colspan="2"><b>{{ 'customer.order.total' | t }}</b></td><td><b>{{ order.total_price | money }}</b></td></tr>
+        </tfoot>
+      </table>
+    </div>
+    <div class="customer__box">
+      <h2 class="h3">{{ 'customer.order.shipping_address' | t }}</h2>
+      <div class="address-card mt-2">{{ order.shipping_address | format_address }}</div>
+      <h2 class="h3 mt-4">{{ 'customer.order.billing_address' | t }}</h2>
+      <div class="address-card mt-2">{{ order.billing_address | format_address }}</div>
+      <a class="link-line mt-4" href="{{ routes.account_url }}">{{ 'customer.account.back' | t }}</a>
+    </div>
+  </div>
+</section>
+{% schema %}{ "name": "注文詳細", "settings": [] }{% endschema %}

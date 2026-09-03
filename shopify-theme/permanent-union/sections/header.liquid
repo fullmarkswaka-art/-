@@ -1,0 +1,105 @@
+{%- liquid
+  assign transparent = false
+  if section.settings.transparent_on_home and request.page_type == 'index'
+    assign transparent = true
+  endif
+  if section.settings.transparent_on_pages and template.suffix == 'about'
+    assign transparent = true
+  endif
+  if request.page_type == 'product' and section.settings.transparent_on_pages
+    assign transparent = false
+  endif
+-%}
+<style>
+  :root { --header-height: {{ section.settings.height }}px; --logo-height: {{ section.settings.logo_height }}px; }
+</style>
+<div class="header-wrap{% if transparent %} header-wrap--transparent{% endif %}" data-hide-on-scroll="{{ section.settings.hide_on_scroll }}">
+  <header class="header">
+    <div class="header__left">
+      <button class="header__burger" type="button" data-drawer-open="MenuDrawer" aria-label="{{ 'accessibility.open_menu' | t }}"><span></span><span></span><span></span></button>
+      <a class="header__logo" href="{{ routes.root_url }}" aria-label="{{ shop.name }}">
+        {%- if section.settings.logo != blank -%}
+          {{ section.settings.logo | image_url: width: 600 | image_tag: class: 'logo--dark', alt: shop.name, loading: 'eager' }}
+          {%- if section.settings.logo_light != blank -%}
+            {{ section.settings.logo_light | image_url: width: 600 | image_tag: class: 'logo--light', alt: shop.name, loading: 'eager' }}
+          {%- else -%}
+            {{ section.settings.logo | image_url: width: 600 | image_tag: class: 'logo--light', alt: shop.name, loading: 'eager', style: 'filter: brightness(0) invert(1);' }}
+          {%- endif -%}
+        {%- else -%}
+          <span class="header__logo-text">{{ shop.name }}</span>
+        {%- endif -%}
+      </a>
+    </div>
+
+    <div class="header__center">
+      <nav class="nav" aria-label="{{ 'accessibility.main_menu' | t }}">
+        {%- for link in linklists[section.settings.menu].links -%}
+          <a class="nav-link" href="{{ link.url }}"{% if link.active %} aria-current="page"{% endif %}>{{ link.title }}</a>
+        {%- endfor -%}
+      </nav>
+    </div>
+
+    <div class="header__right">
+      {%- if section.settings.show_search -%}
+        <a class="header__icon" href="{{ routes.search_url }}" aria-label="{{ 'general.search.search' | t }}">{% render 'icon', name: 'search' %}</a>
+      {%- endif -%}
+      {%- if shop.customer_accounts_enabled -%}
+        <a class="header__icon hide-mobile" href="{{ routes.account_url }}" aria-label="{{ 'customer.account.title' | t }}">{% render 'icon', name: 'account' %}</a>
+      {%- endif -%}
+      <a class="header__icon" href="{{ routes.cart_url }}" {% if settings.cart_type == 'drawer' %}data-drawer-open="CartDrawer"{% endif %} aria-label="{{ 'sections.cart.title' | t }}">
+        <span class="header__icon-label">{{ 'sections.cart.title' | t }}</span><span class="header__icon-mobile">{% render 'icon', name: 'cart' %}</span>
+        <span class="header__count" data-cart-count {% if cart.item_count == 0 %}hidden{% endif %}>{{ cart.item_count }}</span>
+      </a>
+    </div>
+  </header>
+</div>
+
+<div id="MenuDrawer" class="drawer drawer--left" aria-hidden="true" role="dialog" aria-label="{{ 'accessibility.main_menu' | t }}">
+  <div class="drawer__backdrop"></div>
+  <div class="drawer__panel">
+    <div class="drawer__head">
+      <span class="drawer__title">Menu</span>
+      <button class="drawer__close" type="button" data-drawer-close aria-label="{{ 'accessibility.close' | t }}">{% render 'icon', name: 'close' %}</button>
+    </div>
+    <div class="drawer__body">
+      <ul class="menu-drawer__list">
+        {%- for link in linklists[section.settings.menu].links -%}
+          <li>
+            <a href="{{ link.url }}">{{ link.title }}</a>
+            {%- if link.links.size > 0 -%}
+              <div class="menu-drawer__sub">
+                {%- for child in link.links -%}<a href="{{ child.url }}">{{ child.title }}</a>{%- endfor -%}
+              </div>
+            {%- endif -%}
+          </li>
+        {%- endfor -%}
+      </ul>
+      <div class="menu-drawer__meta">
+        {%- if shop.customer_accounts_enabled -%}<a href="{{ routes.account_url }}">{{ 'customer.account.title' | t }}</a>{%- endif -%}
+        <a href="{{ routes.search_url }}">{{ 'general.search.search' | t }}</a>
+        {%- if settings.social_instagram != blank -%}<a href="{{ settings.social_instagram }}" target="_blank" rel="noopener">Instagram</a>{%- endif -%}
+      </div>
+    </div>
+    <div class="drawer__foot">
+      <p class="eyebrow">{{ section.settings.drawer_tagline }}</p>
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "ヘッダー",
+  "settings": [
+    { "type": "image_picker", "id": "logo", "label": "ロゴ（通常）" },
+    { "type": "image_picker", "id": "logo_light", "label": "ロゴ（白 / 透過ヘッダー用）", "info": "未設定の場合は通常ロゴを白く反転して表示します" },
+    { "type": "range", "id": "logo_height", "label": "ロゴの高さ", "min": 24, "max": 80, "step": 2, "unit": "px", "default": 40 },
+    { "type": "range", "id": "height", "label": "ヘッダーの高さ", "min": 56, "max": 110, "step": 2, "unit": "px", "default": 76 },
+    { "type": "link_list", "id": "menu", "label": "メニュー", "default": "main-menu" },
+    { "type": "checkbox", "id": "transparent_on_home", "label": "トップページで透過表示", "default": true },
+    { "type": "checkbox", "id": "transparent_on_pages", "label": "ABOUTページでも透過表示", "default": true },
+    { "type": "checkbox", "id": "hide_on_scroll", "label": "下スクロール時にヘッダーを隠す", "default": false },
+    { "type": "checkbox", "id": "show_search", "label": "検索アイコンを表示", "default": true },
+    { "type": "text", "id": "drawer_tagline", "label": "ドロワー下部テキスト", "default": "Be Awesome In The Mountain" }
+  ]
+}
+{% endschema %}

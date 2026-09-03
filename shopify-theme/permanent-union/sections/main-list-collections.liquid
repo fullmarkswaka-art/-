@@ -1,0 +1,16 @@
+<section class="container container--wide">
+  <div class="page-title"><p class="eyebrow reveal">Products</p><h1 class="display mt-2 reveal" data-delay="1">{{ section.settings.title }}</h1></div>
+  <div class="cats" style="margin-bottom: clamp(56px, 8vw, 120px)">
+    {%- for col in collections -%}
+      {%- unless col.handle == 'frontpage' or col.handle == 'all' -%}
+        <a class="cat reveal" data-delay="{{ forloop.index0 | modulo: 4 }}" href="{{ col.url }}">
+          {%- if col.featured_image -%}{{ col.featured_image | image_url: width: 900 | image_tag: loading: 'lazy', alt: col.title }}{%- elsif col.products.first.featured_media -%}{{ col.products.first.featured_media | image_url: width: 900 | image_tag: loading: 'lazy', alt: col.title }}{%- endif -%}
+          <div class="cat__body"><span class="cat__title">{{ col.title }}</span><span class="cat__sub">{{ 'collections.product_count' | t: count: col.all_products_count }}</span></div>
+        </a>
+      {%- endunless -%}
+    {%- endfor -%}
+  </div>
+</section>
+{% schema %}
+{ "name": "コレクション一覧", "settings": [ { "type": "text", "id": "title", "label": "見出し", "default": "All Categories" } ] }
+{% endschema %}

@@ -1,0 +1,28 @@
+{%- assign s = section.settings -%}
+<section class="page-hero">
+  <div class="hero__media">
+    {%- if s.image != blank -%}
+      {{ s.image | image_url: width: 2800 | image_tag: loading: 'eager', sizes: '100vw', alt: s.title | default: page.title }}
+    {%- else -%}
+      <img src="{{ 'pu-hero.jpg' | asset_url }}" alt="" loading="eager" width="2560" height="1707">
+    {%- endif -%}
+  </div>
+  <div class="hero__vignette"></div>
+  <div class="hero__inner">
+    <p class="eyebrow hero__eyebrow reveal">{{ s.eyebrow }}</p>
+    <h1 class="display hero__title reveal" data-delay="1">{{ s.title | default: page.title }}</h1>
+    {%- if s.subtitle != blank -%}<p class="hero__sub reveal" data-delay="2">{{ s.subtitle }}</p>{%- endif -%}
+  </div>
+</section>
+{% schema %}
+{
+  "name": "ページヒーロー",
+  "settings": [
+    { "type": "image_picker", "id": "image", "label": "画像" },
+    { "type": "text", "id": "eyebrow", "label": "小見出し", "default": "About" },
+    { "type": "text", "id": "title", "label": "見出し（空欄ならページ名）" },
+    { "type": "text", "id": "subtitle", "label": "サブコピー" }
+  ],
+  "presets": [{ "name": "ページヒーロー" }]
+}
+{% endschema %}
