@@ -168,6 +168,12 @@ FULLMARKS（fullmarksstore.jp）の広告運用ツール。Meta/Google広告のA
   公式ブランド紹介文、見出し「ブランド｜Fall / Winter 2026」）で差し替え、Google
   指名_フーディニ / 指名_ノローナ の RSA も「買うなら」「正規販売店」を含まない文言に
   差し替え済み。今後の広告文でも「正規販売店FULLMARKSで」「〇〇を買うなら」は使わない。
+- 【2026-09-04】商品ページが404の商品10件（在庫あり3件: PU LOGO TEE 1700000800 /
+  lofoten flex1 Jacket (M) 71201090250 / OBEX SPIN 71101010300、ほか在庫なし7件）は
+  `config/excluded_products.txt` で恒久除外。catalog-attributes が custom_label_0=
+  unavailable を付け、Meta「通常価格_*」商品セットと Google PLA（unavailable 除外ノード）
+  から外れる。catalog-attributes は在庫あり商品の商品ページ死活確認も毎回行う
+  （404 → unavailable）。EC側にはフィードからの除外を依頼済み（ユーザー対応）。
 - 「〇〇を買うならフルマークス」型の文言は、Google指名検索RSA（ノローナ・
   フーディニ）の見出し/説明文と、Metaカタログ広告テンプレート
   `{{product.name}} ― アウトドアの正規販売店、FULLMARKSで。` が原因。
