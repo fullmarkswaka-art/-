@@ -30,6 +30,15 @@ from .meta_ads import MetaAdsClient, MetaAdsError
 SITE = "https://www.fullmarksstore.jp"
 HEADERS = {"User-Agent": "Mozilla/5.0 (fullmarks-ads-tool)"}
 REPORT_DIR = Path(__file__).resolve().parent.parent / "reports"
+EXCLUDED_FILE = Path(__file__).resolve().parent.parent / "config" / "excluded_products.txt"
+
+
+def load_excluded_ids() -> set[str]:
+    """config/excluded_products.txt の商品ID（恒久除外）を読む。"""
+    if not EXCLUDED_FILE.exists():
+        return set()
+    return {ln.strip() for ln in EXCLUDED_FILE.read_text(encoding="utf-8").splitlines()
+            if ln.strip() and not ln.startswith("#")}
 SUPPLEMENT_CSV = REPORT_DIR / "catalog_attributes.csv"
 
 # サイトのブランド絞り込みカテゴリ → ブランド表記
@@ -156,9 +165,9 @@ def build_attribute_rows(feed_path: str | None = None, check_pages: bool = True)
     custom_label_0 = unavailable を付けて広告の商品セットから外す（死リンク広告の防止）。
     """
     feed = load_feed(feed_path)
-    dead: set[str] = set()
+    dead: set[str] = set(load_excluded_ids())
     if check_pages:
-        dead = check_product_pages([pid for pid, f in feed.items() if f["availability"] == "in stock"])
+        dead |= check_product_pages([pid for pid, f in feed.items() if f["availability"] == "in stock"])
     brand_map: dict[str, str] = {}
     for cat, brand in BRAND_CATEGORIES.items():
         for i in crawl_category(cat):
@@ -210,6 +219,7 @@ def summarize_rows(rows: list[dict]) -> dict:
         "in_stock_regular": sum(1 for r in in_stock if r["custom_label_0"] == LABEL_REGULAR),
         "in_stock_outlet": sum(1 for r in in_stock if r["custom_label_0"] == LABEL_OUTLET),
         "in_stock_unavailable": [r["id"] for r in in_stock if r["custom_label_0"] == LABEL_UNAVAILABLE],
+        "excluded_by_config": sorted(load_excluded_ids()),
         "brand_unknown": sum(1 for r in in_stock if not r["brand"]),
         "by_brand": by_brand,
     }
@@ -360,6 +370,42 @@ def meta_swap_catalog_ads(client: MetaAdsClient, old_ad_id: str,
     if apply:
         client.set_status(old_ad_id, "PAUSED")
         plan["old_ad"]["status"] = "PAUSED"
+    return plan
+
+
+# ---------- Google: 商品グループへ除外ノード追加 ----------
+
+def google_add_listing_exclusion(gclient, campaign_id: str, value: str,
+                                 apply: bool = False) -> dict:
+    """分割済みの商品グループに custom_label_0 = value の除外ノードを追加する。"""
+    rows = gclient.search(
+        "SELECT ad_group.id, ad_group_criterion.resource_name, "
+        "ad_group_criterion.listing_group.type, ad_group_criterion.negative, "
+        "ad_group_criterion.listing_group.case_value.product_custom_attribute.value "
+        f"FROM ad_group_criterion WHERE campaign.id={campaign_id} "
+        "AND ad_group_criterion.type='LISTING_GROUP' AND ad_group_criterion.status!='REMOVED'")
+    root = next((r for r in rows if r.ad_group_criterion.listing_group.type_.name == "SUBDIVISION"), None)
+    existing = [r.ad_group_criterion.listing_group.case_value.product_custom_attribute.value for r in rows]
+    plan = {"campaign_id": campaign_id, "value": value, "already": value in existing, "apply": apply}
+    if root is None:
+        plan["note"] = "ルートが未分割です（pla-split を先に実行）"
+        return plan
+    if plan["already"] or not apply:
+        return plan
+    client = gclient.client
+    cid = gclient.customer_id
+    svc = client.get_service("AdGroupCriterionService")
+    op = client.get_type("AdGroupCriterionOperation")
+    c = op.create
+    c.ad_group = client.get_service("AdGroupService").ad_group_path(cid, root.ad_group.id)
+    c.status = client.enums.AdGroupCriterionStatusEnum.ENABLED
+    c.negative = True
+    c.listing_group.type_ = client.enums.ListingGroupTypeEnum.UNIT
+    c.listing_group.parent_ad_group_criterion = root.ad_group_criterion.resource_name
+    c.listing_group.case_value.product_custom_attribute.index = client.enums.ProductCustomAttributeIndexEnum.INDEX0
+    c.listing_group.case_value.product_custom_attribute.value = value
+    res = svc.mutate_ad_group_criteria(customer_id=cid, operations=[op])
+    plan["result"] = [r.resource_name for r in res.results]
     return plan
 
 

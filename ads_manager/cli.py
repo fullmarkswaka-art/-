@@ -150,6 +150,8 @@ def main(argv=None) -> int:
             mc.add_argument("--limit", type=int, default=None)
             mcp = action_sub.add_parser("mc-product", help="Merchant Center の商品を1件表示")
             mcp.add_argument("offer_id")
+            px = action_sub.add_parser("pla-exclude", help="商品グループに custom_label_0=値 の除外ノードを追加")
+            px.add_argument("campaign_id"); px.add_argument("value"); px.add_argument("--apply", action="store_true")
             pl = action_sub.add_parser(
                 "pla-split", help="ショッピング商品グループを custom_label_0 で分割しoutletを除外")
             pl.add_argument("campaign_id")
@@ -297,6 +299,9 @@ def main(argv=None) -> int:
             _print(google_replace_rsa(client, args.ad_id, spec["headlines"],
                                       spec["descriptions"], spec.get("path1"),
                                       spec.get("path2"), apply=args.apply))
+        elif args.action == "pla-exclude":
+            from .catalog_attributes import google_add_listing_exclusion
+            _print(google_add_listing_exclusion(client, args.campaign_id, args.value, apply=args.apply))
         elif args.action == "pla-split":
             from .catalog_attributes import google_split_listing_group
             _print(google_split_listing_group(client, args.campaign_id,
