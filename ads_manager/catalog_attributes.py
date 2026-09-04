@@ -54,6 +54,7 @@ OUTLET_CATEGORIES = ["OUTLET", "HOUDINI_OUTLET", "NORRONA_OUTLET", "POC_OUTLET",
                      "HESTRA_OUTLET", "ACLIMA_OUTLET", "SAILRACING_OUTLET"]
 LABEL_OUTLET = "outlet"
 LABEL_REGULAR = "regular"
+LABEL_UNAVAILABLE = "unavailable"  # 在庫ありなのに商品ページが404等 → 商品セットから外す
 
 # シリーズ名抽出で読み飛ばすトークン（性別表記・品番）
 _SKIP_TOKENS = {"ms", "ws", "m's", "w's", "mens", "womens", "men's", "women's",
@@ -125,9 +126,39 @@ def series_from_title(title: str) -> str:
     return ""
 
 
-def build_attribute_rows(feed_path: str | None = None) -> list[dict]:
-    """フィード全商品に brand / custom_label_0 / custom_label_1 / product_type を付ける。"""
+def check_product_pages(ids: list[str], workers: int = 8) -> set[str]:
+    """商品ページが 200 で開けない商品IDの集合を返す（在庫あり商品の死リンク検出）。"""
+    from concurrent.futures import ThreadPoolExecutor
+
+    def status(pid: str) -> tuple[str, int]:
+        url = f"{SITE}/item/{pid}.html"
+        for attempt in range(3):
+            try:
+                r = requests.get(url, timeout=20, headers=HEADERS)
+                if r.status_code in (429, 500, 502, 503, 504) and attempt < 2:
+                    time.sleep(2 ** attempt)
+                    continue
+                return pid, r.status_code
+            except requests.RequestException:
+                if attempt == 2:
+                    return pid, 0
+                time.sleep(2 ** attempt)
+        return pid, 0
+
+    with ThreadPoolExecutor(max_workers=workers) as ex:
+        return {pid for pid, code in ex.map(status, ids) if code != 200}
+
+
+def build_attribute_rows(feed_path: str | None = None, check_pages: bool = True) -> list[dict]:
+    """フィード全商品に brand / custom_label_0 / custom_label_1 / product_type を付ける。
+
+    check_pages=True の場合、在庫あり商品の商品ページを実際に開き、404 等の商品には
+    custom_label_0 = unavailable を付けて広告の商品セットから外す（死リンク広告の防止）。
+    """
     feed = load_feed(feed_path)
+    dead: set[str] = set()
+    if check_pages:
+        dead = check_product_pages([pid for pid, f in feed.items() if f["availability"] == "in stock"])
     brand_map: dict[str, str] = {}
     for cat, brand in BRAND_CATEGORIES.items():
         for i in crawl_category(cat):
@@ -140,10 +171,13 @@ def build_attribute_rows(feed_path: str | None = None) -> list[dict]:
     for pid, f in feed.items():
         brand = brand_map.get(pid) or brand_from_id(pid)
         series = series_from_title(f["title"])
+        label = LABEL_OUTLET if pid in outlet else LABEL_REGULAR
+        if pid in dead:
+            label = LABEL_UNAVAILABLE
         rows.append({
             "id": pid,
             "brand": brand,
-            "custom_label_0": LABEL_OUTLET if pid in outlet else LABEL_REGULAR,
+            "custom_label_0": label,
             "custom_label_1": series,
             "product_type": f"{brand} > {series}" if brand and series else brand,
             "availability": f["availability"],
@@ -168,13 +202,14 @@ def summarize_rows(rows: list[dict]) -> dict:
     in_stock = [r for r in rows if r["availability"] == "in stock"]
     by_brand: dict[str, dict[str, int]] = {}
     for r in in_stock:
-        b = by_brand.setdefault(r["brand"] or "(不明)", {"regular": 0, "outlet": 0})
+        b = by_brand.setdefault(r["brand"] or "(不明)", {"regular": 0, "outlet": 0, "unavailable": 0})
         b[r["custom_label_0"]] += 1
     return {
         "feed_total": len(rows),
         "in_stock": len(in_stock),
         "in_stock_regular": sum(1 for r in in_stock if r["custom_label_0"] == LABEL_REGULAR),
         "in_stock_outlet": sum(1 for r in in_stock if r["custom_label_0"] == LABEL_OUTLET),
+        "in_stock_unavailable": [r["id"] for r in in_stock if r["custom_label_0"] == LABEL_UNAVAILABLE],
         "brand_unknown": sum(1 for r in in_stock if not r["brand"]),
         "by_brand": by_brand,
     }

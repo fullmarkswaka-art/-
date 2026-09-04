@@ -122,6 +122,8 @@ def main(argv=None) -> int:
                 "catalog-attributes",
                 help="サイト巡回で brand/outlet/series を補完した補助フィードCSVを生成")
             ca.add_argument("--feed", help="ローカルの gsfeed.xml（省略時はサイトから取得）")
+            ca.add_argument("--no-check-pages", action="store_true",
+                            help="在庫あり商品の商品ページ死活確認（404→unavailable）を省略")
             sp = action_sub.add_parser(
                 "catalog-supplement", help="補助フィードを作成しCSVをアップロード")
             sp.add_argument("catalog_id")
@@ -206,7 +208,7 @@ def main(argv=None) -> int:
         elif args.action == "catalog-attributes":
             from .catalog_attributes import (build_attribute_rows, summarize_rows,
                                              write_supplement_csv)
-            rows = build_attribute_rows(args.feed)
+            rows = build_attribute_rows(args.feed, check_pages=not args.no_check_pages)
             path = write_supplement_csv(rows)
             _print({"csv": str(path), **summarize_rows(rows)})
         elif args.action == "catalog-supplement":
