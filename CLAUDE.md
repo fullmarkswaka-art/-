@@ -134,6 +134,13 @@ FULLMARKS（fullmarksstore.jp）の広告運用ツール。Meta/Google広告のA
   - `python -m ads_manager meta catalog-supplement 610915616169358 --apply` …
     Meta 補助フィード `1098537166224560`（primary=1058904553805180）へCSVを
     アップロード。**毎週月曜の定例で再実行する**（アウトレット入替に追随）。
+    **注意（2026-09-06 に発覚）**: Meta は本体フィードの日次取得（毎日 JST 21:00頃）の
+    たびに補助フィードの属性（brand / custom_label）を消す。そのためラベル条件の商品セットは
+    翌日に空になり、Meta が広告セットを自動停止する（error 4469006「商品セットが空」）。
+    9/4夜〜9/6 にカタログ広告が止まった原因。対策として商品セットの条件は retailer_id の
+    列挙（`meta product-sets --apply`、既定 by_id）にした。ID列挙は日次取得後も維持される。
+    **毎週月曜に catalog-attributes → product-sets --apply を必ず実行**（新商品を組み入れる）。
+    補助フィードのアップロードはブランド表示用で、配信条件には使わない。
   - `python -m ads_manager google mc-supplement --apply` … Merchant Center
     (ID 5642612701) の API 補助データソース `10719929792`（プライマリ
     `10585554861` = gsfeed.xml 取得、デフォルトルールで連結済み）へ商品ごとに
