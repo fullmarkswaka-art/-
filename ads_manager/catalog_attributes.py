@@ -305,22 +305,51 @@ def planned_product_sets(rows: list[dict], min_items: int = 8) -> list[dict]:
     return sets
 
 
+def _id_filter(rows: list[dict], brand: str | None = None, series: str | None = None) -> dict:
+    """retailer_id の列挙による商品セット条件。本体フィードの日次取得でラベルが消えても壊れない。"""
+    ids = [r["id"] for r in rows if r["custom_label_0"] == LABEL_REGULAR
+           and (brand is None or r["brand"] == brand)
+           and (series is None or r["custom_label_1"] == series)]
+    return {"retailer_id": {"is_any": ids}}
+
+
 def meta_product_sets(client: MetaAdsClient, catalog_id: str, rows: list[dict],
-                      apply: bool = False) -> dict:
+                      apply: bool = False, by_id: bool = True) -> dict:
+    """通常価格×ブランド(×シリーズ)の商品セットを作成/更新する。
+
+    by_id=True（既定）: 条件を retailer_id の列挙にする。Meta は本体フィードを取得するたびに
+    補助フィードの属性（brand / custom_label）を消すため、ラベル条件のセットは毎日空になり
+    広告セットが自動停止する（error 4469006）。ID列挙なら取得後も維持される。
+    既存の同名セットは filter を更新する。
+    """
     existing = {ps["name"]: ps for ps in client.get_all(
         f"{catalog_id}/product_sets", fields="id,name,product_count,filter")}
     plan = []
     for s in planned_product_sets(rows):
         cur = existing.get(s["name"])
-        item = {**s, "filter": json.dumps(s["filter"], ensure_ascii=False),
+        if by_id:
+            name = s["name"].replace("通常価格_", "")
+            if name == "全ブランド":
+                flt = _id_filter(rows)
+            elif name.startswith("NORRONA_"):
+                flt = _id_filter(rows, "NORRONA", name.split("_", 1)[1])
+            else:
+                flt = _id_filter(rows, name)
+        else:
+            flt = s["filter"]
+        n_ids = len(flt.get("retailer_id", {}).get("is_any", [])) if by_id else None
+        item = {"name": s["name"], "expected": s["expected"], "ids_in_filter": n_ids,
                 "existing_id": cur["id"] if cur else None,
                 "current_count": cur.get("product_count") if cur else None}
-        if apply and cur is None:
-            res = client.post(f"{catalog_id}/product_sets", name=s["name"],
-                              filter=json.dumps(s["filter"]))
-            item["created_id"] = res.get("id")
+        if apply:
+            if cur is None:
+                res = client.post(f"{catalog_id}/product_sets", name=s["name"], filter=json.dumps(flt))
+                item["created_id"] = res.get("id")
+            else:
+                client.post(cur["id"], filter=json.dumps(flt))
+                item["updated"] = True
         plan.append(item)
-    return {"catalog_id": catalog_id, "apply": apply, "product_sets": plan}
+    return {"catalog_id": catalog_id, "apply": apply, "by_id": by_id, "product_sets": plan}
 
 
 # ---------- Meta: 広告差し替え ----------
