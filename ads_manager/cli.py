@@ -157,6 +157,9 @@ def main(argv=None) -> int:
             pl.add_argument("campaign_id")
             pl.add_argument("--bid", type=float, default=20.0)
             pl.add_argument("--apply", action="store_true")
+        ot = action_sub.add_parser("outlet-rtg", help="アウトレット品を訪問者限定で配信するリターゲティング枠を作成")
+        ot.add_argument("--budget", type=float, default=1500)
+        ot.add_argument("--apply", action="store_true")
         rp = action_sub.add_parser("replace-copy", help="広告文を差し替え（JSON指定、旧広告は停止）")
         rp.add_argument("ad_id")
         rp.add_argument("--json", required=True, help="Meta: {message, headline, description} / Google: {headlines[], descriptions[], path1, path2}")
@@ -239,6 +242,9 @@ def main(argv=None) -> int:
                         for x in args.sets.split(",")]
             _print(meta_swap_catalog_ads(client, args.old_ad_id, sets,
                                          message=args.message, apply=args.apply))
+        elif args.action == "outlet-rtg":
+            from .outlet_rtg import meta_create_outlet_rtg
+            _print(meta_create_outlet_rtg(client, daily_budget=int(args.budget), apply=args.apply))
         elif args.action == "replace-copy":
             import json as _json
             from .ad_copy import meta_replace_link_ad
@@ -292,6 +298,9 @@ def main(argv=None) -> int:
         elif args.action == "creatives":
             from .creatives import google_list_creatives
             _print(google_list_creatives(client))
+        elif args.action == "outlet-rtg":
+            from .outlet_rtg import google_create_outlet_rtg
+            _print(google_create_outlet_rtg(client, daily_budget_yen=args.budget, apply=args.apply))
         elif args.action == "replace-copy":
             import json as _json
             from .ad_copy import google_replace_rsa

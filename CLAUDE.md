@@ -181,6 +181,16 @@ FULLMARKS（fullmarksstore.jp）の広告運用ツール。Meta/Google広告のA
   unavailable を付け、Meta「通常価格_*」商品セットと Google PLA（unavailable 除外ノード）
   から外れる。catalog-attributes は在庫あり商品の商品ページ死活確認も毎回行う
   （404 → unavailable）。EC側にはフィードからの除外を依頼済み（ユーザー対応）。
+- 【2026-09-07 実施済み】アウトレット品は「訪問者限定」で配信（ユーザー判断）。売上の81%
+  （8/1〜9/6、商品別集計）がアウトレット品のため、新規向けからは除外しつつ再訴求だけ行う。
+  - Meta: キャンペーン `UC_DN_3_CVS_アウトレット_RTG` 52605340475935（1,500円/日、CBO）
+    広告セット 52605340482535（FM_全訪問者_30日 − FM_購入者_30日）、広告 52605340528935、
+    商品セット「アウトレット_全ブランド（在庫あり）」2081104399170010（retailer_id列挙、
+    `meta product-sets --apply` が週次で更新）。本文「FULLMARKS OUTLET」。
+  - Google: ショッピング `UC_PL_6_PLA_outlet_RTG` 24217278399（1,500円/日、CPC 15円、
+    custom_label_0=outlet のみ、オーディエンス＝ターゲティングモードで
+    「AdWords optimized list(30日)」「カート訪問」）。PLA_v2 は 4,000→3,000円/日。
+  - `python -m ads_manager meta outlet-rtg --apply` / `google outlet-rtg --apply` で再作成可。
 - 「〇〇を買うならフルマークス」型の文言は、Google指名検索RSA（ノローナ・
   フーディニ）の見出し/説明文と、Metaカタログ広告テンプレート
   `{{product.name}} ― アウトドアの正規販売店、FULLMARKSで。` が原因。

@@ -325,9 +325,16 @@ def meta_product_sets(client: MetaAdsClient, catalog_id: str, rows: list[dict],
     existing = {ps["name"]: ps for ps in client.get_all(
         f"{catalog_id}/product_sets", fields="id,name,product_count,filter")}
     plan = []
-    for s in planned_product_sets(rows):
+    planned = planned_product_sets(rows)
+    outlet_ids = [r["id"] for r in rows if r["availability"] == "in stock"
+                  and r["custom_label_0"] == LABEL_OUTLET]
+    planned.append({"name": "アウトレット_全ブランド（在庫あり）", "filter": None,
+                    "expected": len(outlet_ids), "_ids": outlet_ids})
+    for s in planned:
         cur = existing.get(s["name"])
-        if by_id:
+        if s.get("_ids") is not None:
+            flt = {"retailer_id": {"is_any": s["_ids"]}}
+        elif by_id:
             name = s["name"].replace("通常価格_", "")
             if name == "全ブランド":
                 flt = _id_filter(rows)
