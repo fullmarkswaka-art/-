@@ -28,6 +28,11 @@ FULLMARKS（fullmarksstore.jp）の広告運用ツール。Meta/Google広告のA
 - 週次レポート: `python scripts/weekly_report.py` でMeta+Googleの
   直近7日成果とリンク切れチェックをPDF生成（reports/ に出力）。
   ユーザーは毎週このPDFの送付を希望している。
+  【2026-09-14 改訂】構成は 1.サマリー（KPIタイル・今週のポイント・月間ペース）/
+  2.何が売れたか（ブランド別・枠別・Googleショッピング商品・Metaカタログ広告）/
+  3.キャンペーン別 / 4.日別推移 / 5.監査。フォントは IPAPGothic（無ければ HeiseiKakuGo）。
+  キャンペーン名は `UC_XX_N_` を落として表示。Meta は商品単位の購入を返さないので
+  カタログ広告はブランド／シリーズ単位。
 - リンク切れ監視: `python -m ads_manager meta audit`
 - フィード掲載漏れ確認: `python -m ads_manager google feed-gap`
   （在庫があるのにgsfeed.xml未掲載の商品を検出。EC側の設定漏れ）

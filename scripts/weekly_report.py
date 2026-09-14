@@ -4,21 +4,22 @@
 使い方:
   python scripts/weekly_report.py [--out reports/週次レポート.pdf]
 
-構成（両プラットフォーム対称）:
-  各プラットフォームについて
-    - 週間サマリー（今週 vs 前週の比較）
-    - キャンペーン別成果（前週比付き）
-    - 日別推移
-  共通
-    - リンク切れチェック（配信中の広告のみ）
-  今週 = 昨日までの7日間、前週 = その前の7日間。
-Google Ads API に接続できない場合はその旨を記載してMetaのみで生成する。
+構成:
+  1. サマリー … 今週の費用/売上/ROAS/購入件数（前週比）、今週のポイント、月間ペース
+  2. 何が売れたか … ブランド別・枠別の成果、Googleショッピングで売れた商品、
+                    Metaカタログ広告（ブランド/シリーズ別）
+  3. キャンペーン別 … Google / Meta それぞれ前週比付き
+  4. 日別推移 … Google + Meta 合算
+  5. 監査 … リンク切れ、他口座の消化、アウトレット品の表示
+今週 = 昨日までの7日間、前週 = その前の7日間。売上は各媒体計測のCV金額（税込）。
 """
 from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
+from collections import defaultdict
 from datetime import date, timedelta
 from pathlib import Path
 
@@ -30,247 +31,389 @@ from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import mm
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.cidfonts import UnicodeCIDFont
-from reportlab.platypus import (Paragraph, SimpleDocTemplate, Spacer, Table,
-                                TableStyle)
+from reportlab.platypus import (KeepTogether, PageBreak, Paragraph,
+                                SimpleDocTemplate, Spacer, Table, TableStyle)
 
 from ads_manager.audit import check_url, meta_audit
 from ads_manager.config import load_google_config, load_meta_config
 from ads_manager.meta_ads import MetaAdsClient
 
-pdfmetrics.registerFont(UnicodeCIDFont("HeiseiKakuGo-W5"))
-FONT = "HeiseiKakuGo-W5"
+_IPA = Path("/usr/share/fonts/opentype/ipafont-gothic/ipagp.ttf")
+if _IPA.exists():  # プロポーショナル日本語フォント（Ø や _ の字間が崩れない）
+    from reportlab.pdfbase.ttfonts import TTFont
+    pdfmetrics.registerFont(TTFont("IPAPGothic", str(_IPA)))
+    FONT = "IPAPGothic"
+else:
+    pdfmetrics.registerFont(UnicodeCIDFont("HeiseiKakuGo-W5"))
+    FONT = "HeiseiKakuGo-W5"
+NAVY = colors.HexColor("#1a3c6e"); GREY = colors.HexColor("#555555")
+LIGHT = colors.HexColor("#f0f4fa"); LINE = colors.HexColor("#c8d2e0")
+GOOD = colors.HexColor("#1b7f3b"); BAD = colors.HexColor("#b3261e")
 
-STYLES = {
-    "title": ParagraphStyle("t", fontName=FONT, fontSize=18, leading=24,
-                            spaceAfter=2 * mm),
-    "sub": ParagraphStyle("s", fontName=FONT, fontSize=9.5, leading=13,
-                          textColor=colors.HexColor("#555555")),
-    "h2": ParagraphStyle("h", fontName=FONT, fontSize=13, leading=18,
-                         spaceBefore=7 * mm, spaceAfter=2.5 * mm,
-                         textColor=colors.HexColor("#1a3c6e")),
-    "body": ParagraphStyle("b", fontName=FONT, fontSize=9.5, leading=15),
+S = {
+    "title": ParagraphStyle("t", fontName=FONT, fontSize=17, leading=22, spaceAfter=1 * mm),
+    "sub": ParagraphStyle("s", fontName=FONT, fontSize=9, leading=12, textColor=GREY),
+    "h1": ParagraphStyle("h1", fontName=FONT, fontSize=14, leading=18, spaceBefore=7 * mm,
+                         spaceAfter=3 * mm, textColor=NAVY),
+    "h2": ParagraphStyle("h2", fontName=FONT, fontSize=11, leading=15, spaceBefore=5 * mm,
+                         spaceAfter=2 * mm, textColor=NAVY),
+    "body": ParagraphStyle("b", fontName=FONT, fontSize=9, leading=14),
+    "bullet": ParagraphStyle("bl", fontName=FONT, fontSize=9, leading=14, leftIndent=5 * mm,
+                             bulletIndent=1 * mm),
+    "sub_bullet": ParagraphStyle("sbl", fontName=FONT, fontSize=8.5, leading=13, leftIndent=11 * mm,
+                                 bulletIndent=6 * mm, textColor=BAD),
     "cell": ParagraphStyle("c", fontName=FONT, fontSize=8, leading=10),
+    "tile_label": ParagraphStyle("tl", fontName=FONT, fontSize=8, leading=10, textColor=GREY,
+                                 alignment=1),
+    "tile_value": ParagraphStyle("tv", fontName=FONT, fontSize=15, leading=18, alignment=1),
+    "tile_delta": ParagraphStyle("td", fontName=FONT, fontSize=8, leading=10, alignment=1),
+    "note": ParagraphStyle("n", fontName=FONT, fontSize=7.5, leading=10, textColor=GREY),
 }
 
-SUMMARY_COLS = ["", "費用", "表示", "クリック", "CTR", "CPC",
-                "CV", "CV金額", "CPA", "ROAS"]
+BRANDS = [("HOUDINI", ["フーディ", "houdini"]), ("NORRØNA", ["ノローナ", "norrona", "norrøna"]),
+          ("POC", ["ポック", "poc"]), ("ACLIMA", ["アクリマ", "aclima"]),
+          ("HESTRA", ["ヘストラ", "hestra"]), ("SAIL RACING", ["セイル", "sail"]),
+          ("PLUS ONE WORKS", ["plus one", "pu store"]), ("KANG", ["kang"]), ("POW", ["pow"])]
 
 
-def table(data, widths, align_right_from=1):
-    t = Table(data, colWidths=widths, repeatRows=1)
-    t.setStyle(TableStyle([
-        ("FONT", (0, 0), (-1, -1), FONT, 8),
-        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#1a3c6e")),
-        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-        ("ALIGN", (align_right_from, 1), (-1, -1), "RIGHT"),
-        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-        ("ROWBACKGROUNDS", (0, 1), (-1, -1),
-         [colors.white, colors.HexColor("#f0f4fa")]),
-        ("GRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#c8d2e0")),
-        ("TOPPADDING", (0, 0), (-1, -1), 3),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
-    ]))
-    return t
+def brand_of(name: str) -> str:
+    n = (name or "").lower()
+    for b, keys in BRANDS:
+        if any(k in n for k in keys):
+            return b
+    if "フルマークス" in n and ("指名" in n or "sk_" in n):
+        return "店舗指名（フルマークス）"
+    return "全ブランド（旧・全商品カタログ等）"
 
+
+def disp(name: str) -> str:
+    """キャンペーン名の表示用: 運用プレフィックス（UC_SK_1_ など）を落とす。"""
+    n = re.sub(r"^UC_[A-Z]{2}_\d+_", "", name or "")
+    return n.replace("NORRONA", "NORRØNA").replace("_", " ")
+
+
+def frame_of(name: str) -> str:
+    n = (name or "").upper()
+    if "UC_SK" in n or "指名" in n:
+        return "指名検索"
+    if "UC_PL" in n or "PLA" in n or "ショッピング" in n:
+        return "ショッピング"
+    if "CVS" in n or "カタログ" in n or "DPA" in n:
+        return "カタログ"
+    if "RTG" in n:
+        return "リターゲティング（静止画）"
+    if "CLK" in n:
+        return "新規向け（静止画）"
+    return "その他"
+
+
+# ---------------- 書式 ----------------
 
 def yen(v):
     return f"¥{v:,.0f}"
 
 
-def pct_change(cur, prev):
+def pct(cur, prev):
     if not prev:
         return "—" if not cur else "新規"
     return f"{(cur - prev) / prev * 100:+.0f}%"
 
 
-def derived(m):
-    """spend/imp/clicks/cv/rev から率系の指標を補完する。"""
-    m["ctr"] = m["clicks"] / m["imp"] * 100 if m["imp"] else 0
-    m["cpc"] = m["spend"] / m["clicks"] if m["clicks"] else 0
-    m["cpa"] = m["spend"] / m["cv"] if m["cv"] else 0
-    m["roas"] = m["rev"] / m["spend"] if m["spend"] else 0
-    return m
+def roas(m):
+    return m["rev"] / m["spend"] if m["spend"] else 0.0
 
 
-def summary_rows(cur, prev):
-    def fmt(m):
-        return [yen(m["spend"]), f"{m['imp']:,}", f"{m['clicks']:,}",
-                f"{m['ctr']:.2f}%", yen(m["cpc"]), f"{m['cv']:.0f}",
-                yen(m["rev"]) if m["rev"] else "—",
-                yen(m["cpa"]) if m["cv"] else "—",
-                f"{m['roas']:.2f}" if m["rev"] else "—"]
-    change = [pct_change(cur["spend"], prev["spend"]),
-              pct_change(cur["imp"], prev["imp"]),
-              pct_change(cur["clicks"], prev["clicks"]),
-              f"{cur['ctr'] - prev['ctr']:+.2f}pt",
-              pct_change(cur["cpc"], prev["cpc"]),
-              pct_change(cur["cv"], prev["cv"]),
-              pct_change(cur["rev"], prev["rev"]),
-              pct_change(cur["cpa"], prev["cpa"]) if cur["cv"] and prev["cv"] else "—",
-              (f"{cur['roas'] - prev['roas']:+.2f}"
-               if cur["rev"] or prev["rev"] else "—")]
-    return [SUMMARY_COLS, ["今週"] + fmt(cur), ["前週"] + fmt(prev),
-            ["前週比"] + change]
+def table(data, widths, align_right_from=1, font_size=8, zebra=True, header=True):
+    t = Table(data, colWidths=widths, repeatRows=1 if header else 0)
+    st = [("FONT", (0, 0), (-1, -1), FONT, font_size),
+          ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+          ("ALIGN", (align_right_from, 1 if header else 0), (-1, -1), "RIGHT"),
+          ("GRID", (0, 0), (-1, -1), 0.4, LINE),
+          ("TOPPADDING", (0, 0), (-1, -1), 3), ("BOTTOMPADDING", (0, 0), (-1, -1), 3)]
+    if header:
+        st += [("BACKGROUND", (0, 0), (-1, 0), NAVY), ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+               ("ALIGN", (0, 0), (-1, 0), "CENTER")]
+    if zebra:
+        st.append(("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, LIGHT]))
+    t.setStyle(TableStyle(st))
+    return t
 
 
-SUMMARY_W = [12 * mm, 20 * mm, 18 * mm, 16 * mm, 14 * mm, 15 * mm,
-             11 * mm, 20 * mm, 20 * mm, 13 * mm]
-CAMP_W = [42 * mm, 24 * mm, 15 * mm, 14 * mm, 13 * mm, 10 * mm,
-          18 * mm, 12 * mm, 14 * mm]
+def kpi_tiles(cur, prev):
+    """費用 / 売上 / ROAS / 購入件数 の4タイル（前週比付き）。"""
+    items = [("広告費", yen(cur["spend"]), pct(cur["spend"], prev["spend"]), None),
+             ("売上（広告経由）", yen(cur["rev"]), pct(cur["rev"], prev["rev"]), True),
+             ("ROAS", f"{roas(cur):.1f}", f"{roas(cur) - roas(prev):+.1f}（前週 {roas(prev):.1f}）", True),
+             ("購入件数", f"{cur['cv']:.0f}件", pct(cur["cv"], prev["cv"]), True)]
+    row_label, row_value, row_delta = [], [], []
+    for label, value, delta, good_up in items:
+        row_label.append(Paragraph(label, S["tile_label"]))
+        row_value.append(Paragraph(value, S["tile_value"]))
+        color = GREY
+        if good_up is not None and delta not in ("—", "新規"):
+            color = GOOD if delta.startswith("+") else BAD
+        row_delta.append(Paragraph(f'<font color="{color.hexval()}">前週比 {delta}</font>', S["tile_delta"]))
+    t = Table([row_label, row_value, row_delta], colWidths=[44 * mm] * 4)
+    t.setStyle(TableStyle([("BOX", (0, 0), (-1, -1), 0.6, LINE),
+                           ("INNERGRID", (0, 0), (-1, -1), 0.6, LINE),
+                           ("BACKGROUND", (0, 0), (-1, -1), LIGHT),
+                           ("LINEBELOW", (0, 0), (-1, 0), 0, LIGHT), ("LINEBELOW", (0, 1), (-1, 1), 0, LIGHT),
+                           ("TOPPADDING", (0, 0), (-1, -1), 2), ("BOTTOMPADDING", (0, 0), (-1, -1), 2)]))
+    return t
 
 
-def campaign_table(cur_rows, prev_rows):
-    """キャンペーン別テーブル。前週比（費用）付き。"""
-    prev_by_id = {r["id"]: r for r in prev_rows}
-    data = [["キャンペーン", "費用 (前週比)", "表示", "クリック", "CTR",
-             "CV", "CV金額", "ROAS", "前週CV"]]
-    for r in sorted(cur_rows, key=lambda r: -r["spend"]):
-        p = prev_by_id.get(r["id"], {"spend": 0, "cv": 0})
-        m = derived(dict(r))
-        data.append([
-            Paragraph(r["name"], STYLES["cell"]),
-            f"{yen(m['spend'])} ({pct_change(m['spend'], p['spend'])})",
-            f"{m['imp']:,}", f"{m['clicks']:,}", f"{m['ctr']:.2f}%",
-            f"{m['cv']:.0f}", yen(m["rev"]) if m["rev"] else "—",
-            f"{m['roas']:.2f}" if m["rev"] else "—",
-            f"{p['cv']:.0f}"])
-    # 今週配信なしでも前週動いていたキャンペーンは示す（停止の影響が見えるように）
-    cur_ids = {r["id"] for r in cur_rows}
-    for p in sorted(prev_rows, key=lambda r: -r["spend"]):
-        if p["id"] not in cur_ids and p["spend"]:
-            data.append([Paragraph(p["name"], STYLES["cell"]),
-                         f"¥0 ({pct_change(0, p['spend'])})",
-                         "0", "0", "—", "0", "—", "—", f"{p['cv']:.0f}"])
-    return table(data, CAMP_W)
-
-
-def daily_table(rows):
-    data = [["日付", "費用", "表示", "クリック", "CTR", "CPC", "CV", "CV金額"]]
-    for r in rows:
-        m = derived(dict(r))
-        data.append([r["date"], yen(m["spend"]), f"{m['imp']:,}",
-                     f"{m['clicks']:,}", f"{m['ctr']:.2f}%", yen(m["cpc"]),
-                     f"{m['cv']:.0f}", yen(m["rev"]) if m["rev"] else "—"])
-    return table(data, [24 * mm, 20 * mm, 17 * mm, 16 * mm, 14 * mm,
-                        17 * mm, 12 * mm, 22 * mm])
-
-
-# ---------------- Meta ----------------
+# ---------------- データ取得 ----------------
 
 def _meta_actions(row, key, values=False):
-    src = row.get("action_values" if values else "actions") or []
-    for a in src:
+    for a in row.get("action_values" if values else "actions") or []:
         if a["action_type"] == key:
             return float(a["value"])
     return 0.0
 
 
-def _meta_metrics(row):
-    return {"spend": float(row.get("spend") or 0),
-            "imp": int(row.get("impressions") or 0),
-            "clicks": int(row.get("clicks") or 0),
-            "cv": _meta_actions(row, "omni_purchase"),
+def _mm(row):
+    return {"spend": float(row.get("spend") or 0), "imp": int(row.get("impressions") or 0),
+            "clicks": int(row.get("clicks") or 0), "cv": _meta_actions(row, "omni_purchase"),
             "rev": _meta_actions(row, "omni_purchase", values=True)}
 
 
-def meta_week(client, since, until):
+def meta_data(client, since, until):
     acct = client.config.ad_account_id
     tr = json.dumps({"since": str(since), "until": str(until)})
-    fields = "campaign_id,campaign_name,impressions,clicks,spend,actions,action_values"
-    total_rows = client.get(f"{acct}/insights", level="account",
-                            time_range=tr, fields=fields).get("data", [])
-    total = derived(_meta_metrics(total_rows[0] if total_rows else {}))
-    camps = []
-    for r in client.get(f"{acct}/insights", level="campaign",
-                        time_range=tr, fields=fields).get("data", []):
-        camps.append({"id": r.get("campaign_id"),
-                      "name": r.get("campaign_name") or "-",
-                      **_meta_metrics(r)})
-    daily = []
-    for r in client.get(f"{acct}/insights", level="account", time_range=tr,
-                        time_increment=1, fields=fields).get("data", []):
-        daily.append({"date": r["date_start"], **_meta_metrics(r)})
-    return total, camps, sorted(daily, key=lambda r: r["date"])
+    f = "campaign_id,campaign_name,ad_id,ad_name,impressions,clicks,spend,actions,action_values"
+    camps = [{"id": r["campaign_id"], "name": r["campaign_name"], **_mm(r)}
+             for r in client.get_all(f"{acct}/insights", level="campaign", time_range=tr, fields=f, limit=200)]
+    ads = [{"id": r["ad_id"], "name": r["ad_name"], "campaign": r["campaign_name"], **_mm(r)}
+           for r in client.get_all(f"{acct}/insights", level="ad", time_range=tr, fields=f, limit=500)]
+    daily = {r["date_start"]: _mm(r) for r in client.get_all(
+        f"{acct}/insights", level="account", time_range=tr, time_increment=1, fields=f, limit=100)}
+    return camps, ads, daily
 
 
-# ---------------- Google ----------------
-
-def _g_metrics(m):
-    return {"spend": m.cost_micros / 1_000_000,
-            "imp": m.impressions, "clicks": m.clicks,
+def _gm(m):
+    return {"spend": m.cost_micros / 1e6, "imp": m.impressions, "clicks": m.clicks,
             "cv": m.conversions, "rev": m.conversions_value}
 
 
-def google_week(client, since, until):
+def google_data(client, since, until):
     where = f"segments.date BETWEEN '{since}' AND '{until}'"
-    fields = ("metrics.impressions, metrics.clicks, metrics.cost_micros, "
-              "metrics.conversions, metrics.conversions_value")
-    total = {"spend": 0, "imp": 0, "clicks": 0, "cv": 0, "rev": 0}
+    f = "metrics.impressions, metrics.clicks, metrics.cost_micros, metrics.conversions, metrics.conversions_value"
     camps = []
-    for r in client.search(f"SELECT campaign.id, campaign.name, {fields} "
-                           f"FROM campaign WHERE {where}"):
-        m = _g_metrics(r.metrics)
-        if not m["imp"] and not m["spend"]:
+    for r in client.search(f"SELECT campaign.id, campaign.name, {f} FROM campaign WHERE {where}"):
+        m = _gm(r.metrics)
+        if m["imp"] or m["spend"]:
+            camps.append({"id": str(r.campaign.id), "name": r.campaign.name, **m})
+    daily = {}
+    for r in client.search(f"SELECT segments.date, {f} FROM customer WHERE {where}"):
+        daily[r.segments.date] = _gm(r.metrics)
+    shop_brand = defaultdict(lambda: {"spend": 0.0, "imp": 0, "clicks": 0, "cv": 0.0, "rev": 0.0})
+    products = defaultdict(lambda: {"title": "", "brand": "", "spend": 0.0, "clicks": 0, "cv": 0.0, "rev": 0.0})
+    labels = defaultdict(lambda: defaultdict(int))  # label -> campaign -> imp
+    for r in client.search(
+            "SELECT campaign.id, campaign.name, segments.product_item_id, segments.product_title, "
+            "segments.product_brand, segments.product_custom_attribute0, "
+            f"{f} FROM shopping_performance_view WHERE {where}"):
+        m = _gm(r.metrics)
+        b = (r.segments.product_brand or "").upper().replace("NORRONA", "NORRØNA") or "ショッピング（ブランド属性なし）"
+        for k in ("spend", "imp", "clicks", "cv", "rev"):
+            shop_brand[b][k] += m[k]
+        p = products[r.segments.product_item_id]
+        p["title"] = r.segments.product_title; p["brand"] = b
+        p["spend"] += m["spend"]; p["clicks"] += m["clicks"]; p["cv"] += m["cv"]; p["rev"] += m["rev"]
+        labels[r.segments.product_custom_attribute0 or "（ラベルなし）"][r.campaign.name] += m["imp"]
+    return camps, daily, shop_brand, products, labels
+
+
+def total_of(rows):
+    t = {"spend": 0.0, "imp": 0, "clicks": 0, "cv": 0.0, "rev": 0.0}
+    for r in rows:
+        for k in t:
+            t[k] += r[k]
+    return t
+
+
+# ---------------- 集計 ----------------
+
+def by_brand(g_camps, g_shop_brand, m_ads):
+    """ブランド別（広告経由）。指名検索/静止画はキャンペーン名、ショッピングは商品ブランド、
+    カタログは広告名（fullmarks-dpa-<BRAND>）から判定する。"""
+    agg = defaultdict(lambda: {"spend": 0.0, "cv": 0.0, "rev": 0.0})
+    for c in g_camps:
+        if frame_of(c["name"]) == "ショッピング":
+            continue  # 商品ブランド別で計上
+        b = brand_of(c["name"])
+        for k in ("spend", "cv", "rev"):
+            agg[b][k] += c[k]
+    for b, m in g_shop_brand.items():
+        for k in ("spend", "cv", "rev"):
+            agg[b][k] += m[k]
+    for a in m_ads:
+        b = brand_of(a["name"]) if frame_of(a["campaign"]) == "カタログ" else brand_of(a["campaign"])
+        for k in ("spend", "cv", "rev"):
+            agg[b][k] += a[k]
+    return agg
+
+
+def by_frame(g_camps, m_camps):
+    agg = defaultdict(lambda: {"spend": 0.0, "cv": 0.0, "rev": 0.0})
+    for c in g_camps + m_camps:
+        fr = frame_of(c["name"])
+        for k in ("spend", "cv", "rev"):
+            agg[fr][k] += c[k]
+    return agg
+
+
+def highlights(brand_cur, brand_prev, frame_cur, camps_cur, camps_prev):
+    """今週のポイント（自動生成）。"""
+    lines = []
+    top = sorted(brand_cur.items(), key=lambda kv: -kv[1]["rev"])[:3]
+    if top and top[0][1]["rev"]:
+        lines.append("売上が大きかったブランド: " + "、".join(
+            f"{b} {yen(m['rev'])}（{m['cv']:.0f}件、ROAS {roas(m):.1f}）" for b, m in top if m["rev"]))
+    fr = sorted(frame_cur.items(), key=lambda kv: -kv[1]["rev"])
+    if fr:
+        lines.append("枠別: " + "、".join(f"{f} ROAS {roas(m):.1f}" for f, m in fr if m["spend"]))
+    weak = [(c, roas(c)) for c in camps_cur if c["spend"] >= 5000 and roas(c) < 2]
+    if weak:
+        lines.append("要改善（週5,000円以上でROAS 2未満）: " + "／".join(
+            f"{disp(c['name'])} 費用{yen(c['spend'])}・売上{yen(c['rev'])}・ROAS {r:.1f}"
+            for c, r in sorted(weak, key=lambda x: -x[0]['spend'])))
+    prev_by = {c["id"]: c for c in camps_prev}
+    moves = []
+    for c in camps_cur:
+        p = prev_by.get(c["id"])
+        if p and p["spend"] >= 3000 and c["spend"] >= 3000:
+            d = roas(c) - roas(p)
+            if abs(d) >= 3:
+                moves.append(f"{disp(c['name'])} ROAS {roas(p):.1f}→{roas(c):.1f}")
+    if moves:
+        lines.append("前週から大きく変わった: " + "／".join(moves))
+    return lines
+
+
+# ---------------- セクション ----------------
+
+def sec_brand(brand_cur, brand_prev):
+    data = [["ブランド", "広告費", "購入", "売上", "ROAS", "前週売上", "前週比"]]
+    for b, m in sorted(brand_cur.items(), key=lambda kv: -kv[1]["rev"]):
+        p = brand_prev.get(b, {"spend": 0, "cv": 0, "rev": 0})
+        data.append([b, yen(m["spend"]), f"{m['cv']:.0f}", yen(m["rev"]) if m["rev"] else "—",
+                     f"{roas(m):.1f}" if m["rev"] else "—", yen(p["rev"]) if p["rev"] else "—",
+                     pct(m["rev"], p["rev"])])
+    t = total_of([dict(imp=0, clicks=0, **m) for m in brand_cur.values()])
+    data.append(["合計", yen(t["spend"]), f"{t['cv']:.0f}", yen(t["rev"]), f"{roas(t):.1f}", "", ""])
+    tb = table(data, [42 * mm, 24 * mm, 14 * mm, 26 * mm, 16 * mm, 26 * mm, 18 * mm])
+    tb.setStyle(TableStyle([("FONT", (0, len(data) - 1), (-1, len(data) - 1), FONT, 8),
+                            ("BACKGROUND", (0, len(data) - 1), (-1, len(data) - 1), colors.HexColor("#dfe7f3"))]))
+    return tb
+
+
+def sec_frame(frame_cur, frame_prev):
+    data = [["枠", "広告費", "購入", "売上", "ROAS", "前週ROAS"]]
+    for f, m in sorted(frame_cur.items(), key=lambda kv: -kv[1]["spend"]):
+        p = frame_prev.get(f, {"spend": 0, "cv": 0, "rev": 0})
+        data.append([f, yen(m["spend"]), f"{m['cv']:.0f}", yen(m["rev"]) if m["rev"] else "—",
+                     f"{roas(m):.1f}" if m["rev"] else "—", f"{roas(p):.1f}" if p["rev"] else "—"])
+    return table(data, [46 * mm, 26 * mm, 14 * mm, 28 * mm, 18 * mm, 20 * mm])
+
+
+def sec_products(products):
+    sold = [p for p in products.values() if p["cv"] >= 1]
+    if not sold:
+        return Paragraph("今週、Googleショッピング広告からの購入はありませんでした。", S["body"])
+    data = [["商品", "ブランド", "クリック", "広告費", "購入", "売上"]]
+    for p in sorted(sold, key=lambda p: -p["rev"])[:15]:
+        data.append([Paragraph(p["title"][:40], S["cell"]), p["brand"], f"{p['clicks']}", yen(p["spend"]),
+                     f"{p['cv']:.0f}", yen(p["rev"])])
+    return table(data, [66 * mm, 26 * mm, 16 * mm, 20 * mm, 12 * mm, 26 * mm])
+
+
+def sec_catalog_ads(m_ads, m_ads_prev):
+    rows = [a for a in m_ads if frame_of(a["campaign"]) == "カタログ" and a["spend"] > 0]
+    if not rows:
+        return Paragraph("今週、Metaカタログ広告の配信はありませんでした。", S["body"])
+    prev = {a["id"]: a for a in m_ads_prev}
+    data = [["広告（ブランド／シリーズ）", "広告費", "表示", "購入", "売上", "ROAS", "前週売上"]]
+    for a in sorted(rows, key=lambda a: -a["spend"]):
+        label = re.sub(r"^fullmarks-dpa-", "", a["name"]).replace("NORRONA_", "NORRØNA ")
+        p = prev.get(a["id"], {"rev": 0})
+        data.append([label, yen(a["spend"]), f"{a['imp']:,}", f"{a['cv']:.0f}",
+                     yen(a["rev"]) if a["rev"] else "—", f"{roas(a):.1f}" if a["rev"] else "—",
+                     yen(p["rev"]) if p["rev"] else "—"])
+    return table(data, [46 * mm, 22 * mm, 18 * mm, 12 * mm, 24 * mm, 14 * mm, 24 * mm])
+
+
+def sec_campaigns(cur, prev_rows):
+    prev = {c["id"]: c for c in prev_rows}
+    data = [["キャンペーン", "広告費", "前週比", "購入", "売上", "ROAS", "前週ROAS"]]
+    for c in sorted(cur, key=lambda c: -c["spend"]):
+        if c["spend"] <= 0:
             continue
-        camps.append({"id": r.campaign.id, "name": r.campaign.name, **m})
-        for k in total:
-            total[k] += m[k]
-    daily = []
-    for r in client.search(f"SELECT segments.date, {fields} "
-                           f"FROM customer WHERE {where} "
-                           "ORDER BY segments.date"):
-        daily.append({"date": r.segments.date, **_g_metrics(r.metrics)})
-    return derived(total), camps, daily
+        p = prev.get(c["id"], {"spend": 0, "cv": 0, "rev": 0})
+        data.append([Paragraph(disp(c["name"]), S["cell"]), yen(c["spend"]), pct(c["spend"], p["spend"]),
+                     f"{c['cv']:.0f}", yen(c["rev"]) if c["rev"] else "—",
+                     f"{roas(c):.1f}" if c["rev"] else "—", f"{roas(p):.1f}" if p["rev"] else "—"])
+    cur_ids = {c["id"] for c in cur if c["spend"] > 0}
+    for p in sorted(prev_rows, key=lambda r: -r["spend"]):
+        if p["id"] not in cur_ids and p["spend"] > 0:
+            data.append([Paragraph(disp(p["name"]) + "（今週配信なし）", S["cell"]), "¥0", pct(0, p["spend"]),
+                         "0", "—", "—", f"{roas(p):.1f}" if p["rev"] else "—"])
+    return table(data, [62 * mm, 22 * mm, 16 * mm, 12 * mm, 24 * mm, 14 * mm, 18 * mm])
 
 
-# ---------------- リンク切れ ----------------
-
-def pacing_section(story, meta_client, google_client, today):
-    """月初来の消化ペースと全体ROASを targets.json の目標と比較する。"""
-    targets_path = Path(__file__).resolve().parent.parent / "targets.json"
-    if not targets_path.exists():
-        return
-    targets = json.loads(targets_path.read_text())
-    month_start = today.replace(day=1)
-    until = today - timedelta(days=1)
-    if until < month_start:  # 月初1日は前月分を対象にしない
-        return
-    m_total, _, _ = meta_week(meta_client, month_start, until)
-    spend, rev = m_total["spend"], m_total["rev"]
-    if google_client is not None:
-        g_total, _, _ = google_week(google_client, month_start, until)
-        spend += g_total["spend"]
-        rev += g_total["rev"]
-    budget = targets["monthly_budget_ex_tax"] - targets.get("event_reserve", 0)
-    days_in_month = (month_start.replace(month=month_start.month % 12 + 1,
-                                         day=1) - timedelta(days=1)).day
-    elapsed = (until - month_start).days + 1
-    pace_target = budget * elapsed / days_in_month
-    roas = rev / spend if spend else 0
-    min_roas = targets.get("min_roas", 0)
-    story.append(Paragraph("月間ペース（通常運用予算に対する進捗）", STYLES["h2"]))
-    story.append(table([
-        ["項目", "実績", "目標", "評価"],
-        [f"消化額 ({month_start}〜{until})", yen(spend),
-         f"{yen(pace_target)}（{elapsed}/{days_in_month}日経過時点）",
-         "順調" if spend >= pace_target * 0.9 else "⚠ 未消化ペース"],
-        ["全体ROAS", f"{roas:.1f}", f"{min_roas:.0f} 以上",
-         "達成" if roas >= min_roas else "⚠ 目標未達"],
-        ["月間予算（税抜）", "", f"{yen(targets['monthly_budget_ex_tax'])}"
-         f"（うち企画予備 {yen(targets.get('event_reserve', 0))}）", ""],
-    ], [52 * mm, 32 * mm, 55 * mm, 22 * mm]))
+def sec_daily(g_daily, m_daily, since, until):
+    data = [["日付", "曜", "Google 費用", "Google 売上", "Meta 費用", "Meta 売上", "合計費用", "合計売上", "ROAS"]]
+    d = since
+    tot = defaultdict(float)
+    while d <= until:
+        k = d.isoformat(); g = g_daily.get(k, {"spend": 0, "rev": 0}); m = m_daily.get(k, {"spend": 0, "rev": 0})
+        sp, rv = g["spend"] + m["spend"], g["rev"] + m["rev"]
+        tot["gs"] += g["spend"]; tot["gr"] += g["rev"]; tot["ms"] += m["spend"]; tot["mr"] += m["rev"]
+        data.append([k, "月火水木金土日"[d.weekday()], yen(g["spend"]), yen(g["rev"]), yen(m["spend"]), yen(m["rev"]),
+                     yen(sp), yen(rv), f"{rv / sp:.1f}" if sp else "—"])
+        d += timedelta(days=1)
+    sp, rv = tot["gs"] + tot["ms"], tot["gr"] + tot["mr"]
+    data.append(["合計", "", yen(tot["gs"]), yen(tot["gr"]), yen(tot["ms"]), yen(tot["mr"]), yen(sp), yen(rv),
+                 f"{rv / sp:.1f}" if sp else "—"])
+    tb = table(data, [22 * mm, 8 * mm, 20 * mm, 22 * mm, 20 * mm, 22 * mm, 20 * mm, 22 * mm, 12 * mm], align_right_from=2)
+    tb.setStyle(TableStyle([("BACKGROUND", (0, len(data) - 1), (-1, len(data) - 1), colors.HexColor("#dfe7f3"))]))
+    return tb
 
 
-def link_check_section(story, meta_client, google_client):
-    story.append(Paragraph("リンク切れチェック", STYLES["h2"]))
+def sec_pacing(meta_client, google_client, today):
+    p = Path(__file__).resolve().parent.parent / "targets.json"
+    if not p.exists():
+        return None
+    t = json.loads(p.read_text())
+    ms = today.replace(day=1); until = today - timedelta(days=1)
+    if until < ms:
+        return None
+    m_c, _, _ = meta_data(meta_client, ms, until)
+    tot = total_of(m_c)
+    if google_client:
+        g_c, _, _, _, _ = google_data(google_client, ms, until)
+        g = total_of(g_c)
+        for k in tot: tot[k] += g[k]
+    budget = t["monthly_budget_ex_tax"] - t.get("event_reserve", 0)
+    dim = (ms.replace(month=ms.month % 12 + 1, day=1) - timedelta(days=1)).day
+    el = (until - ms).days + 1
+    pace = budget * el / dim
+    proj = tot["spend"] / el * dim
+    data = [["項目", "実績", "目安", "評価"],
+            [f"月初来の広告費（{ms.month}/1〜{until.month}/{until.day}）", yen(tot["spend"]),
+             f"{yen(pace)}（{el}/{dim}日）", "順調" if tot["spend"] >= pace * 0.9 else "未消化ペース"],
+            ["月末の着地見込み", yen(proj), f"{yen(budget)}（通常運用）", f"{proj / budget:.0%}"],
+            ["月初来のROAS", f"{roas(tot):.1f}", f"{t.get('min_roas', 0):.0f} 以上", "達成" if roas(tot) >= t.get("min_roas", 0) else "未達"]]
+    return table(data, [60 * mm, 30 * mm, 46 * mm, 26 * mm])
+
+
+def sec_audit(meta_client, google_client, g_labels):
+    lines = []
     audit = meta_audit(meta_client, check_links=True)
-    broken = [r for r in audit["問題のある広告"]
-              if any("リンク切れ" in f or "リダイレクト" in f for f in r["flags"])]
-    lines = [f"Meta: 配信中 {audit['summary']['調査対象']}本を検査 → "
-             f"リンク切れ {len(broken)}件"]
-    lines += [f"　⚠ {r['campaign']} / {r['ad_name']}: " + "; ".join(r["flags"])
-              for r in broken]
-    if google_client is not None:
+    broken = [r for r in audit["問題のある広告"] if any("リンク切れ" in f or "リダイレクト" in f for f in r["flags"])]
+    lines.append(f"Meta: 配信中 {audit['summary']['調査対象']}本のリンクを検査 → リンク切れ {len(broken)}件")
+    lines += [f"　※ {r['campaign']} / {r['ad_name']}: " + "; ".join(r["flags"]) for r in broken]
+    if google_client:
         try:
             from ads_manager.creatives import google_list_creatives
             g_all = google_list_creatives(google_client)
@@ -280,81 +423,108 @@ def link_check_section(story, meta_client, google_client):
                 for url in a["final_urls"]:
                     res = check_url(url)
                     if res["status"] is not None and res["status"] >= 400:
-                        g_broken.append(f"{a['campaign']} / {a['ad_id']}: "
-                                        f"{url} ({res['status']})")
-            lines.append(f"Google: 配信中の広告 {len(g_ads)}本を検査 → "
-                         f"リンク切れ {len(g_broken)}件")
-            lines += [f"　⚠ {b}" for b in g_broken]
-            dormant = len(g_all) - len(g_ads)
-            if dormant:
-                lines.append(
-                    f"（参考）停止中キャンペーン等に残る広告 {dormant}本は"
-                    "検査対象外。過去のリンク切れ広告が多数含まれるため、"
-                    "旧キャンペーンを再開する際は必ず事前にリンク確認を行うこと")
+                        g_broken.append(f"{a['campaign']} / {a['ad_id']}: {url} ({res['status']})")
+            lines.append(f"Google: 配信中 {len(g_ads)}本のリンクを検査 → リンク切れ {len(g_broken)}件"
+                         f"（停止中キャンペーンの広告 {len(g_all) - len(g_ads)}本は対象外。再開時は要リンク確認）")
+            lines += [f"　※ {b}" for b in g_broken]
         except Exception as e:
-            lines.append(f"Google: リンク確認を実行できませんでした ({type(e).__name__})")
-    else:
-        lines.append("Google: API接続不可のため未検査")
-    story.append(Paragraph("<br/>".join(lines), STYLES["body"]))
+            lines.append(f"Google: リンク確認を実行できませんでした（{type(e).__name__}）")
+        by_c = g_labels.get("outlet", {}); out = sum(by_c.values())
+        lines.append(f"アウトレット品のショッピング表示: {out:,}回（方針: アウトレット品は広告しない）")
+        if out:
+            lines += [f"　※ {disp(c)}: {n:,}回（停止済みの枠なら停止前の表示。稼働中なら除外設定を確認）"
+                      for c, n in sorted(by_c.items(), key=lambda kv: -kv[1]) if n]
+    # 他口座
+    try:
+        other = []
+        for acct, name in [("act_587527895389459", "フルマークス/MDX"), ("act_719498040184021", "認知施策用/MDX")]:
+            d = meta_client.get(f"{acct}/insights", fields="spend", date_preset="this_month").get("data", [])
+            other.append(f"{name} {yen(float(d[0]['spend']) if d else 0)}")
+        lines.append("他口座の当月消化（回してはいけない口座）: " + "、".join(other))
+    except Exception as e:
+        lines.append(f"他口座の消化確認: 取得できませんでした（{type(e).__name__}）")
+    return [Paragraph(l.lstrip("　").lstrip("※ "), S["bullet"] if not l.startswith("　") else S["sub_bullet"],
+                      bulletText="■" if not l.startswith("　") else "※") for l in lines]
 
+
+# ---------------- main ----------------
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--out",
-                        default=f"reports/広告週次レポート_{date.today()}.pdf")
-    args = parser.parse_args()
-
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--out", default=f"reports/広告週次レポート_{date.today()}.pdf")
+    args = ap.parse_args()
     today = date.today()
-    cur_since, cur_until = today - timedelta(days=7), today - timedelta(days=1)
-    prev_since, prev_until = today - timedelta(days=14), today - timedelta(days=8)
+    cs, cu = today - timedelta(days=7), today - timedelta(days=1)
+    ps, pu = today - timedelta(days=14), today - timedelta(days=8)
 
-    story = [
-        Paragraph("広告 週次成果レポート（Meta + Google）", STYLES["title"]),
-        Paragraph(f"今週: {cur_since} 〜 {cur_until}　|　前週: {prev_since} 〜 {prev_until}　|　"
-                  "通貨: JPY　|　CV・CV金額は各プラットフォーム計測の概算", STYLES["sub"]),
-        Spacer(1, 4 * mm),
-    ]
-
-    # ---- Meta ----
     meta_client = MetaAdsClient(load_meta_config())
-    m_cur, m_camps, m_daily = meta_week(meta_client, cur_since, cur_until)
-    m_prev, m_camps_prev, _ = meta_week(meta_client, prev_since, prev_until)
-    story.append(Paragraph("1. Meta 週間サマリー（前週比較）", STYLES["h2"]))
-    story.append(table(summary_rows(m_cur, m_prev), SUMMARY_W))
-    story.append(Paragraph("2. Meta キャンペーン別", STYLES["h2"]))
-    story.append(campaign_table(m_camps, m_camps_prev))
-    story.append(Paragraph("3. Meta 日別推移（今週）", STYLES["h2"]))
-    story.append(daily_table(m_daily))
-
-    # ---- Google ----
+    m_camps, m_ads, m_daily = meta_data(meta_client, cs, cu)
+    m_camps_p, m_ads_p, _ = meta_data(meta_client, ps, pu)
     google_client = None
+    g_camps = g_camps_p = []; g_daily = {}; g_shop = {}; g_shop_p = {}; g_products = {}; g_labels = {}
+    g_err = None
     try:
         from ads_manager.google_ads_client import GoogleAdsClientWrapper
         google_client = GoogleAdsClientWrapper(load_google_config())
-        g_cur, g_camps, g_daily = google_week(google_client, cur_since, cur_until)
-        g_prev, g_camps_prev, _ = google_week(google_client, prev_since, prev_until)
-        story.append(Paragraph("4. Google 週間サマリー（前週比較）", STYLES["h2"]))
-        story.append(table(summary_rows(g_cur, g_prev), SUMMARY_W))
-        story.append(Paragraph("5. Google キャンペーン別", STYLES["h2"]))
-        story.append(campaign_table(g_camps, g_camps_prev))
-        story.append(Paragraph("6. Google 日別推移（今週）", STYLES["h2"]))
-        story.append(daily_table(g_daily))
+        g_camps, g_daily, g_shop, g_products, g_labels = google_data(google_client, cs, cu)
+        g_camps_p, _, g_shop_p, _, _ = google_data(google_client, ps, pu)
     except Exception as e:
-        story.append(Paragraph("4. Google 広告成果", STYLES["h2"]))
-        story.append(Paragraph(
-            "Google Ads API に接続できなかったため今週は掲載できません。"
-            f"（{type(e).__name__}: 認証情報を確認してください）", STYLES["body"]))
-        google_client = None
+        g_err = f"{type(e).__name__}"; google_client = None
 
-    pacing_section(story, meta_client, google_client, today)
-    link_check_section(story, meta_client, google_client)
+    cur = total_of(g_camps + m_camps); prev = total_of(g_camps_p + m_camps_p)
+    brand_cur = by_brand(g_camps, g_shop, m_ads); brand_prev = by_brand(g_camps_p, g_shop_p, m_ads_p)
+    frame_cur = by_frame(g_camps, m_camps); frame_prev = by_frame(g_camps_p, m_camps_p)
 
-    out = Path(args.out)
-    out.parent.mkdir(parents=True, exist_ok=True)
-    SimpleDocTemplate(str(out), pagesize=A4,
-                      topMargin=18 * mm, bottomMargin=18 * mm,
-                      leftMargin=16 * mm, rightMargin=16 * mm,
-                      title="広告 週次成果レポート").build(story)
+    story = [Paragraph("広告 週次レポート", S["title"]),
+             Paragraph(f"対象: {cs} 〜 {cu}（前週 {ps} 〜 {pu}）　媒体: Google広告 + Meta広告　"
+                       "売上は各媒体計測のCV金額（税込）", S["sub"]), Spacer(1, 5 * mm)]
+    if g_err:
+        story.append(Paragraph(f"※ Google Ads API に接続できなかったため Google の数値は含まれていません（{g_err}）", S["body"]))
+
+    # 1. サマリー
+    story.append(Paragraph("1. サマリー", S["h1"]))
+    story.append(kpi_tiles(cur, prev))
+    story.append(Paragraph("今週のポイント", S["h2"]))
+    hl = highlights(brand_cur, brand_prev, frame_cur, g_camps + m_camps, g_camps_p + m_camps_p)
+    for line in hl or ["特筆事項なし"]:
+        story.append(Paragraph(line, S["bullet"], bulletText="■"))
+    pac = sec_pacing(meta_client, google_client, today)
+    if pac:
+        story.append(KeepTogether([Paragraph("月間ペース（targets.json の通常運用予算に対して）", S["h2"]), pac]))
+
+    # 2. 何が売れたか
+    story.append(Paragraph("2. 何が売れたか", S["h1"]))
+    story.append(KeepTogether([Paragraph("ブランド別（広告経由の売上順）", S["h2"]), sec_brand(brand_cur, brand_prev)]))
+    story.append(Paragraph("ブランドの判定: 指名検索と静止画はキャンペーン名、ショッピングは商品のブランド属性、"
+                           "Metaカタログは広告（ブランド／シリーズ別）から。店舗指名はブランド横断のため別建て。", S["note"]))
+    story.append(KeepTogether([Paragraph("枠別", S["h2"]), sec_frame(frame_cur, frame_prev)]))
+    story.append(KeepTogether([Paragraph("Googleショッピングで売れた商品", S["h2"]), sec_products(g_products)]))
+    story.append(KeepTogether([Paragraph("Metaカタログ広告（ブランド／シリーズ別）", S["h2"]), sec_catalog_ads(m_ads, m_ads_p)]))
+    story.append(Paragraph("Metaは商品単位の購入データを返さないため、カタログ広告は広告（ブランド／シリーズ）単位で表示。", S["note"]))
+
+    # 3. キャンペーン別
+    story.append(Paragraph("3. キャンペーン別", S["h1"]))
+    if google_client:
+        story.append(KeepTogether([Paragraph("Google", S["h2"]), sec_campaigns(g_camps, g_camps_p)]))
+    story.append(KeepTogether([Paragraph("Meta", S["h2"]), sec_campaigns(m_camps, m_camps_p)]))
+
+    # 4. 日別
+    story.append(KeepTogether([Paragraph("4. 日別推移（Google + Meta）", S["h1"]), sec_daily(g_daily, m_daily, cs, cu)]))
+
+    # 5. 監査
+    story.append(Paragraph("5. 監査", S["h1"]))
+    story.extend(sec_audit(meta_client, google_client, g_labels))
+
+    out = Path(args.out); out.parent.mkdir(parents=True, exist_ok=True)
+    def _footer(canvas, doc):
+        canvas.saveState(); canvas.setFont(FONT, 7.5); canvas.setFillColor(GREY)
+        canvas.drawString(15 * mm, 9 * mm, f"FULLMARKS 広告週次レポート  {cs} 〜 {cu}")
+        canvas.drawRightString(A4[0] - 15 * mm, 9 * mm, f"{doc.page}")
+        canvas.restoreState()
+
+    SimpleDocTemplate(str(out), pagesize=A4, topMargin=16 * mm, bottomMargin=16 * mm,
+                      leftMargin=15 * mm, rightMargin=15 * mm, title="広告 週次レポート"
+                      ).build(story, onFirstPage=_footer, onLaterPages=_footer)
     print(f"PDFを生成: {out}")
 
 
