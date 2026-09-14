@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""広告予算計画（2026-05〜2027-04、税抜、年間上限1,200万）を数式ベースのExcelで生成する。
+"""広告予算計画（2026-05〜2027-04、年間上限は税込1,200万＝税抜約1,091万）を数式ベースのExcelで生成する。
+計画・実績の金額はすべて税抜（媒体APIの消化額は税抜。消費税は請求書で上乗せ）。
 
 使い方: python scripts/build_ad_budget_plan.py [出力パス]
 シート: 前提 / 月別予算 / FULLMARKS内訳 / 実施_日予算 / 9月実績
@@ -23,7 +24,9 @@ newf = PatternFill("solid", fgColor="E2EFDA")
 thin = Side(style="thin", color="BFBFBF"); border = Border(left=thin, right=thin, top=thin, bottom=thin)
 center = Alignment(horizontal="center", vertical="center", wrap_text=True)
 
-ANNUAL = 12_000_000
+ANNUAL_INCL = 12_000_000   # 年間上限（税込、ユーザー指示 2026-09-14）
+TAX = 1.10
+ANNUAL = round(ANNUAL_INCL / TAX)  # 税抜 10,909,091
 ACTUALS = [("2026-05", 280_564, 0, "FULLMARKS API実績"),
            ("2026-06", 298_599, 651_401, "月合計95万（ユーザー提供）。差額はMDX管理口座等"),
            ("2026-07", 328_194, 621_806, "月合計95万（ユーザー提供）"),
@@ -76,13 +79,19 @@ def build(out: str) -> None:
     wb = Workbook()
     # ================= 前提 =================
     ws = wb.active; ws.title = "前提"
-    ws["A1"] = "広告予算計画 2026-05〜2027-04（税抜）― 前提・入力値　2026-09-11 改訂"; ws["A1"].font = Font(name=F, size=13, bold=True)
+    ws["A1"] = "広告予算計画 2026-05〜2027-04（税抜）― 前提・入力値　2026-09-14 改訂（上限を税込1,200万に統一）"; ws["A1"].font = Font(name=F, size=13, bold=True)
     ws["A2"] = ("青字＝入力値、黄色＝仮置き（他ストアの実績や方針で差し替え）。他シートは全てこのシートを参照。"
                 "方針: アウトレット品は広告しない／広告口座は FULLMARKS広告運用(Meta)・FULLMARKS Inc.(Google) のみ。"); ws["A2"].font = small
     r = 4
-    ws.cell(row=r, column=1, value="年間広告費上限（4ストア合計・税抜）").font = black
-    c = ws.cell(row=r, column=2, value=ANNUAL); c.font = blue; c.number_format = YEN
-    K_ANNUAL = "前提!$B$4"
+    ws.cell(row=r, column=1, value="年間広告費上限（4ストア合計・税込）").font = black
+    c = ws.cell(row=r, column=2, value=ANNUAL_INCL); c.font = blue; c.number_format = YEN
+    ws.cell(row=r, column=3, value="会社の上限は税込1,200万（2026-09-14 ユーザー確認）").font = small
+    ws.cell(row=7, column=1, value="消費税率（÷で税抜換算）").font = black
+    c = ws.cell(row=7, column=2, value=TAX); c.font = blue; c.number_format = "0.00"
+    ws.cell(row=8, column=1, value="年間広告費上限（税抜換算）← 以下の計画はすべてこの税抜額で管理").font = bold
+    c = ws.cell(row=8, column=2, value="=B4/B7"); c.font = bold; c.number_format = YEN
+    ws.cell(row=8, column=3, value="媒体（Google/Meta）の管理画面・API消化額は税抜。消費税は請求書で上乗せされる").font = small
+    K_ANNUAL = "前提!$B$8"
     ws.cell(row=5, column=1, value="3ストア各社の予算シェア（10月〜、各）").font = black
     c = ws.cell(row=5, column=2, value=STORE_R); c.font = blue; c.number_format = PCT; c.fill = yellow
     K_STORE = "前提!$B$5"
@@ -155,7 +164,7 @@ def build(out: str) -> None:
 
     # ================= 月別予算 =================
     ws2 = wb.create_sheet("月別予算")
-    ws2["A1"] = "月別 広告予算（税抜）― 4ストア合計で年間1,200万"; ws2["A1"].font = Font(name=F, size=13, bold=True)
+    ws2["A1"] = "月別 広告予算（税抜）― 4ストア合計で年間 税込1,200万（税抜 約1,091万）"; ws2["A1"].font = Font(name=F, size=13, bold=True)
     ws2["A2"] = "通常運用＝上限−実績−9月−イベント予備費 を10〜4月の比率で配分。10月から HOUDINI / NORRONA / PU STORE が各15%。"; ws2["A2"].font = small
     h = ["月", "区分", "FULLMARKS", "HOUDINI STORE", "NORRONA STORE", "PU STORE", "その他(実績)", "通常運用 計", "イベント予備費", "月合計", "累計", "上限までの残り", "備考"]
     for c_, hh in enumerate(h, 1):
