@@ -130,7 +130,9 @@ FULLMARKS（fullmarksstore.jp）の広告運用ツール。Meta/Google広告のA
   予算による損失0%・ランクによる損失57%（入札方式は「コンバージョン数の最大化」）。
   増額しても消化は増えない。Meta RTG フーディニ は30日訪問者 約7千人/週・頻度2.2〜3.0。
   HOUDINI STORE が9月末に開くため、HOUDINI 指名は10月以降 HOUDINI STORE 口座で組み直す前提。
-- HESTRA 広告の作成依頼書: `reports/HESTRA広告_作成依頼書_2026-09-16.docx`
+- HESTRA 画像制作依頼書（画像のみ、ユーザー指示）: `reports/HESTRA画像制作依頼書_2026-09-16.docx`
+  （`scripts/build_hestra_image_brief.js`。参考画像は配信中の HOUDINI/NORRØNA 静止画）。
+- HESTRA 広告の作成依頼書（運用側の設計メモ）: `reports/HESTRA広告_作成依頼書_2026-09-16.docx`
   （`scripts/build_hestra_brief.js` で生成。文言は copy/hestra_google_rsa.json / copy/hestra_meta.json）。
   フィード未掲載の HESTRA 在庫あり商品は14件（2026-09-16、feed-gap）。
 
