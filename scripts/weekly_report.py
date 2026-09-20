@@ -343,6 +343,17 @@ def sec_catalog_ads(m_ads, m_ads_prev):
     return table(data, [46 * mm, 22 * mm, 18 * mm, 12 * mm, 24 * mm, 14 * mm, 24 * mm])
 
 
+def _event_ids():
+    p = Path(__file__).resolve().parent.parent / "targets.json"
+    try:
+        return set(json.loads(p.read_text(encoding="utf-8")).get("event_campaign_ids", []))
+    except Exception:
+        return set()
+
+
+EVENT_IDS = _event_ids()
+
+
 def sec_campaigns(cur, prev_rows):
     prev = {c["id"]: c for c in prev_rows}
     data = [["キャンペーン", "広告費", "前週比", "購入", "売上", "ROAS", "前週ROAS"]]
@@ -350,7 +361,8 @@ def sec_campaigns(cur, prev_rows):
         if c["spend"] <= 0:
             continue
         p = prev.get(c["id"], {"spend": 0, "cv": 0, "rev": 0})
-        data.append([Paragraph(disp(c["name"]), S["cell"]), yen(c["spend"]), pct(c["spend"], p["spend"]),
+        label = disp(c["name"]) + ("【イベント枠】" if c["id"] in EVENT_IDS else "")
+        data.append([Paragraph(label, S["cell"]), yen(c["spend"]), pct(c["spend"], p["spend"]),
                      f"{c['cv']:.0f}", yen(c["rev"]) if c["rev"] else "—",
                      f"{roas(c):.1f}" if c["rev"] else "—", f"{roas(p):.1f}" if p["rev"] else "—"])
     cur_ids = {c["id"] for c in cur if c["spend"] > 0}
@@ -384,26 +396,35 @@ def sec_pacing(meta_client, google_client, today):
     p = Path(__file__).resolve().parent.parent / "targets.json"
     if not p.exists():
         return None
-    t = json.loads(p.read_text())
+    t = json.loads(p.read_text(encoding="utf-8"))
     ms = today.replace(day=1); until = today - timedelta(days=1)
     if until < ms:
         return None
+    ev_ids = set(t.get("event_campaign_ids", []))
     m_c, _, _ = meta_data(meta_client, ms, until)
-    tot = total_of(m_c)
+    camps = list(m_c)
     if google_client:
         g_c, _, _, _, _ = google_data(google_client, ms, until)
-        g = total_of(g_c)
-        for k in tot: tot[k] += g[k]
-    budget = t["monthly_budget_ex_tax"] - t.get("event_reserve", 0)
+        camps += g_c
+    normal = total_of([c for c in camps if c["id"] not in ev_ids])
+    event = total_of([c for c in camps if c["id"] in ev_ids])
+    reserve = t.get("event_reserve", 0)
+    budget = t["monthly_budget_ex_tax"] - reserve
     dim = (ms.replace(month=ms.month % 12 + 1, day=1) - timedelta(days=1)).day
     el = (until - ms).days + 1
     pace = budget * el / dim
-    proj = tot["spend"] / el * dim
+    proj = normal["spend"] / el * dim
     data = [["項目", "実績", "目安", "評価"],
-            [f"月初来の広告費（{ms.month}/1〜{until.month}/{until.day}）", yen(tot["spend"]),
-             f"{yen(pace)}（{el}/{dim}日）", "順調" if tot["spend"] >= pace * 0.9 else "未消化ペース"],
-            ["月末の着地見込み", yen(proj), f"{yen(budget)}（通常運用）", f"{proj / budget:.0%}"],
-            ["月初来のROAS", f"{roas(tot):.1f}", f"{t.get('min_roas', 0):.0f} 以上", "達成" if roas(tot) >= t.get("min_roas", 0) else "未達"]]
+            [f"通常運用の広告費（{ms.month}/1〜{until.month}/{until.day}）", yen(normal["spend"]),
+             f"{yen(pace)}（{el}/{dim}日）", "順調" if normal["spend"] >= pace * 0.9 else "未消化ペース"],
+            ["通常運用の月末着地見込み", yen(proj), f"{yen(budget)}（通常運用）", f"{proj / budget:.0%}"],
+            ["通常運用のROAS", f"{roas(normal):.1f}", f"{t.get('min_roas', 0):.0f} 以上",
+             "達成" if roas(normal) >= t.get("min_roas", 0) else "未達"]]
+    if ev_ids:
+        data.append([f"イベント枠の広告費（{t.get('event_label', '企画')}）", yen(event["spend"]),
+                     f"{yen(reserve)}（予備費・税抜）",
+                     f"{event['spend'] / reserve:.0%}" if reserve else "—"])
+        data.append(["イベント枠のROAS", f"{roas(event):.1f}" if event["spend"] else "—", "", ""])
     return table(data, [60 * mm, 30 * mm, 46 * mm, 26 * mm])
 
 
