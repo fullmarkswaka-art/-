@@ -160,6 +160,9 @@ def main(argv=None) -> int:
         ot = action_sub.add_parser("outlet-rtg", help="アウトレット品を訪問者限定で配信するリターゲティング枠を作成")
         ot.add_argument("--budget", type=float, default=1500)
         ot.add_argument("--apply", action="store_true")
+        ev = action_sub.add_parser("event-ad", help="EC企画の期間限定バナー広告（Meta: 静止画リンク広告 / Google: プロモーション アセット）")
+        ev.add_argument("--json", required=True, help="Meta: {name,image,message_file,headline,link,daily_budget,end_date,include_purchasers} / Google: {campaign_ids[],promotion_target,percent_off,start_date,end_date,final_url,up_to,promotion_code}")
+        ev.add_argument("--apply", action="store_true")
         rp = action_sub.add_parser("replace-copy", help="広告文を差し替え（JSON指定、旧広告は停止）")
         rp.add_argument("ad_id")
         rp.add_argument("--json", required=True, help="Meta: {message, headline, description} / Google: {headlines[], descriptions[], path1, path2}")
@@ -245,6 +248,14 @@ def main(argv=None) -> int:
         elif args.action == "outlet-rtg":
             from .outlet_rtg import meta_create_outlet_rtg
             _print(meta_create_outlet_rtg(client, daily_budget=int(args.budget), apply=args.apply))
+        elif args.action == "event-ad":
+            import json as _json
+            from .event_ads import meta_create_event_ad
+            spec = _json.load(open(args.json, encoding="utf-8"))
+            message = open(spec["message_file"], encoding="utf-8").read().strip() if spec.get("message_file") else spec["message"]
+            _print(meta_create_event_ad(client, spec["name"], spec["image"], message, spec["headline"], spec["link"],
+                                        int(spec["daily_budget"]), spec["end_date"],
+                                        include_purchasers=spec.get("include_purchasers", True), apply=args.apply))
         elif args.action == "replace-copy":
             import json as _json
             from .ad_copy import meta_replace_link_ad
@@ -301,6 +312,14 @@ def main(argv=None) -> int:
         elif args.action == "outlet-rtg":
             from .outlet_rtg import google_create_outlet_rtg
             _print(google_create_outlet_rtg(client, daily_budget_yen=args.budget, apply=args.apply))
+        elif args.action == "event-ad":
+            import json as _json
+            from .event_ads import google_create_promotion_asset
+            spec = _json.load(open(args.json, encoding="utf-8"))
+            _print(google_create_promotion_asset(client, spec["campaign_ids"], spec["promotion_target"],
+                                                 int(spec["percent_off"]), spec["start_date"], spec["end_date"],
+                                                 spec["final_url"], up_to=spec.get("up_to", True),
+                                                 promotion_code=spec.get("promotion_code"), apply=args.apply))
         elif args.action == "replace-copy":
             import json as _json
             from .ad_copy import google_replace_rsa
