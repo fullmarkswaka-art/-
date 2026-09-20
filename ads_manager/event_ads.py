@@ -78,6 +78,40 @@ def meta_create_event_ad(client: MetaAdsClient, name: str, image_path: str, mess
     return plan
 
 
+def meta_add_broad_adset(client: MetaAdsClient, campaign_id: str, creative_id: str, name: str,
+                         end_date: str, apply: bool = False) -> dict:
+    """既存のイベント広告キャンペーンに「全員向け（Advantage+ オーディエンス）」広告セットを追加し、
+    同じクリエイティブで広告を作る。キャンペーン予算（CBO）が2つの広告セットに自動配分される。"""
+    acct = client.config.ad_account_id
+    adset_name = f"UCDN3_CVS_{name}_全員_Advantage+"
+    ad_name = f"{name.lower()}_1080x1080_all"
+    end_time = f"{end_date}T23:59:00+0900"
+    targeting = {
+        "geo_locations": {"countries": ["JP"], "location_types": ["home", "recent"]},
+        "age_min": 25, "age_max": 65,
+        "targeting_automation": {"advantage_audience": 1},
+    }
+    existing = {a["name"]: a for a in client.get_all(f"{campaign_id}/adsets", fields="id,name,status")}
+    plan = {"apply": apply, "campaign_id": campaign_id, "adset": existing.get(adset_name) or {"name": adset_name, "status": "(新規)"},
+            "targeting": "日本・25〜65歳・Advantage+ オーディエンス（新規含む全員）", "ad": {"name": ad_name, "creative_id": creative_id},
+            "end_time": end_time}
+    if not apply:
+        return plan
+    adset = existing.get(adset_name)
+    if adset is None:
+        adset = client.post(f"{acct}/adsets", name=adset_name, campaign_id=campaign_id, status="ACTIVE",
+                            billing_event="IMPRESSIONS", optimization_goal="OFFSITE_CONVERSIONS",
+                            promoted_object=json.dumps({"pixel_id": PIXEL_ID, "custom_event_type": "PURCHASE"}),
+                            targeting=json.dumps(targeting, ensure_ascii=False), end_time=end_time,
+                            attribution_spec=json.dumps([{"event_type": "CLICK_THROUGH", "window_days": 7},
+                                                         {"event_type": "VIEW_THROUGH", "window_days": 1}]))
+    plan["adset"] = adset
+    ad = client.post(f"{acct}/ads", name=ad_name, adset_id=adset["id"],
+                     creative=json.dumps({"creative_id": creative_id}), status="ACTIVE")
+    plan["ad"]["ad_id"] = ad["id"]
+    return plan
+
+
 # ---------- Google ----------
 
 def google_create_promotion_asset(gclient, campaign_ids: list[str], promotion_target: str,
