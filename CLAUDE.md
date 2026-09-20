@@ -114,9 +114,15 @@ FULLMARKS（fullmarksstore.jp）の広告運用ツール。Meta/Google広告のA
 
 ## 月間運用方針（2026-09〜）
 
-- イベント広告（EC企画）は通常運用と別枠。targets.json の `event_campaign_ids` に入れたキャンペーンは
-  週次レポートの「月間ペース」で通常運用から除外し、`event_reserve`（予備費、税抜）に対して集計する。
-  企画が終わったら ID を外す。予算計画の「イベント予備費」列と対応。
+- イベント広告（EC企画）は通常運用と**別予算・別計測**（2026-09-20 ユーザー指示）。
+  - targets.json `events[]` に企画ごと {key, label, start, end, reserve_ex_tax, meta_campaign_ids,
+    google_asset_ids, utm_campaign} を登録。`event_campaign_ids` は月間ペースからの除外用（同じ ID）。
+  - 集計: `python scripts/event_report.py [--key sw2026]`（Meta は広告セット別、Google はプロモーション
+    アセットが表示された広告のキャンペーン別）。週次レポートにも「イベント枠」節が自動で入る。
+  - Google のプロモーション アセットは追加費用なし（通常キャンペーンに付く）。イベントに独自予算を持たせるのは
+    Meta 側（専用キャンペーン）。EC側の計測用に最終URLへ utm_campaign を付ける（Meta は作成時に `url_tags`）。
+  - 企画終了後: 9月実績の予算計画にイベント分を「イベント予備費」列で分けて記入し、events から外す
+    （履歴として残す場合は `ended: true` を付けて event_campaign_ids からだけ外す）。
 - 月間広告費: 税抜70万円（targets.json 参照）。
   うち5〜10万はシルバーウィーク等のEC企画用予備費として残し、
   通常運用は約60万（実消化 約2万円/日）を Google + Meta で使い切る。

@@ -255,7 +255,8 @@ def main(argv=None) -> int:
             message = open(spec["message_file"], encoding="utf-8").read().strip() if spec.get("message_file") else spec["message"]
             _print(meta_create_event_ad(client, spec["name"], spec["image"], message, spec["headline"], spec["link"],
                                         int(spec["daily_budget"]), spec["end_date"],
-                                        include_purchasers=spec.get("include_purchasers", True), apply=args.apply))
+                                        include_purchasers=spec.get("include_purchasers", True),
+                                        url_tags=spec.get("url_tags"), apply=args.apply))
         elif args.action == "replace-copy":
             import json as _json
             from .ad_copy import meta_replace_link_ad

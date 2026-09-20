@@ -421,11 +421,37 @@ def sec_pacing(meta_client, google_client, today):
             ["通常運用のROAS", f"{roas(normal):.1f}", f"{t.get('min_roas', 0):.0f} 以上",
              "達成" if roas(normal) >= t.get("min_roas", 0) else "未達"]]
     if ev_ids:
-        data.append([f"イベント枠の広告費（{t.get('event_label', '企画')}）", yen(event["spend"]),
+        label = "、".join(e.get("label", "") for e in t.get("events", [])) or "企画"
+        data.append([f"イベント枠の広告費（{label}）", yen(event["spend"]),
                      f"{yen(reserve)}（予備費・税抜）",
                      f"{event['spend'] / reserve:.0%}" if reserve else "—"])
         data.append(["イベント枠のROAS", f"{roas(event):.1f}" if event["spend"] else "—", "", ""])
     return table(data, [60 * mm, 30 * mm, 46 * mm, 26 * mm])
+
+
+def sec_event(meta_client, google_client, today):
+    """イベント枠（EC企画）: 企画ごとに Meta キャンペーン／Google プロモーション アセットを別建てで集計。"""
+    from ads_manager.event_report import event_summary, load_events
+    out = []
+    for ev in load_events():
+        if date.fromisoformat(ev["start"]) > today - timedelta(days=1):
+            continue
+        sm = event_summary(meta_client, google_client, ev, today - timedelta(days=1))
+        data = [["媒体", "キャンペーン／アセット", "広告費", "表示", "クリック", "購入", "売上", "ROAS"]]
+        for r in sm["rows"]:
+            data.append([r["media"], Paragraph(disp(r["name"]), S["cell"]), yen(r["spend"]), f"{r['imp']:,}",
+                         f"{r['clicks']:,}", f"{r['cv']:.0f}", yen(r["rev"]) if r["rev"] else "—",
+                         f"{r['rev'] / r['spend']:.1f}" if r["spend"] and r["rev"] else "—"])
+        t = sm["total"]
+        data.append(["", "合計", yen(t["spend"]), "", "", f"{t['cv']:.0f}", yen(t["rev"]) if t["rev"] else "—",
+                     f"{t['rev'] / t['spend']:.1f}" if t["spend"] and t["rev"] else "—"])
+        tb = table(data, [14 * mm, 62 * mm, 20 * mm, 16 * mm, 16 * mm, 12 * mm, 22 * mm, 14 * mm], align_right_from=2)
+        tb.setStyle(TableStyle([("BACKGROUND", (0, len(data) - 1), (-1, len(data) - 1), colors.HexColor("#dfe7f3"))]))
+        title = f"{ev['label']}（{ev['start']}〜{ev['end']}、集計 {sm['since']}〜{sm['until']}）"
+        note = (f"イベント予算（税抜）{yen(sm['reserve'])} に対する Meta 消化 {yen(sm['meta_spend'])}"
+                f"（{sm['meta_spend'] / sm['reserve']:.0%}）。" if sm["reserve"] else "") + sm["note"]
+        out += [KeepTogether([Paragraph(title, S["h2"]), tb]), Paragraph(note, S["note"])]
+    return out
 
 
 def sec_audit(meta_client, google_client, g_labels):
@@ -512,6 +538,11 @@ def main():
     pac = sec_pacing(meta_client, google_client, today)
     if pac:
         story.append(KeepTogether([Paragraph("月間ペース（targets.json の通常運用予算に対して）", S["h2"]), pac]))
+
+    ev = sec_event(meta_client, google_client, today)
+    if ev:
+        story.append(Paragraph("イベント枠（EC企画・通常運用と別予算）", S["h2"]))
+        story.extend(ev)
 
     # 2. 何が売れたか
     story.append(Paragraph("2. 何が売れたか", S["h1"]))

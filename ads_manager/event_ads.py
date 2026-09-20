@@ -20,8 +20,10 @@ from .outlet_rtg import (AUD_ALL_VISITORS_30D, AUD_PURCHASERS_30D, IG_USER_ID, P
 
 def meta_create_event_ad(client: MetaAdsClient, name: str, image_path: str, message: str,
                          headline: str, link: str, daily_budget: int, end_date: str,
-                         include_purchasers: bool = True, apply: bool = False) -> dict:
+                         include_purchasers: bool = True, url_tags: str | None = None,
+                         apply: bool = False) -> dict:
     """静止画1枚のリンク広告を新規キャンペーンで作成する（訪問者30日、任意で購入者30日も含む）。
+    url_tags: 例 "utm_source=meta&utm_medium=paid_social&utm_campaign=sw2026"（EC側の計測用）。
 
     name: キャンペーン名の識別子（例 SW2026_AUTUMN_JOURNEY）。
     end_date: YYYY-MM-DD。当日 23:59 JST でキャンペーン終了。
@@ -68,8 +70,9 @@ def meta_create_event_ad(client: MetaAdsClient, name: str, image_path: str, mess
     spec = {"page_id": PAGE_ID, "instagram_user_id": IG_USER_ID,
             "link_data": {"image_hash": img["hash"], "link": link, "message": message, "name": headline,
                           "call_to_action": {"type": "SHOP_NOW", "value": {"link": link}}}}
+    extra = {"url_tags": url_tags} if url_tags else {}
     creative = client.post(f"{acct}/adcreatives", name=ad_name,
-                           object_story_spec=json.dumps(spec, ensure_ascii=False))
+                           object_story_spec=json.dumps(spec, ensure_ascii=False), **extra)
     ad = client.post(f"{acct}/ads", name=ad_name, adset_id=adset["id"],
                      creative=json.dumps({"creative_id": creative["id"]}), status="ACTIVE")
     plan["ad"].update(creative_id=creative["id"], ad_id=ad["id"])
