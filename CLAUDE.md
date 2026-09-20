@@ -224,6 +224,14 @@ FULLMARKS（fullmarksstore.jp）の広告運用ツール。Meta/Google広告のA
     custom_label_0=outlet のみ、オーディエンス＝ターゲティングモードで
     「AdWords optimized list(30日)」「カート訪問」）。PLA_v2 は 4,000→3,000円/日。
   - `python -m ads_manager meta outlet-rtg --apply` / `google outlet-rtg --apply` で再作成可。
+- 【2026-09-20 実施済み（ユーザー指示）】SW企画「AUTUMN JOURNEY DAYS」（対象OUTLET品がクーポンで最大10%OFF、
+  9/16〜9/23）のバナー広告。アウトレット不広告方針の例外で、EC企画予備費（税込10万まで、使い切らなくて可）。
+  - Meta: キャンペーン `UC_DN_3_CVS_SW2026_AUTUMN_JOURNEY` 52608025248135（15,000円/日、9/23 23:59 JST で自動停止）、
+    広告セット 52608025252135（FM_全訪問者_30日＋FM_購入者_30日、新規向けには出さない）、広告 52608025275735
+    （静止画 copy/sw2026_autumn_journey_1080x1080.jpg、リンク先はトップページ）。
+  - Google: プロモーション アセット 423327218833（「対象のOUTLET商品 最大10%OFF」9/16〜9/23）を指名検索4本に付与。
+    期間終了で自動的に非表示。percent_off は 1,000,000 = 100%（10% = 100,000）。
+  - 再利用: `python -m ads_manager meta|google event-ad --json copy/<企画>.json [--apply]`（ads_manager/event_ads.py）。
 - 「〇〇を買うならフルマークス」型の文言は、Google指名検索RSA（ノローナ・
   フーディニ）の見出し/説明文と、Metaカタログ広告テンプレート
   `{{product.name}} ― アウトドアの正規販売店、FULLMARKSで。` が原因。

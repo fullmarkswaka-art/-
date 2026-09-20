@@ -104,7 +104,7 @@ def google_create_promotion_asset(gclient, campaign_ids: list[str], promotion_ta
     a.final_urls.append(final_url)
     p = a.promotion_asset
     p.promotion_target = promotion_target
-    p.percent_off = int(percent_off) * 1_000_000
+    p.percent_off = int(percent_off) * 10_000  # 1,000,000 = 100%
     p.language_code = "ja"
     if up_to:
         p.discount_modifier = client.enums.PromotionExtensionDiscountModifierEnum.UP_TO
