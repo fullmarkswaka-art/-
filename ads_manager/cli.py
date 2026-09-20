@@ -160,6 +160,9 @@ def main(argv=None) -> int:
         ot = action_sub.add_parser("outlet-rtg", help="アウトレット品を訪問者限定で配信するリターゲティング枠を作成")
         ot.add_argument("--budget", type=float, default=1500)
         ot.add_argument("--apply", action="store_true")
+        if name == "google":
+            tr = action_sub.add_parser("set-troas", help="入札戦略を『コンバージョン値の最大化（目標ROAS）』へ。倍率で指定（10 = 1000%）")
+            tr.add_argument("campaign_id"); tr.add_argument("target_roas", type=float)
         ev = action_sub.add_parser("event-ad", help="EC企画の期間限定バナー広告（Meta: 静止画リンク広告 / Google: プロモーション アセット）")
         ev.add_argument("--json", required=True, help="Meta: {name,image,message_file,headline,link,daily_budget,end_date,include_purchasers} / Google: {campaign_ids[],promotion_target,percent_off,start_date,end_date,final_url,up_to,promotion_code}")
         ev.add_argument("--apply", action="store_true")
@@ -313,6 +316,8 @@ def main(argv=None) -> int:
         elif args.action == "outlet-rtg":
             from .outlet_rtg import google_create_outlet_rtg
             _print(google_create_outlet_rtg(client, daily_budget_yen=args.budget, apply=args.apply))
+        elif args.action == "set-troas":
+            _print(client.set_target_roas(args.campaign_id, args.target_roas))
         elif args.action == "event-ad":
             import json as _json
             from .event_ads import google_create_promotion_asset

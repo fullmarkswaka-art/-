@@ -96,6 +96,17 @@ class GoogleAdsClientWrapper:
             customer_id=self.customer_id, operations=[op])
         return resp.results[0].resource_name
 
+    def set_target_roas(self, campaign_id: str, target_roas: float) -> str:
+        """入札戦略を「コンバージョン値の最大化（目標ROAS付き）」に切り替える。target_roas は倍率（10.0 = 1000%）。"""
+        service = self.client.get_service("CampaignService")
+        op = self.client.get_type("CampaignOperation")
+        c = op.update
+        c.resource_name = service.campaign_path(self.customer_id, int(campaign_id))
+        c.maximize_conversion_value.target_roas = float(target_roas)
+        op.update_mask.paths.append("maximize_conversion_value.target_roas")
+        resp = service.mutate_campaigns(customer_id=self.customer_id, operations=[op])
+        return resp.results[0].resource_name
+
     def set_campaign_budget(self, campaign_id: str, daily_amount: float) -> str:
         """キャンペーンの日予算を変更（金額はアカウント通貨単位）。"""
         rows = self.search(
