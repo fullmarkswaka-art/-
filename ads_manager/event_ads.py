@@ -21,19 +21,20 @@ from .outlet_rtg import (AUD_ALL_VISITORS_30D, AUD_PURCHASERS_30D, IG_USER_ID, P
 def meta_create_event_ad(client: MetaAdsClient, name: str, image_path: str, message: str,
                          headline: str, link: str, daily_budget: int, end_date: str,
                          include_purchasers: bool = True, url_tags: str | None = None,
-                         apply: bool = False) -> dict:
+                         end_hm: str = "23:50", apply: bool = False) -> dict:
     """静止画1枚のリンク広告を新規キャンペーンで作成する（訪問者30日、任意で購入者30日も含む）。
     url_tags: 例 "utm_source=meta&utm_medium=paid_social&utm_campaign=sw2026"（EC側の計測用）。
 
     name: キャンペーン名の識別子（例 SW2026_AUTUMN_JOURNEY）。
-    end_date: YYYY-MM-DD。当日 23:59 JST でキャンペーン終了。
+    end_date: YYYY-MM-DD、end_hm: HH:MM（JST）でキャンペーン終了。
+    既定を 23:50 にしているのは、締切直前の流入がクーポンを使えず無駄になるため（2026-09-21 ユーザー指示）。
     """
     acct = client.config.ad_account_id
     camp_name = f"UC_DN_3_CVS_{name}"
     adset_name = f"UCDN3_CVS_{name}_訪問者30日"
     ad_name = f"{name.lower()}_1080x1080"
     existing = {c["name"]: c for c in client.get_all(f"{acct}/campaigns", fields="id,name,status")}
-    end_time = f"{end_date}T23:59:00+0900"
+    end_time = f"{end_date}T{end_hm}:00+0900"
     targeting = {
         "geo_locations": {"countries": ["JP"], "location_types": ["home", "recent"]},
         "age_min": 25, "age_max": 65,
@@ -82,13 +83,13 @@ def meta_create_event_ad(client: MetaAdsClient, name: str, image_path: str, mess
 
 
 def meta_add_broad_adset(client: MetaAdsClient, campaign_id: str, creative_id: str, name: str,
-                         end_date: str, apply: bool = False) -> dict:
+                         end_date: str, end_hm: str = "23:50", apply: bool = False) -> dict:
     """既存のイベント広告キャンペーンに「全員向け（Advantage+ オーディエンス）」広告セットを追加し、
     同じクリエイティブで広告を作る。キャンペーン予算（CBO）が2つの広告セットに自動配分される。"""
     acct = client.config.ad_account_id
     adset_name = f"UCDN3_CVS_{name}_全員_Advantage+"
     ad_name = f"{name.lower()}_1080x1080_all"
-    end_time = f"{end_date}T23:59:00+0900"
+    end_time = f"{end_date}T{end_hm}:00+0900"
     targeting = {
         "geo_locations": {"countries": ["JP"], "location_types": ["home", "recent"]},
         "age_min": 25, "age_max": 65,
@@ -163,4 +164,27 @@ def google_create_promotion_asset(gclient, campaign_ids: list[str], promotion_ta
         ops.append(cop)
     r2 = ca_svc.mutate_campaign_assets(customer_id=gclient.customer_id, operations=ops)
     plan["campaign_assets"] = [x.resource_name for x in r2.results]
+    return plan
+
+
+def google_remove_promotion_asset(gclient, asset_id: str, apply: bool = False) -> dict:
+    """プロモーション アセットのキャンペーン紐付けを外す。
+    Google のアセットは終了日（日付単位）しか指定できないため、当日の途中で止めたいときに使う。"""
+    rows = gclient.search(
+        "SELECT campaign.name, campaign_asset.resource_name, campaign_asset.status FROM campaign_asset "
+        f"WHERE campaign_asset.field_type='PROMOTION' AND asset.id = {int(asset_id)}")
+    links = [{"campaign": r.campaign.name, "resource_name": r.campaign_asset.resource_name,
+              "status": r.campaign_asset.status.name} for r in rows]
+    plan = {"apply": apply, "asset_id": str(asset_id), "links": links}
+    if not apply or not links:
+        return plan
+    client = gclient.client
+    svc = client.get_service("CampaignAssetService")
+    ops = []
+    for link in links:
+        op = client.get_type("CampaignAssetOperation")
+        op.remove = link["resource_name"]
+        ops.append(op)
+    resp = svc.mutate_campaign_assets(customer_id=gclient.customer_id, operations=ops)
+    plan["removed"] = [x.resource_name for x in resp.results]
     return plan

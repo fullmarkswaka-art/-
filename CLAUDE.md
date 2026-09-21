@@ -251,6 +251,11 @@ FULLMARKS（fullmarksstore.jp）の広告運用ツール。Meta/Google広告のA
     訪問者側は消化 18,138円・購入0（LP閲覧593・カート追加2）、全員向けは消化 5,461円・購入3・売上 15,093円
     （ROAS 2.8）。CBO が反応の悪い訪問者側に寄っていたため、残り2日は全員向けに集約。
     → EC企画では「訪問者・購入者への再訴求」より「新規を含む全員（Advantage+）」の方が効いた、が今回の学び。
+    【2026-09-21 ユーザー指示】**企画広告は締切の10分前に止める**（23:59 に流入してもクーポンを使えず無駄になるため）。
+    Meta はキャンペーン stop_time / 広告セット end_time を 9/23 23:50 JST に変更済み。`meta_create_event_ad` /
+    `meta_add_broad_adset` の `end_hm` 既定値も "23:50" にした。Google のプロモーション アセットは終了日（日付単位）
+    しか指定できないため、`google_remove_promotion_asset(gclient, asset_id, apply=True)` で紐付けを外す
+    （9/23 23:50 JST に実行するスケジュールを登録済み）。
   - Google: プロモーション アセット 423327218833（「対象のOUTLET商品 最大10%OFF」9/16〜9/23）を指名検索4本に付与。
     期間終了で自動的に非表示。percent_off は 1,000,000 = 100%（10% = 100,000）。
   - 再利用: `python -m ads_manager meta|google event-ad --json copy/<企画>.json [--apply]`（ads_manager/event_ads.py）。
