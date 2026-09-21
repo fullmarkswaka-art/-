@@ -247,6 +247,10 @@ FULLMARKS（fullmarksstore.jp）の広告運用ツール。Meta/Google広告のA
     52608026094935（全員向け・Advantage+ オーディエンス、広告 52608026100335。ユーザー指示「新規も入れて最大売上」）。
     静止画 copy/sw2026_autumn_journey_1080x1080.jpg、リンク先はトップページ。
     追加は `ads_manager.event_ads.meta_add_broad_adset`。
+    【2026-09-21 実施済み（ユーザー承認）】訪問者30日の広告セット 52608025252135 を停止。9/20〜21 の実績で
+    訪問者側は消化 18,138円・購入0（LP閲覧593・カート追加2）、全員向けは消化 5,461円・購入3・売上 15,093円
+    （ROAS 2.8）。CBO が反応の悪い訪問者側に寄っていたため、残り2日は全員向けに集約。
+    → EC企画では「訪問者・購入者への再訴求」より「新規を含む全員（Advantage+）」の方が効いた、が今回の学び。
   - Google: プロモーション アセット 423327218833（「対象のOUTLET商品 最大10%OFF」9/16〜9/23）を指名検索4本に付与。
     期間終了で自動的に非表示。percent_off は 1,000,000 = 100%（10% = 100,000）。
   - 再利用: `python -m ads_manager meta|google event-ad --json copy/<企画>.json [--apply]`（ads_manager/event_ads.py）。
