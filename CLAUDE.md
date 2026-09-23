@@ -256,6 +256,12 @@ FULLMARKS（fullmarksstore.jp）の広告運用ツール。Meta/Google広告のA
     `meta_add_broad_adset` の `end_hm` 既定値も "23:50" にした。Google のプロモーション アセットは終了日（日付単位）
     しか指定できないため、`google_remove_promotion_asset(gclient, asset_id, apply=True)` で紐付けを外す
     （9/23 23:50 JST に実行するスケジュールを登録済み）。
+    【2026-09-23 23:50 JST 実施済み】予定どおり Google のプロモーション紐付け4本を削除（status=REMOVED）、
+    Meta キャンペーンも明示的に PAUSED にして企画終了。**最終結果**: Meta 消化 48,422円（予算90,909円の53%）、
+    購入17・売上174,556円。内訳は全員向け 30,036円・購入14・売上189,832円（ROAS 6.3）、訪問者30日 18,386円・購入0。
+    9/23 単日は全員向けが 9,723円で購入8・売上159,463円（ROAS 16.4）と最終日に伸びた。
+    targets.json の events[] に `ended: true` を付けたが、**9月末までは event_campaign_ids に残す**
+    （外すと月間ペースで通常運用に合算されてしまうため）。10月に入ったら ID を外す。
   - Google: プロモーション アセット 423327218833（「対象のOUTLET商品 最大10%OFF」9/16〜9/23）を指名検索4本に付与。
     期間終了で自動的に非表示。percent_off は 1,000,000 = 100%（10% = 100,000）。
   - 再利用: `python -m ads_manager meta|google event-ad --json copy/<企画>.json [--apply]`（ads_manager/event_ads.py）。

@@ -21,7 +21,9 @@
       "google_asset_ids": [
         "423327218833"
       ],
-      "utm_campaign": "sw2026_autumn_journey"
+      "utm_campaign": "sw2026_autumn_journey",
+      "ended": true,
+      "result_note": "最終: Meta 48,422円・購入17・売上174,556円（ROAS 3.6）。全員向けのみ 30,036円・購入14・売上189,832円。訪問者30日は9/21に停止。9月末までは event_campaign_ids に残す（月間ペースを通常運用と分けるため）"
     }
   ],
   "_events_note": "イベント広告は通常運用と別枠。events[] で企画ごとに予算・Metaキャンペーン・Googleアセットを管理し、scripts/event_report.py と週次レポートの「イベント枠」で集計する。event_campaign_ids は月間ペースの除外用（events の meta_campaign_ids と同じ）"
