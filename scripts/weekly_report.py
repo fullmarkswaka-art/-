@@ -454,6 +454,31 @@ def sec_event(meta_client, google_client, today):
     return out
 
 
+def sec_adset_compare(meta_client, since, until):
+    """同じキャンペーン内に広告セットが複数あるもの（全員向け vs 絞った配信の比較テスト）を並べる。"""
+    acct = meta_client.config.ad_account_id
+    tr = json.dumps({"since": str(since), "until": str(until)})
+    rows = meta_client.get_all(f"{acct}/insights", level="adset", time_range=tr, limit=200,
+                               fields="campaign_id,campaign_name,adset_name,spend,impressions,reach,frequency,clicks,actions,action_values")
+    by = defaultdict(list)
+    for r in rows:
+        m = _mm(r)
+        if m["spend"] > 0:
+            by[r["campaign_id"]].append({"camp": r["campaign_name"], "adset": r["adset_name"],
+                                         "freq": float(r.get("frequency") or 0), **m})
+    data = [["キャンペーン／広告セット", "広告費", "頻度", "購入", "売上", "ROAS"]]
+    for cid, lst in by.items():
+        if len(lst) < 2 or cid in EVENT_IDS:
+            continue
+        for x in sorted(lst, key=lambda x: -x["spend"]):
+            label = disp(x["camp"]) + " / " + ("全員向け" if "全員" in x["adset"] else re.sub(r"^UCDN\d_", "", x["adset"]))
+            data.append([Paragraph(label, S["cell"]), yen(x["spend"]), f"{x['freq']:.1f}", f"{x['cv']:.0f}",
+                         yen(x["rev"]) if x["rev"] else "—", f"{roas(x):.1f}" if x["rev"] else "—"])
+    if len(data) == 1:
+        return None
+    return table(data, [80 * mm, 24 * mm, 14 * mm, 14 * mm, 26 * mm, 16 * mm])
+
+
 def sec_audit(meta_client, google_client, g_labels):
     lines = []
     audit = meta_audit(meta_client, check_links=True)
@@ -559,6 +584,10 @@ def main():
     if google_client:
         story.append(KeepTogether([Paragraph("Google", S["h2"]), sec_campaigns(g_camps, g_camps_p)]))
     story.append(KeepTogether([Paragraph("Meta", S["h2"]), sec_campaigns(m_camps, m_camps_p)]))
+    cmp_tb = sec_adset_compare(meta_client, cs, cu)
+    if cmp_tb:
+        story.append(KeepTogether([Paragraph("Meta 配信先の比較（全員向け vs 絞った配信）", S["h2"]), cmp_tb]))
+        story.append(Paragraph("同じキャンペーン内で予算を奪い合う形。ROASの高い方に寄せる判断材料（2026-09-23 開始のテスト）。", S["note"]))
 
     # 4. 日別
     story.append(KeepTogether([Paragraph("4. 日別推移（Google + Meta）", S["h1"]), sec_daily(g_daily, m_daily, cs, cu)]))
