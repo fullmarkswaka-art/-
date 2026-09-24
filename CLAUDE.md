@@ -117,6 +117,11 @@ FULLMARKS（fullmarksstore.jp）の広告運用ツール。Meta/Google広告のA
 - イベント広告（EC企画）は通常運用と**別予算・別計測**（2026-09-20 ユーザー指示）。
   - targets.json `events[]` に企画ごと {key, label, start, end, reserve_ex_tax, meta_campaign_ids,
     google_asset_ids, utm_campaign} を登録。`event_campaign_ids` は月間ペースからの除外用（同じ ID）。
+  - 結果報告PDF: `python scripts/event_pdf_report.py --key <key>` → reports/イベント広告報告_<key>.pdf
+    （サマリー / いくら使っていくら売れたか / 広告計測の精度 / 学び / 設定。events[] の offer・ads_start・image・
+    daily_memo・learnings を使う）。計測精度はクリック経由とビュー経由の内訳、Metaピクセルのサイト全体の購入数、
+    媒体間の重複、税込/税抜の差で評価する。**Meta ピクセルはブラウザのみ（コンバージョンAPI未導入）、
+    自動詳細マッチングはオフ**（2026-09-24 確認）→ 購入は少なめに計測されている可能性。
   - 集計: `python scripts/event_report.py [--key sw2026]`（Meta は広告セット別、Google はプロモーション
     アセットが表示された広告のキャンペーン別）。週次レポートにも「イベント枠」節が自動で入る。
   - Google のプロモーション アセットは追加費用なし（通常キャンペーンに付く）。イベントに独自予算を持たせるのは
