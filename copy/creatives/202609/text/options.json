@@ -1,0 +1,26 @@
+{
+ "houdini": {
+  "headline": "HOUDINI｜PACE SERIES",
+  "image": "houdini-pace_v2_1080x1350.jpg",
+  "options": {
+   "A": {"label": "A 今の本文のまま（ブランド紹介）",
+         "text": "1993年にスウェーデンで生まれたアウトドアブランド。「最高の着心地」をコンセプトとし、リサイクル素材や生分解性をもつ生地を最大限採用した、高機能かつ持続可能なウェアを提案しています。"},
+   "B": {"label": "B シリーズの考え方を伝える",
+         "text": "激しい運動のために開発された、HOUDINI の PACE SERIES。\n肌触り、フィット感、動きやすさ、そして動いたときの静かさ。着たときの感覚を突き詰めた、ランニングとトレーニングのためのウェアです。"},
+   "C": {"label": "C アイテムを具体的に見せる",
+         "text": "羽のように軽く、濡れてもすぐ乾く Pace Air LS Tee。\nメッシュ構造で熱を逃がし、重ねると暖かい Pace Flow Half Zip。\nトレイルの長い一日に応える Pace Trail Tights。\n走る季節のための、HOUDINI PACE SERIES。"}
+  }
+ },
+ "norrona": {
+  "headline": "NORRØNA senja｜Trail Running Collection",
+  "image": "norrona-senja_v1_1080x1350.jpg",
+  "options": {
+   "A": {"label": "A 今の本文のまま（ブランド紹介）",
+         "text": "1929年に創業されたノルウェーのアウトドアブランド。北極圏の厳しく過酷な自然環境にも対応する最高峰のプロダクトを開発しています。"},
+   "B": {"label": "B シリーズの考え方を伝える",
+         "text": "NORRØNA のトレイルランニングコレクション、senja。\n軽さ、速乾性、動きやすさ。山を走るために開発されたウェアは、あらゆるアクティビティにそのまま応えます。"},
+   "C": {"label": "C アイテムを具体的に見せる",
+         "text": "薄手の4方向ストレッチ素材 flex1 で、軽く動ける senja flex1 Shorts。\n前面で風を防ぎ、背中で熱を逃がす senja aero90 Vest。\n秋の山を走るための、NORRØNA senja。"}
+  }
+ }
+}
