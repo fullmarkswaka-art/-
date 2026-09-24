@@ -166,6 +166,15 @@ FULLMARKS（fullmarksstore.jp）の広告運用ツール。Meta/Google広告のA
   アクリマ 計 2,000→1,000、Google PLA_v2 2,500→1,500 / 指名_ノローナ 1,600→1,200。
   指名_フルマークス・フーディ二（ROAS 15〜18）は据え置き。Google は日予算の最大2倍まで日によって使うため、
   9/27 にペースを再確認する。10月は予算計画（FULLMARKS 約57万）に合わせて改めて設定する。
+- 【2026-09-24 実施（ユーザー承認）】Meta 静止画の差し替え: HOUDINI PACE SERIES（2パターン）/ NORRØNA senja。
+  画像は copy/creatives/202609/（1:1・4:5・9:16。`ads_manager/creative_swap.py` で配置ごとに出し分け。
+  フィード=4:5、ストーリーズ・リール=9:16、その他=1:1）。本文はユーザーが選んだB案（シリーズの考え方、
+  copy/creatives/202609/text/options.json）。ユーザーの評価は「どれも微妙、強いて言えばB」なので文言は改善余地あり。
+  見出し: HOUDINI｜PACE SERIES / NORRØNA senja｜Trail Running Collection。リンク先: HOUDINI 一覧 /
+  NORRØNA は /category/NORRONA_TRAIL/（senja のみ28商品、うちアウトレット価格8点）。
+  新広告: HOUDINI RTG 52608939624735・52608939633335、NORRØNA RTG 52608939638135、NORRØNA 全員 52608939640135。
+  審査通過後に旧広告（52604714181535 / 52604711975335 / 52608801270935）を停止する（配信を途切れさせないため）。
+  HOUDINI STORE の準備が整うまでは FULLMARKS 口座で HOUDINI 広告を続ける（ユーザー確認）。
 - HESTRA 画像制作依頼書（画像のみ、ユーザー指示）: `reports/HESTRA画像制作依頼書_2026-09-16.docx`
   （`scripts/build_hestra_image_brief.js`。参考画像は配信中の HOUDINI/NORRØNA 静止画）。
 - HESTRA 広告の作成依頼書（運用側の設計メモ）: `reports/HESTRA広告_作成依頼書_2026-09-16.docx`
