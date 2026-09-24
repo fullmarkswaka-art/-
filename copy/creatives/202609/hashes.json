@@ -1,0 +1,17 @@
+{
+ "houdini-pace_v1": {
+  "1x1": "a812114049713088e1b5a44947f1b5f4",
+  "4x5": "a5b46cbb89a3bfad09da2c0753ce0ffa",
+  "9x16": "55c3e1f3515bc58ef725e023c9611e7e"
+ },
+ "houdini-pace_v2": {
+  "1x1": "d39fdc080e0db2a76d59f6c52a5e237c",
+  "4x5": "43bfd6ea5728aa8a93c304fa5e2e1e7f",
+  "9x16": "56f5146d79edfb3e2f635e9d66cc5a02"
+ },
+ "norrona-senja_v1": {
+  "1x1": "794b1bd542dbd07b7725171aa9150695",
+  "4x5": "3209da875ace4381528b8560e5321747",
+  "9x16": "d42926ebc912ea83613d04c2e92106d2"
+ }
+}
