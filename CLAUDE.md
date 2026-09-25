@@ -175,6 +175,10 @@ FULLMARKS（fullmarksstore.jp）の広告運用ツール。Meta/Google広告のA
   新広告: HOUDINI RTG 52608939624735・52608939633335、NORRØNA RTG 52608939638135、NORRØNA 全員 52608939640135。
   9/25 0:11 JST に4本とも審査通過を確認し、旧広告（52604714181535 / 52604711975335 / 52608801270935）を停止済み。
   HOUDINI STORE の準備が整うまでは FULLMARKS 口座で HOUDINI 広告を続ける（ユーザー確認）。
+- 【2026-09-25 発覚】**Meta 広告アカウントの利用上限（spend_cap）¥300,000 に到達し、9/23 昼ごろから Meta 全広告が停止**
+  （amount_spent=300,000、9/24 の Meta 消化 0）。上限の変更・リセットは費用に関わるためユーザー承認が必要。
+  API では `act_976410622096585` の `spend_cap` / `amount_spent` で確認できる。週次レポート時に残額も確認する。
+  9/1〜24 の通常運用 524,909円（Google 9/24 分は速報）、65万まで残り 125,091円（6日で 約20,800円/日）。
 - HESTRA 画像制作依頼書（画像のみ、ユーザー指示）: `reports/HESTRA画像制作依頼書_2026-09-16.docx`
   （`scripts/build_hestra_image_brief.js`。参考画像は配信中の HOUDINI/NORRØNA 静止画）。
 - HESTRA 広告の作成依頼書（運用側の設計メモ）: `reports/HESTRA広告_作成依頼書_2026-09-16.docx`
