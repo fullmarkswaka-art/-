@@ -31,10 +31,11 @@ ACTUALS = [("2026-05", 280_564, 0, "FULLMARKS API実績"),
            ("2026-06", 298_599, 651_401, "月合計95万（ユーザー提供）。差額はMDX管理口座等"),
            ("2026-07", 328_194, 621_806, "月合計95万（ユーザー提供）"),
            ("2026-08", 468_641, 147_557, "FULLMARKS API実績 + 広告代理店請求 税込162,313円→税抜147,557円（2026-09-14 ユーザー提供）")]
-SEP_MTD = 220_464          # 9/1〜9/10 実績（Google 104,706 + Meta 115,758）
-SEP_MTD_DAYS = 10
+SEP_MTD = 524_909          # 9/1〜9/24 通常運用の実績（Google 266,460 + Meta 258,449。イベント枠は含まない）
+SEP_MTD_DAYS = 24
 SEP_NORMAL = 650_000       # 9月 通常運用（FULLMARKSのみ）
-EVENTS = {"2026-09": ("シルバーウィーク企画（税込10万）", 90_909), "2026-12": ("年末年始企画", 100_000),
+# 9月のイベントは「使った分だけ」を通常運用と別に計上する（2026-09-25 ユーザー指示）。予備費 税込10万のうち使用分。
+EVENTS = {"2026-09": ("SW企画 実績（予備費 税込10万のうち使用分）", 48_422), "2026-12": ("年末年始企画", 100_000),
           "2027-02": ("冬セール", 250_000), "2027-03": ("イベント告知予備", 50_000)}
 MONTHS_OCT = ["2026-10", "2026-11", "2026-12", "2027-01", "2027-02", "2027-03", "2027-04"]
 WEIGHTS = [0.15, 0.155, 0.17, 0.14, 0.16, 0.115, 0.11]
@@ -63,12 +64,12 @@ CAMP = {  # ブランド -> [(媒体, キャンペーン, 比率, 新設?)]
 }
 STORE_CAMP = [("Google", "【新設】指名検索", 0.45), ("Google", "【新設】ショッピング(通常価格のみ)", 0.30), ("Meta", "【新設】カタログ/リターゲティング", 0.25)]
 STORES = ["HOUDINI STORE", "NORRONA STORE", "PU STORE"]
-SEP_ACTUAL_BY_CAMP = [("Google", "UC_PL_5_PLA_v2", 42_548), ("Google", "UC_SK_1_指名_フーディ二", 21_682),
-                      ("Google", "UC_SK_1_指名_フルマークス", 20_073), ("Google", "UC_SK_1_指名_ノローナ", 17_816),
-                      ("Google", "UC_SK_1_指名_ポック", 2_540), ("Meta", "UC_DN_3_CVS_フルマークス", 42_212),
-                      ("Meta", "UC_DN_3_RTG_フーディニ_2608", 22_086), ("Meta", "UC_DN_3_RTG_アクリマ_2608", 14_179),
-                      ("Meta", "UC_DN_3_RTG_ポック_2608", 12_428), ("Meta", "UC_DN_3_RTG_ノローナ_2608", 12_315),
-                      ("Meta", "UC_DN_4_CLK_アクリマ", 12_149), ("Google/Meta", "アウトレット枠（9/7停止）", 436)]
+SEP_ACTUAL_BY_CAMP = [("Google", "UC_PL_5_PLA_v2", 85_598), ("Google", "UC_SK_1_指名_フーディ二", 70_344),
+                      ("Google", "UC_SK_1_指名_フルマークス", 60_858), ("Google", "UC_SK_1_指名_ノローナ", 41_556),
+                      ("Google", "UC_SK_1_指名_ポック", 8_057), ("Meta", "UC_DN_3_CVS_フルマークス", 104_104),
+                      ("Meta", "UC_DN_3_RTG_フーディニ_2608", 49_462), ("Meta", "UC_DN_3_RTG_アクリマ_2608", 27_751),
+                      ("Meta", "UC_DN_4_CLK_アクリマ", 27_064), ("Meta", "UC_DN_3_RTG_ポック_2608", 25_087),
+                      ("Meta", "UC_DN_3_RTG_ノローナ_2608", 24_592), ("Google/Meta", "アウトレット枠（9/7停止）", 436)]
 
 
 def days(m: str) -> int:
@@ -99,7 +100,7 @@ def build(out: str) -> None:
     ws.cell(row=6, column=1, value="9月 通常運用（FULLMARKS）").font = black
     c = ws.cell(row=6, column=2, value=SEP_NORMAL); c.font = blue; c.number_format = YEN
     K_SEP = "前提!$B$6"
-    ws.cell(row=6, column=3, value=f"9/1〜9/10実績 ¥{SEP_MTD:,}（日割 ¥{SEP_MTD//SEP_MTD_DAYS:,}、月換算 ¥{SEP_MTD*30//SEP_MTD_DAYS:,}）→ 65万ペースに乗っている").font = small
+    ws.cell(row=6, column=3, value=f"9/1〜9/{SEP_MTD_DAYS}実績 ¥{SEP_MTD:,}（日割 ¥{SEP_MTD//SEP_MTD_DAYS:,}）。残り6日 約2万円/日で月末 約64万の見込み。イベント枠は含まない").font = small
     # 実績
     ws["A9"] = "実績（5〜8月）"; ws["A9"].font = bold
     for c_, h in enumerate(["月", "FULLMARKS", "その他(MDX等)", "合計", "備考"], 1):
@@ -115,13 +116,14 @@ def build(out: str) -> None:
         cell = ws.cell(row=15, column=c_, value=f"=SUM({L(c_)}11:{L(c_)}14)"); cell.font = bold; cell.number_format = YEN
     K_ACT = "前提!$D$15"
     # イベント
-    ws["A18"] = "イベント予備費（通常運用と別枠）"; ws["A18"].font = bold
+    ws["A18"] = "イベント予備費（通常運用と別枠。終わった企画は使った分だけを計上）"; ws["A18"].font = bold
     for c_, h in enumerate(["月", "内容", "金額"], 1):
         cell = ws.cell(row=19, column=c_, value=h); cell.font = wb_; cell.fill = hdr; cell.alignment = center
     ev_rows = {}
     for i, (m, (name, amt)) in enumerate(EVENTS.items(), 20):
         ws.cell(row=i, column=1, value=m).font = black; ws.cell(row=i, column=2, value=name).font = black
-        cell = ws.cell(row=i, column=3, value=amt); cell.font = blue; cell.number_format = YEN; cell.fill = yellow
+        cell = ws.cell(row=i, column=3, value=amt); cell.font = blue; cell.number_format = YEN
+        cell.fill = grey if m == "2026-09" else yellow  # 9月は実績（使った分）、以降は仮置き
         ev_rows[m] = i
     ev_end = 19 + len(EVENTS)
     ws.cell(row=ev_end + 1, column=1, value="計").font = bold
@@ -192,7 +194,7 @@ def build(out: str) -> None:
     ws2.cell(row=row, column=10, value=f"=H{row}+I{row}")
     ws2.cell(row=row, column=11, value=f"=K{row-1}+J{row}")
     ws2.cell(row=row, column=12, value=f"={K_ANNUAL}-K{row}")
-    ws2.cell(row=row, column=13, value=f"FULLMARKSのみ。9/1〜10実績 ¥{SEP_MTD:,}（65万ペース）。SW企画10万は別枠").font = small
+    ws2.cell(row=row, column=13, value=f"FULLMARKSのみ。9/1〜{SEP_MTD_DAYS}実績 ¥{SEP_MTD:,}。SW企画は使用分 ¥48,422 を別枠で計上（予備費の残りは10〜4月へ）").font = small
     month_rows["2026-09"] = row; row += 1
     for m in MONTHS_OCT:
         ws2.cell(row=row, column=1, value=m); ws2.cell(row=row, column=2, value="計画")
@@ -322,7 +324,7 @@ def build(out: str) -> None:
     ws5.cell(row=e + 1, column=5, value=f"={K_SEP}").number_format = YEN
     ws5.cell(row=e + 2, column=1, value="差（月換算−計画）").font = bold
     ws5.cell(row=e + 2, column=5, value=f"=E{e}-E{e+1}").number_format = YEN
-    ws5.cell(row=e + 3, column=1, value="注: 9/4夜〜9/6はMetaカタログ広告が停止していたため、その分は月換算が低めに出る。アウトレット枠は9/7に停止。").font = small
+    ws5.cell(row=e + 3, column=1, value="注: 9/4夜〜9/6はMetaカタログ広告、9/23昼〜9/25夕はMeta全広告（利用上限到達）が停止。アウトレット枠は9/7に停止。SW企画（イベント枠）は含まない。").font = small
     for rr in range(3, e + 3):
         for c_ in range(1, 6): ws5.cell(row=rr, column=c_).border = border
     for col, w in zip("ABCDE", (12, 34, 16, 12, 14)): ws5.column_dimensions[col].width = w

@@ -409,7 +409,7 @@ def sec_pacing(meta_client, google_client, today):
     normal = total_of([c for c in camps if c["id"] not in ev_ids])
     event = total_of([c for c in camps if c["id"] in ev_ids])
     reserve = t.get("event_reserve", 0)
-    budget = t["monthly_budget_ex_tax"] - reserve
+    budget = t.get("normal_budget_ex_tax", t["monthly_budget_ex_tax"] - reserve)
     dim = (ms.replace(month=ms.month % 12 + 1, day=1) - timedelta(days=1)).day
     el = (until - ms).days + 1
     pace = budget * el / dim
@@ -422,8 +422,8 @@ def sec_pacing(meta_client, google_client, today):
              "達成" if roas(normal) >= t.get("min_roas", 0) else "未達"]]
     if ev_ids:
         label = "、".join(e.get("label", "") for e in t.get("events", [])) or "企画"
-        data.append([f"イベント枠の広告費（{label}）", yen(event["spend"]),
-                     f"{yen(reserve)}（予備費・税抜）",
+        data.append([f"イベント枠の広告費（{label}）※通常と別に使った分だけ計上", yen(event["spend"]),
+                     f"予備費 {yen(reserve)} まで",
                      f"{event['spend'] / reserve:.0%}" if reserve else "—"])
         data.append(["イベント枠のROAS", f"{roas(event):.1f}" if event["spend"] else "—", "", ""])
     return table(data, [60 * mm, 30 * mm, 46 * mm, 26 * mm])
