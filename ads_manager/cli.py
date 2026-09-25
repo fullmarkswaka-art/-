@@ -5,11 +5,11 @@
   python -m ads_manager meta campaigns              # Metaキャンペーン一覧
   python -m ads_manager meta insights [--days 7]    # Meta成果データ
   python -m ads_manager meta set-status <id> ACTIVE|PAUSED
-  python -m ads_manager meta set-budget <id> <金額(円)>
+  python -m ads_manager meta set-budget <id> <金額(円)> [--apply]
   python -m ads_manager google campaigns            # Googleキャンペーン一覧
   python -m ads_manager google metrics [--days 7]   # Google成果データ
   python -m ads_manager google set-status <id> ENABLED|PAUSED
-  python -m ads_manager google set-budget <id> <金額>
+  python -m ads_manager google set-budget <id> <金額> [--apply]
   python -m ads_manager meta audit                    # 広告棚卸し（リンク切れ・停止漏れ検出）
   python -m ads_manager meta catalog-usage            # 広告セットが参照するカタログ/商品セット
   python -m ads_manager meta catalog-products <ID> [--query 語]  # カタログ内商品の表示状態
@@ -77,9 +77,11 @@ def main(argv=None) -> int:
         st = action_sub.add_parser("set-status")
         st.add_argument("object_id")
         st.add_argument("status")
+        st.add_argument("--apply", action="store_true", help="指定しなければ変更内容の表示のみ")
         bd = action_sub.add_parser("set-budget")
         bd.add_argument("object_id")
         bd.add_argument("amount", type=float)
+        bd.add_argument("--apply", action="store_true", help="指定しなければ変更内容の表示のみ")
         action_sub.add_parser("creatives")
         if name == "google":
             action_sub.add_parser("feed-gap")
@@ -191,9 +193,15 @@ def main(argv=None) -> int:
                 args.days, "last_7d")
             _print(client.get_insights(date_preset=preset))
         elif args.action == "set-status":
-            _print(client.set_status(args.object_id, args.status))
+            if not args.apply:
+                _print({"apply": False, "object_id": args.object_id, "status": args.status})
+            else:
+                _print(client.set_status(args.object_id, args.status))
         elif args.action == "set-budget":
-            _print(client.set_daily_budget(args.object_id, int(args.amount)))
+            if not args.apply:
+                _print({"apply": False, "object_id": args.object_id, "daily_budget": int(args.amount)})
+            else:
+                _print(client.set_daily_budget(args.object_id, int(args.amount)))
         elif args.action == "audit":
             from .audit import meta_audit
             _print(meta_audit(client,
@@ -307,9 +315,18 @@ def main(argv=None) -> int:
         elif args.action == "metrics":
             _print(client.get_metrics(days=args.days))
         elif args.action == "set-status":
-            _print(client.set_campaign_status(args.object_id, args.status))
+            if not args.apply:
+                _print({"apply": False, "campaign_id": args.object_id, "status": args.status})
+            else:
+                _print(client.set_campaign_status(args.object_id, args.status))
         elif args.action == "set-budget":
-            _print(client.set_campaign_budget(args.object_id, args.amount))
+            if not args.apply:
+                cur = client.search("SELECT campaign.name, campaign_budget.amount_micros FROM campaign "
+                                    f"WHERE campaign.id = {int(args.object_id)}")
+                _print({"apply": False, "campaign": cur[0].campaign.name if cur else args.object_id,
+                        "daily_budget": f"{cur[0].campaign_budget.amount_micros / 1e6:,.0f} → {args.amount:,.0f}" if cur else args.amount})
+            else:
+                _print(client.set_campaign_budget(args.object_id, args.amount))
         elif args.action == "creatives":
             from .creatives import google_list_creatives
             _print(google_list_creatives(client))

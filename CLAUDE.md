@@ -182,6 +182,9 @@ FULLMARKS（fullmarksstore.jp）の広告運用ツール。Meta/Google広告のA
   【2026-09-25 17:30 JST 実施（ユーザー承認「予算が足りるなら上げて」）】上限を 350,000 に引き上げ（+5万）。
   9月残り（Google 約1.2万/日＋Meta 最大5万）で月末 約64万の見込み＝65万以内。上限は9月中の歯止めも兼ねる。
   10/1 に10月予算に合わせて上限を再設定する（要承認）。全員向けテストは実質この再開日から開始（10/7 判定は後ろ倒し）。
+- 【2026-09-25 18:40 JST 注意】`google set-budget` に dry-run が無く、確認のつもりの実行で Google 指名_フーディ二
+  3,800→5,500 / PLA_v2 1,500→800 が**承認前に適用されてしまった**（ユーザーへ報告済み、維持か戻すかはユーザー判断待ち）。
+  以後 `meta|google set-budget` / `set-status` は `--apply` なしでは変更内容の表示のみ（cli.py 修正済み）。
 - HESTRA 画像制作依頼書（画像のみ、ユーザー指示）: `reports/HESTRA画像制作依頼書_2026-09-16.docx`
   （`scripts/build_hestra_image_brief.js`。参考画像は配信中の HOUDINI/NORRØNA 静止画）。
 - HESTRA 広告の作成依頼書（運用側の設計メモ）: `reports/HESTRA広告_作成依頼書_2026-09-16.docx`
