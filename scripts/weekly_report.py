@@ -139,11 +139,11 @@ def table(data, widths, align_right_from=1, font_size=8, zebra=True, header=True
     return t
 
 
-def kpi_tiles(cur, prev):
-    """費用 / 売上 / ROAS / 購入件数 の4タイル（前週比付き）。"""
+def kpi_tiles(cur, prev, vs="前週"):
+    """費用 / 売上 / ROAS / 購入件数 の4タイル（前週比付き。月次は vs="前月同期"）。"""
     items = [("広告費", yen(cur["spend"]), pct(cur["spend"], prev["spend"]), None),
              ("売上（広告経由）", yen(cur["rev"]), pct(cur["rev"], prev["rev"]), True),
-             ("ROAS", f"{roas(cur):.1f}", f"{roas(cur) - roas(prev):+.1f}（前週 {roas(prev):.1f}）", True),
+             ("ROAS", f"{roas(cur):.1f}", f"{roas(cur) - roas(prev):+.1f}（{vs} {roas(prev):.1f}）", True),
              ("購入件数", f"{cur['cv']:.0f}件", pct(cur["cv"], prev["cv"]), True)]
     row_label, row_value, row_delta = [], [], []
     for label, value, delta, good_up in items:
@@ -152,7 +152,7 @@ def kpi_tiles(cur, prev):
         color = GREY
         if good_up is not None and delta not in ("—", "新規"):
             color = GOOD if delta.startswith("+") else BAD
-        row_delta.append(Paragraph(f'<font color="{color.hexval()}">前週比 {delta}</font>', S["tile_delta"]))
+        row_delta.append(Paragraph(f'<font color="{color.hexval()}">{vs}比 {delta}</font>', S["tile_delta"]))
     t = Table([row_label, row_value, row_delta], colWidths=[44 * mm] * 4)
     t.setStyle(TableStyle([("BOX", (0, 0), (-1, -1), 0.6, LINE),
                            ("INNERGRID", (0, 0), (-1, -1), 0.6, LINE),

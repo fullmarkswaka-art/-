@@ -33,6 +33,9 @@ FULLMARKS（fullmarksstore.jp）の広告運用ツール。Meta/Google広告のA
   3.キャンペーン別 / 4.日別推移 / 5.監査。フォントは IPAPGothic（無ければ HeiseiKakuGo）。
   キャンペーン名は `UC_XX_N_` を落として表示。Meta は商品単位の購入を返さないので
   カタログ広告はブランド／シリーズ単位。
+- 月次レポート: `python scripts/monthly_report.py --month YYYY-MM [--until YYYY-MM-DD]` で
+  reports/広告月次レポート_<月>.pdf（通常運用とイベント枠を分けて集計、前月の同じ日数と比較）。
+  文章（今月のポイント・施策と結果・来月に向けて）は copy/monthly/<月>.json に書く。
 - リンク切れ監視: `python -m ads_manager meta audit`
 - フィード掲載漏れ確認: `python -m ads_manager google feed-gap`
   （在庫があるのにgsfeed.xml未掲載の商品を検出。EC側の設定漏れ）
@@ -150,7 +153,7 @@ FULLMARKS（fullmarksstore.jp）の広告運用ツール。Meta/Google広告のA
 - 【2026-09-16 判断材料】Google 指名_フーディ二 は日予算 4,500 に対し消化 約2,500/日、
   予算による損失0%・ランクによる損失57%（入札方式は「コンバージョン数の最大化」）。
   増額しても消化は増えない。Meta RTG フーディニ は30日訪問者 約7千人/週・頻度2.2〜3.0。
-  HOUDINI STORE が9月末に開くため、HOUDINI 指名は10月以降 HOUDINI STORE 口座で組み直す前提。
+  （旧メモ「HOUDINI 指名は10月以降 HOUDINI STORE 口座で組み直す」は 9/28 のユーザー指示で保留。他ECの節を参照）
 - 【2026-09-20 実施済み（ユーザー承認）】Google 指名_フルマークス / 指名_フーディ二 の入札を
   「コンバージョン値の最大化（目標ROAS）」へ切替（`google set-troas <campaign> <倍率>`）。
   目標ROAS: フルマークス 10.0（直近30日 15.2 / 60日 16.1）、フーディニ 12.0（30日 17.9 / 60日 25.2）。
@@ -198,6 +201,13 @@ FULLMARKS（fullmarksstore.jp）の広告運用ツール。Meta/Google広告のA
 - HESTRA 広告の作成依頼書（運用側の設計メモ）: `reports/HESTRA広告_作成依頼書_2026-09-16.docx`
   （`scripts/build_hestra_brief.js` で生成。文言は copy/hestra_google_rsa.json / copy/hestra_meta.json）。
   フィード未掲載の HESTRA 在庫あり商品は14件（2026-09-16、feed-gap）。
+
+## 他EC（HOUDINI / NORRONA / PU STORE）の扱い（2026-09-28 ユーザー指示）
+
+- HOUDINI STORE などはサイトの準備が整っておらず、まだ対応できない。**ユーザーが「実施します」と言うまで
+  他ECのことは考えない**（レポート・提案・予算配分に他ECの開店や移管を前提にしない）。
+  HOUDINI の広告は FULLMARKS 口座で続ける。年間予算計画・売上目標の Excel は10月から3ストア稼働を
+  前提にした配分のままなので、10月の FULLMARKS 予算はユーザーと確認して決める。
 
 ## 広告アカウントの原則（2026-09-03 ユーザー指示）
 
