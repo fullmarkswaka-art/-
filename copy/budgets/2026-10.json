@@ -1,0 +1,35 @@
+{
+  "_comment": "10月の日予算案（FULLMARKS のみ、税抜）。2026-09-28 方針: 10月は約80万に抑え、通常品（粗利50%）の購入につながる枠を優先。イベントで動くセール品には広告費を上乗せしない。適用は scripts/apply_budget_plan.py（--apply なしは差分表示のみ、適用はユーザー承認後）",
+  "month": "2026-10",
+  "monthly_cap_ex_tax": 800286,
+  "expected_ex_tax": "約72〜78万（使い残しは11〜12月へ）",
+  "google": [
+    {"campaign_id": "272310512", "name": "指名_フルマークス", "daily": 4000, "target_roas": 15.0,
+     "note": "9/20の切替後 ROAS 22→10 に低下。目標ROASを上げて効率を戻す。10月は検索が増えるので日予算に余裕"},
+    {"campaign_id": "20299964805", "name": "指名_フーディ二", "daily": 5000, "target_roas": 18.0,
+     "note": "切替前 ROAS 29・約2,800円/日。目標ROASを上げ、日予算は季節の増加分だけ残す"},
+    {"campaign_id": "20299964808", "name": "指名_ポック", "daily": 800,
+     "note": "直近 ROAS 16.6。予算の制約はほぼ無し"},
+    {"campaign_id": "20299964802", "name": "指名_ノローナ", "daily": 1000,
+     "note": "冬物（lofoten 等）の検索増に合わせて少し戻す。ROAS は日によってぶれる"},
+    {"campaign_id": "24136223642", "name": "PLA_v2（ショッピング・通常品のみ）", "daily": 500,
+     "note": "ROAS 2.1〜2.6 で損益分岐（通常品 2.2）付近。据え置き"}
+  ],
+  "meta": [
+    {"object_id": "52598939062735", "name": "CVS フルマークス（カタログ・通常品のみ、CBO）", "daily": 7000,
+     "note": "ROAS 4.6。通常品だけを見せる枠なので冬物の本命。全員向けテストもこの中"},
+    {"object_id": "52597385880935", "name": "RTG フーディニ", "daily": 2000,
+     "note": "新しい PACE SERIES の静止画。10/7ごろに成果を見て見直し"},
+    {"object_id": "52597385982935", "name": "RTG ポック", "daily": 800, "note": ""},
+    {"object_id": "52597386015935", "name": "RTG ノローナ", "daily": 800, "note": "senja の新しい静止画"},
+    {"object_id": "52598747483935", "name": "CLK アクリマ（広告セット）", "daily": 500,
+     "note": "ROAS 2.6、ACLIMA の売上の72%がセール品。縮小"}
+  ],
+  "new": [
+    {"media": "Google", "name": "指名_HESTRA（新設）", "daily": 1000,
+     "note": "作成は別途承認。文言は copy/hestra_google_rsa.json。HESTRA は売上の79%が通常品"},
+    {"media": "Meta", "name": "HESTRA 静止画（画像が届いたら）", "daily": 1500,
+     "note": "画像制作依頼中（reports/HESTRA画像制作依頼書_2026-09-16.docx）。10月中旬からの想定"}
+  ],
+  "meta_spend_cap_note": "Meta の10月消化見込み 約37万。10/1 に利用上限を「その時点の使用額 + 38万」に設定する案（要承認）"
+}
