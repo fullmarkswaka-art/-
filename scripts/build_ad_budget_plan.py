@@ -39,14 +39,16 @@ EVENTS = {"2026-09": ("SW企画 実績（予備費 税込10万のうち使用分
           "2027-02": ("冬セール", 250_000), "2027-03": ("イベント告知予備", 50_000)}
 MONTHS_OCT = ["2026-10", "2026-11", "2026-12", "2027-01", "2027-02", "2027-03", "2027-04"]
 WEIGHTS = [0.15, 0.155, 0.17, 0.14, 0.16, 0.115, 0.11]
-STORE_R = 0.15
+# 他EC（HOUDINI / NORRONA / PU STORE）の予算シェア（各）。ユーザーが「実施します」と言うまで 0 にして
+# 通常運用の予算を FULLMARKS に集める（2026-09-28 ユーザー指示）。開店が決まったら 0.15 などに戻す。
+STORE_R = 0.0
 BRANDS = [  # (名称, 9月比率, 10月〜比率, 備考)
-    ("HOUDINI", 0.27, 0.20, "売上の7割。Google指名 ROAS 12〜13、Meta RTG 5.0（9月第1週）。HOUDINI STORE稼働後は縮小"),
-    ("商品連動(ショッピング/カタログ)", 0.30, 0.28, "通常価格品のみ（アウトレットは広告しない）。PLA 4,000円/日＋Metaカタログ9本 5,000円/日"),
-    ("店舗指名(フルマークス)", 0.17, 0.18, "ROAS 9〜10の安定枠"),
-    ("POC", 0.09, 0.12, "9月売上構成比13%に上昇。専用ストア無し"),
-    ("NORRØNA", 0.07, 0.06, "ROAS 2前後。NORRONA STORE移管で最小化"),
-    ("ACLIMA", 0.05, 0.06, "ユーザー判断で維持（売れる見込み）"),
+    ("HOUDINI", 0.27, 0.26, "広告売上の半分以上（9月 ROAS 11.8）。FULLMARKS で継続"),
+    ("商品連動(ショッピング/カタログ)", 0.30, 0.23, "通常価格品のみ（アウトレットは広告しない）。9月 ROAS: カタログ 4.6 / ショッピング 2.5。ショッピングを絞る"),
+    ("店舗指名(フルマークス)", 0.17, 0.18, "9月 ROAS 16.2 の安定枠"),
+    ("POC", 0.09, 0.11, "9月 ROAS 3.8。10月以降やや厚く"),
+    ("NORRØNA", 0.07, 0.07, "9月 ROAS 4.1（8月 1.0 から改善）。FULLMARKS で継続"),
+    ("ACLIMA", 0.05, 0.05, "ユーザー判断で維持（売れる見込み）"),
     ("HESTRA【新規】", 0.04, 0.08, "10〜1月が本番。フィード未掲載の解消が前提"),
     ("KANG【新規】", 0.005, 0.01, "テスト枠"),
     ("PLUS ONE WORKS【新規】", 0.005, 0.01, "テスト枠"),
@@ -96,7 +98,7 @@ def build(out: str) -> None:
     ws.cell(row=5, column=1, value="3ストア各社の予算シェア（10月〜、各）").font = black
     c = ws.cell(row=5, column=2, value=STORE_R); c.font = blue; c.number_format = PCT; c.fill = yellow
     K_STORE = "前提!$B$5"
-    ws.cell(row=5, column=3, value="HOUDINI STORE 9月末開店 / NORRONA・PU 10月開店 → 10月から各15%、FULLMARKS 55%").font = small
+    ws.cell(row=5, column=3, value="他ECは実施が決まるまで0%（2026-09-28 ユーザー指示）。通常運用は全額 FULLMARKS。開店が決まったら各15%などに変更").font = small
     ws.cell(row=6, column=1, value="9月 通常運用（FULLMARKS）").font = black
     c = ws.cell(row=6, column=2, value=SEP_NORMAL); c.font = blue; c.number_format = YEN
     K_SEP = "前提!$B$6"
@@ -167,7 +169,7 @@ def build(out: str) -> None:
     # ================= 月別予算 =================
     ws2 = wb.create_sheet("月別予算")
     ws2["A1"] = "月別 広告予算（税抜）― 4ストア合計で年間 税込1,200万（税抜 約1,091万）"; ws2["A1"].font = Font(name=F, size=13, bold=True)
-    ws2["A2"] = "通常運用＝上限−実績−9月−イベント予備費 を10〜4月の比率で配分。10月から HOUDINI / NORRONA / PU STORE が各15%。"; ws2["A2"].font = small
+    ws2["A2"] = "通常運用＝上限−実績−9月−イベント予備費 を10〜4月の比率で配分。他ECは実施が決まるまで0（前提!B5）で、全額 FULLMARKS。"; ws2["A2"].font = small
     h = ["月", "区分", "FULLMARKS", "HOUDINI STORE", "NORRONA STORE", "PU STORE", "その他(実績)", "通常運用 計", "イベント予備費", "月合計", "累計", "上限までの残り", "備考"]
     for c_, hh in enumerate(h, 1):
         cell = ws2.cell(row=4, column=c_, value=hh); cell.font = wb_; cell.fill = hdr; cell.alignment = center
@@ -208,7 +210,7 @@ def build(out: str) -> None:
         ws2.cell(row=row, column=10, value=f"=H{row}+I{row}")
         ws2.cell(row=row, column=11, value=f"=K{row-1}+J{row}")
         ws2.cell(row=row, column=12, value=f"={K_ANNUAL}-K{row}")
-        note = {"2026-10": "3ストア稼働・広告開始。勝負月", "2026-12": "年末年始企画 予備10万", "2027-02": "冬セール 予備25万",
+        note = {"2026-10": "勝負月", "2026-12": "年末年始企画 予備10万", "2027-02": "冬セール 予備25万",
                 "2027-03": "イベント告知予備5万", "2027-04": "調整月（残額を全額割当）"}.get(m, "")
         ws2.cell(row=row, column=13, value=note).font = small
         month_rows[m] = row; row += 1
@@ -264,7 +266,7 @@ def build(out: str) -> None:
     # ================= 実施_日予算 =================
     ws4 = wb.create_sheet("実施_日予算")
     ws4["A1"] = "実施用 キャンペーン別 日予算（月予算÷日数、100円単位）"; ws4["A1"].font = Font(name=F, size=13, bold=True)
-    ws4["A2"] = ("緑＝新設キャンペーン。3ストアは10月から 指名45% / ショッピング30% / カタログ・RTG25% の標準構成。"
+    ws4["A2"] = ("緑＝新設キャンペーン。他ECは実施が決まるまで載せない（前提!B5 を0より大きくすると 指名45% / ショッピング30% / カタログ・RTG25% で行が出る）。"
                  "ショッピング・カタログはすべて通常価格品のみ（アウトレット除外）。イベント予備費は欄外。"); ws4["A2"].font = small
     hh = ["ストア", "ブランド/枠", "媒体", "キャンペーン"] + [f"{m} 日予算" for m in PLAN_MONTHS] + [f"{m} 月予算" for m in PLAN_MONTHS]
     for c_, x in enumerate(hh, 1):
@@ -282,7 +284,7 @@ def build(out: str) -> None:
             if new:
                 for c_ in range(1, 5 + 2 * nm): ws4.cell(row=row, column=c_).fill = newf
             row += 1
-    for si, st in enumerate(STORES):
+    for si, st in enumerate(STORES if STORE_R > 0 else []):
         scol = "DEF"[si]
         for media, camp, share in STORE_CAMP:
             ws4.cell(row=row, column=1, value=st); ws4.cell(row=row, column=2, value="ストア全体")
