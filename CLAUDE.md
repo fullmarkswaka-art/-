@@ -196,6 +196,8 @@ FULLMARKS（fullmarksstore.jp）の広告運用ツール。Meta/Google広告のA
 - 【2026-09-25 18:40 JST 注意】`google set-budget` に dry-run が無く、確認のつもりの実行で Google 指名_フーディ二
   3,800→5,500 / PLA_v2 1,500→800 が**承認前に適用されてしまった**。ユーザーへ報告し「このまま残す」と承認済み（9/25）。
   以後 `meta|google set-budget` / `set-status` は `--apply` なしでは変更内容の表示のみ（cli.py 修正済み）。
+- 【2026-09-28 実施（ユーザー承認）】9月の予算オーバー防止: Google PLA_v2 800→500円/日、指名_ノローナ 1,200→800円/日。
+  9/1〜27 の通常運用 592,180円、残り 57,820円（3日）。Meta は利用上限（残り約1.9万円）で 9/30 ごろ自動停止の見込み。
 - HESTRA 画像制作依頼書（画像のみ、ユーザー指示）: `reports/HESTRA画像制作依頼書_2026-09-16.docx`
   （`scripts/build_hestra_image_brief.js`。参考画像は配信中の HOUDINI/NORRØNA 静止画）。
 - HESTRA 広告の作成依頼書（運用側の設計メモ）: `reports/HESTRA広告_作成依頼書_2026-09-16.docx`
