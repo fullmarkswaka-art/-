@@ -154,16 +154,17 @@ def sec_products(products, n=10):
     return table(data, [70 * mm, 30 * mm, 16 * mm, 20 * mm, 14 * mm, 24 * mm], align_right_from=2)
 
 
-def sec_budget(t: dict, normal: dict, event: dict, since: date, until: date):
+def sec_budget(t: dict, normal: dict, event: dict, since: date, until: date, budget: float | None = None):
     dim = calendar.monthrange(since.year, since.month)[1]
     el = (until - since).days + 1
-    budget = t.get("normal_budget_ex_tax", t.get("monthly_budget_ex_tax", 0) - t.get("event_reserve", 0))
+    if budget is None:  # 過去の月は copy/monthly/<月>.json の normal_budget_ex_tax を使う
+        budget = t.get("normal_budget_ex_tax", t.get("monthly_budget_ex_tax", 0) - t.get("event_reserve", 0))
     proj = normal["spend"] / el * dim if el else 0
     data = [["項目", "金額（税抜）", "メモ"],
             [f"通常運用の予算（{since.month}月）", yen(budget), "FULLMARKS STORE の Google + Meta"],
             [f"通常運用の実績（{since.month}/1〜{until.month}/{until.day}）", yen(normal["spend"]),
              f"予算の {normal['spend'] / budget:.0%}（{el}/{dim}日経過）" if budget else ""],
-            ["通常運用の月末見込み（日割り）", yen(proj), f"予算比 {proj / budget:.0%}" if budget else ""],
+            ["通常運用の月末見込み（日割り）" if el < dim else "通常運用の月の合計", yen(proj), f"予算比 {proj / budget:.0%}" if budget else ""],
             ["イベント枠の実績（別計上・使った分だけ）", yen(event["spend"]),
              f"購入 {event['cv']:.0f}件・売上 {yen(event['rev'])}（ROAS {roas(event):.1f}）" if event["spend"] else "—"]]
     return table(data, [70 * mm, 30 * mm, 80 * mm])
@@ -181,8 +182,9 @@ def main():
     until = date.fromisoformat(args.until) if args.until else min(month_end, date.today() - timedelta(days=1))
     n_days = (until - since).days + 1
     p_since = (since - timedelta(days=1)).replace(day=1)
-    p_until = min(p_since + timedelta(days=n_days - 1),
-                  date(p_since.year, p_since.month, calendar.monthrange(p_since.year, p_since.month)[1]))
+    p_end = date(p_since.year, p_since.month, calendar.monthrange(p_since.year, p_since.month)[1])
+    # 月が終わっていれば前月の全期間と比べる。途中なら前月の同じ日数と比べる
+    p_until = p_end if until == month_end else min(p_since + timedelta(days=n_days - 1), p_end)
     t = _targets(); ev_ids = _event_ids(t)
     narr_p = ROOT / "copy" / "monthly" / f"{args.month}.json"
     narr = json.loads(narr_p.read_text(encoding="utf-8")) if narr_p.exists() else {}
@@ -210,7 +212,7 @@ def main():
     story.append(Paragraph("今月のポイント", S["h2"]))
     for line in narr.get("points", []) or ["（copy/monthly に文章がありません）"]:
         story.append(Paragraph(line, S["bullet"], bulletText="■"))
-    story.append(KeepTogether([Paragraph("予算の消化", S["h2"]), sec_budget(t, normal, event, since, until)]))
+    story.append(KeepTogether([Paragraph("予算の消化", S["h2"]), sec_budget(t, normal, event, since, until, narr.get("normal_budget_ex_tax"))]))
 
     story.append(Paragraph("2. 媒体別・週別", S["h1"]))
     story.append(KeepTogether([Paragraph(f"媒体別（{label}との比較）", S["h2"]),
