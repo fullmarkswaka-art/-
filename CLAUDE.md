@@ -198,6 +198,11 @@ FULLMARKS（fullmarksstore.jp）の広告運用ツール。Meta/Google広告のA
   以後 `meta|google set-budget` / `set-status` は `--apply` なしでは変更内容の表示のみ（cli.py 修正済み）。
 - 【2026-09-28 実施（ユーザー承認）】9月の予算オーバー防止: Google PLA_v2 800→500円/日、指名_ノローナ 1,200→800円/日。
   9/1〜27 の通常運用 592,180円、残り 57,820円（3日）。Meta は利用上限（残り約1.9万円）で 9/30 ごろ自動停止の見込み。
+- 【2026-10-01 確定・制作担当へ渡し済み】新入荷広告の画像制作依頼書 `reports/新入荷広告_画像制作依頼書_2026-09-29.docx`
+  （`scripts/build_new_arrival_image_brief.js`）。ACLIMA / NORRØNA / HOUDINI / HESTRA / POC、ブランドの広告（特定商品にしない）。
+  ユーザー指摘「スキーウェアの写真では“だから何？”」を受け、写真は『このブランドだから欲しい』理由が写るもの
+  （ブランドと分かる・商品が主役・良さが写る・リンク先で買える）を選ぶ指定に変更。画像が届いたら creative_swap.py で配置別に入れ、
+  入荷に合わせて承認後に配信。
 - HESTRA 画像制作依頼書（画像のみ、ユーザー指示）: `reports/HESTRA画像制作依頼書_2026-09-16.docx`
   （`scripts/build_hestra_image_brief.js`。参考画像は配信中の HOUDINI/NORRØNA 静止画）。
 - HESTRA 広告の作成依頼書（運用側の設計メモ）: `reports/HESTRA広告_作成依頼書_2026-09-16.docx`
