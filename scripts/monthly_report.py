@@ -8,15 +8,17 @@
 数値の表は API から作り、文章（今月のポイント・施策・来月に向けて）は copy/monthly/<月>.json から読む。
 イベント枠（targets.json の events[]）は通常運用と分けて計上する。
 
+お店全体（EC）の売上は API で取れないため、copy/ec/<月>.json（scripts/ec_import.py でユーザー提供の
+予実資料から作る）があれば読み込んで、広告の数字と並べる。
+
+広告に詳しくない人が読んでも分かるように書く（ROAS は「広告1円あたりの売上」、判定は ◎○△×）。
 構成:
-  1. サマリー … 通常運用の費用/売上/ROAS/購入（前月同期比）、今月のポイント、予算の消化
-  2. 媒体別・週別 … Google / Meta、週ごとの推移
-  3. 何が売れたか … ブランド別・枠別・ショッピングで売れた商品
-  4. キャンペーン別
-  5. 今月の施策と結果
-  6. イベント枠
-  7. 来月に向けて
-  8. 監査
+  1. 今月のまとめ … ひとことで言うと、お店全体と広告の数字、信号、ポイント、承認のお願い
+  2. お店全体の売上と広告 … 予算・前年・新作目標の進み具合、新作／旧品、ブランド別
+  3. 広告の成績 … Google と Instagram・Facebook の比較、週ごとの推移、ブランド別
+  4. 広告ごとの成績表（判定つき）
+  5. 今月やったことと結果 / 来月に向けて
+  参考資料 … 媒体別・週別・ブランド別・種類別の表、売れた商品、予算の消化、イベント、点検、言葉の説明
 """
 from __future__ import annotations
 
@@ -37,13 +39,16 @@ _spec.loader.exec_module(wr)
 
 from reportlab.lib.pagesizes import A4  # noqa: E402
 from reportlab.lib.units import mm  # noqa: E402
-from reportlab.platypus import KeepTogether, Paragraph, SimpleDocTemplate, Spacer  # noqa: E402
+from reportlab.lib import colors  # noqa: E402
+from reportlab.platypus import (CondPageBreak, KeepTogether, PageBreak, Paragraph,  # noqa: E402
+                                SimpleDocTemplate, Spacer, Table, TableStyle)
 
 from ads_manager.config import load_google_config, load_meta_config  # noqa: E402
 from ads_manager.google_ads_client import GoogleAdsClientWrapper  # noqa: E402
 from ads_manager.meta_ads import MetaAdsClient  # noqa: E402
 
-S, yen, roas, pct, table, disp = wr.S, wr.yen, wr.roas, wr.pct, wr.table, wr.disp
+S, yen, roas, pct, table, disp, man = wr.S, wr.yen, wr.roas, wr.pct, wr.table, wr.disp, wr.man
+TAX = 1.1  # 媒体の売上（税込）をお店の売上（税抜）と比べるときに割る
 
 
 def _targets() -> dict:
@@ -122,28 +127,6 @@ def sec_brand(cur, prev, label):
     return table(data, [50 * mm, 22 * mm, 13 * mm, 26 * mm, 13 * mm, 26 * mm, 20 * mm])
 
 
-def sec_frame(cur, prev, label):
-    data = [["枠", "広告費", "購入", "売上", "ROAS", f"{label} ROAS"]]
-    for f, m in sorted(cur.items(), key=lambda kv: -kv[1]["rev"]):
-        p = prev.get(f, {"spend": 0, "rev": 0})
-        data.append([f, yen(m["spend"]), f"{m['cv']:.0f}", yen(m["rev"]), f"{roas(m):.1f}",
-                     f"{roas(p):.1f}" if p["spend"] else "—"])
-    return table(data, [50 * mm, 26 * mm, 16 * mm, 30 * mm, 18 * mm, 26 * mm])
-
-
-def sec_campaigns(cur, prev):
-    prev_by = {c["id"]: c for c in prev}
-    data = [["キャンペーン", "媒体", "広告費", "購入", "売上", "ROAS", "前月同期 ROAS"]]
-    for media, c in sorted(cur, key=lambda x: -x[1]["spend"]):
-        if c["spend"] < 100:
-            continue
-        p = prev_by.get(c["id"])
-        data.append([disp(c["name"]), media, yen(c["spend"]), f"{c['cv']:.0f}",
-                     yen(c["rev"]) if c["rev"] else "—", f"{roas(c):.1f}",
-                     f"{roas(p):.1f}" if p and p["spend"] else "—"])
-    return table(data, [58 * mm, 14 * mm, 22 * mm, 12 * mm, 24 * mm, 14 * mm, 24 * mm], align_right_from=2)
-
-
 def sec_products(products, n=10):
     data = [["商品", "ブランド", "クリック", "広告費", "購入", "売上"]]
     for _, p in sorted(products.items(), key=lambda kv: -kv[1]["rev"])[:n]:
@@ -166,8 +149,100 @@ def sec_budget(t: dict, normal: dict, event: dict, since: date, until: date, bud
              f"予算の {normal['spend'] / budget:.0%}（{el}/{dim}日経過）" if budget else ""],
             ["通常運用の月末見込み（日割り）" if el < dim else "通常運用の月の合計", yen(proj), f"予算比 {proj / budget:.0%}" if budget else ""],
             ["イベント枠の実績（別計上・使った分だけ）", yen(event["spend"]),
-             f"購入 {event['cv']:.0f}件・売上 {yen(event['rev'])}（ROAS {roas(event):.1f}）" if event["spend"] else "—"]]
+             f"購入 {event['cv']:.0f}件・売上 {yen(event['rev'])}（1円あたり {roas(event):.1f}円）" if event["spend"] else "—"]]
     return table(data, [70 * mm, 30 * mm, 80 * mm])
+
+
+def ec_tiles(ec, ad_spend, ad_rev):
+    """お店全体（EC、税抜）の4タイル。"""
+    items = [("お店全体の売上（税抜）", man(ec["sales"]),
+              f"予算比 {ec['sales'] / ec['budget']:.0%}・前年比 {ec['sales'] / ec['last_year']:.0%}", ec["sales"] >= ec["budget"]),
+             (f"うち新作（{ec['new_season']['label']}）", man(ec["new_season"]["sales"]),
+              f"新作目標 {man(ec['new_season']['target'])} の {ec['new_season']['sales'] / ec['new_season']['target']:.0%}",
+              ec["new_season"]["sales"] >= ec["new_season"]["target"]),
+             ("広告費（イベント込み・税抜）", man(ad_spend), f"お店の売上の {ad_spend / ec['sales']:.1%}", None),
+             ("広告がきっかけの売上（税抜換算）", man(ad_rev / TAX), f"お店の売上の {ad_rev / TAX / ec['sales']:.0%}", None)]
+    rows = [[Paragraph(a, S["tile_label"]) for a, _, _, _ in items],
+            [Paragraph(b, S["tile_value"]) for _, b, _, _ in items],
+            [Paragraph(f'<font color="{(wr.GREY if ok is None else (wr.GOOD if ok else wr.BAD)).hexval()}">{c}</font>',
+                       S["tile_delta"]) for _, _, c, ok in items]]
+    t = Table(rows, colWidths=[45 * mm] * 4)
+    t.setStyle(TableStyle([("BOX", (0, 0), (-1, -1), 0.6, wr.LINE), ("INNERGRID", (0, 0), (-1, -1), 0.6, wr.LINE),
+                           ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#f3f7f0")),
+                           ("LINEBELOW", (0, 0), (-1, 0), 0, colors.HexColor("#f3f7f0")),
+                           ("LINEBELOW", (0, 1), (-1, 1), 0, colors.HexColor("#f3f7f0")),
+                           ("TOPPADDING", (0, 0), (-1, -1), 2), ("BOTTOMPADDING", (0, 0), (-1, -1), 2)]))
+    return t
+
+
+def ec_signals(ec):
+    r = ec["sales"] / ec["budget"]; rn = ec["new_season"]["sales"] / ec["new_season"]["target"]
+    out = [("◎" if r >= 1 else ("△" if r >= 0.9 else "×"), "お店全体の売上",
+            f"{man(ec['sales'])}（会社予算 {man(ec['budget'])} の {r:.0%}）",
+            f"前年（{man(ec['last_year'])}）の {ec['sales'] / ec['last_year']:.1f}倍。"
+            f"年度累計も予算の {ec['ytd']['sales'] / ec['ytd']['budget']:.0%}。"),
+           ("◎" if rn >= 1 else ("△" if rn >= 0.5 else "×"), f"新作（{ec['new_season']['label']}）の売上",
+            f"{man(ec['new_season']['sales'])}（目標 {man(ec['new_season']['target'])} の {rn:.0%}）",
+            "売上の多くは旧品（セール品中心）。新作の立ち上がりはこれから。" if rn < 1 else "新作も目標を達成。")]
+    return out
+
+
+def sec_ec(ec, brand_ads):
+    """お店全体の売上の進み具合と、ブランド別（お店の売上・新作・広告）。"""
+    nx = ec.get("next_month", {})
+    prog = wr.chart_progress([
+        ("今月の売上 vs 会社予算", ec["sales"], ec["budget"], None,
+         f"{man(ec['sales'])}／{man(ec['budget'])}（{ec['sales'] / ec['budget']:.0%}）"),
+        ("今月の売上 vs 前年", ec["sales"], ec["last_year"], None,
+         f"{man(ec['sales'])}／前年 {man(ec['last_year'])}（{ec['sales'] / ec['last_year']:.0%}）"),
+        ("年度累計 vs 会社予算", ec["ytd"]["sales"], ec["ytd"]["budget"], None,
+         f"{man(ec['ytd']['sales'])}／{man(ec['ytd']['budget'])}（{ec['ytd']['sales'] / ec['ytd']['budget']:.0%}）"),
+        (f"新作（{ec['new_season']['label']}）vs 新作目標", ec["new_season"]["sales"], ec["new_season"]["target"], None,
+         f"{man(ec['new_season']['sales'])}／{man(ec['new_season']['target'])}"
+         f"（{ec['new_season']['sales'] / ec['new_season']['target']:.0%}）")])
+    mix = wr.chart_hbars([
+        (f"新作（{ec['new_season']['label']}）", ec["new_season"]["sales"],
+         f"{man(ec['new_season']['sales'])}（{ec['new_season']['sales'] / ec['sales']:.0%}）", wr.GOOD),
+        ("旧品（前シーズン以前）", ec["old_items"], f"{man(ec['old_items'])}（{ec['old_items'] / ec['sales']:.0%}）", wr.SPEND_C)])
+    data = [["ブランド", "お店の売上", "前月比", "新作の売上", "新作目標\nの達成", "広告がきっかけ\n（税抜換算）",
+             "広告費", "来月の\n新作目標"]]
+    for b in ec["brands"]:
+        ad = brand_ads.get(b["brand"], {"spend": 0, "rev": 0})
+        rn = b["new"] / b["new_target"] if b["new_target"] else None
+        mk = "—" if rn is None else ("◎" if rn >= 1 else ("△" if rn >= 0.5 else "×"))
+        color = {"◎": wr.GOOD, "△": wr.WARN, "×": wr.BAD}.get(mk, wr.GREY)
+        data.append([b["brand"], man(b["sales"]), pct(b["sales"], b["prev_month"]), man(b["new"]),
+                     Paragraph(f'<font color="{color.hexval()}">{mk} {rn:.0%}</font>' if rn is not None else "—", S["cell_r"]),
+                     man(ad["rev"] / TAX) if ad["rev"] else "—", man(ad["spend"]) if ad["spend"] else "—",
+                     man(b["next_new_target"]) if b["next_new_target"] else "—"])
+    tb = table(data, [32 * mm, 22 * mm, 16 * mm, 21 * mm, 20 * mm, 24 * mm, 20 * mm, 25 * mm])
+    out = [Paragraph("今月の売上の進み具合", S["h2"]), prog,
+           Paragraph("棒の長さは目標（予算）を100%とした割合。緑は目標達成。", S["note"]),
+           KeepTogether([Paragraph("売上の中身：新作と旧品", S["h2"]), mix,
+                         Paragraph("新作＝今シーズンの商品（会社の消化率の対象）。旧品＝前シーズン以前の商品で、セール品が中心。"
+                                   "広告は新作・通常品だけに出している（アウトレット品は広告しない方針）。", S["note"])]),
+           KeepTogether([Paragraph("ブランド別：お店の売上・新作・広告", S["h2"]), tb,
+                         Paragraph("お店の売上は受注データ（税抜）。広告がきっかけの売上は媒体の計測（税込）を1.1で割って税抜に"
+                                   "そろえた参考値で、広告を見ずに買った人もお店の売上には含まれる。新作目標の達成: ◎100%以上 "
+                                   "△50%以上 ×50%未満。", S["note"])])]
+    if nx:
+        out.append(Paragraph(f"来月の会社予算は {man(nx.get('budget', 0))}（前年 {man(nx.get('last_year', 0))}）、"
+                             f"新作目標は {man(nx.get('new_target', 0))}（今月の新作実績の "
+                             f"{nx.get('new_target', 0) / ec['new_season']['sales']:.1f}倍）。", S["body"]))
+    return out
+
+
+def week_chart(d, ev_ids, since, until):
+    labels, sp, rv = [], [], []
+    for s, e in weeks(since, until):
+        ks, ke = str(s), str(e)
+        g = wr.total_of([v for k, v in d["g_daily"].items() if ks <= k <= ke])
+        m = wr.total_of([r for r in d["m_daily"] if ks <= r["date"] <= ke and r["id"] not in ev_ids])
+        t = wr.total_of([g, m])
+        labels.append(f"{s.month}/{s.day}〜{e.month}/{e.day}\n1円あたり {roas(t):.1f}円")
+        sp.append(t["spend"]); rv.append(t["rev"])
+    return wr.chart_columns(labels, [sp, rv], ["広告費", "広告がきっかけの売上"], [wr.SPEND_C, wr.NAVY],
+                            value_series=(0, 1), footnote="単位: 万円（イベント広告を除く）")
 
 
 def main():
@@ -188,6 +263,8 @@ def main():
     t = _targets(); ev_ids = _event_ids(t)
     narr_p = ROOT / "copy" / "monthly" / f"{args.month}.json"
     narr = json.loads(narr_p.read_text(encoding="utf-8")) if narr_p.exists() else {}
+    ec_p = ROOT / "copy" / "ec" / f"{args.month}.json"
+    ec = json.loads(ec_p.read_text(encoding="utf-8")) if ec_p.exists() and until == month_end else None
     label = narr.get("compare_label", "前月同期")
 
     meta = MetaAdsClient(load_meta_config()); google = GoogleAdsClientWrapper(load_google_config())
@@ -197,63 +274,94 @@ def main():
     prev_m, prev_g = wr.total_of(pm), wr.total_of(prev["g_camps"])
     normal, normal_p = wr.total_of([cur_m, cur_g]), wr.total_of([prev_m, prev_g])
     event = wr.total_of(ce)
+    brand_cur = wr.by_brand(cur["g_camps"], cur["g_shop"], cads)
+    brand_prev = wr.by_brand(prev["g_camps"], prev["g_shop"], pads)
+    budget = narr.get("normal_budget_ex_tax") or t.get("normal_budget_ex_tax", 0)
+    dim = calendar.monthrange(y, m)[1]
 
     partial = until < month_end
     story = [Paragraph(f"広告 月次レポート　{y}年{m}月", S["title"]),
-             Paragraph(f"対象: {since} 〜 {until}（{n_days}日間{'・月の途中' if partial else ''}）　"
-                       f"比較: {p_since} 〜 {p_until}（{label}）　FULLMARKS STORE / Google広告 + Meta広告　"
-                       "売上は各媒体計測のCV金額（税込）。広告費は税抜。", S["sub"]), Spacer(1, 4 * mm)]
+             Paragraph(f"対象: {since.month}/{since.day}〜{until.month}/{until.day}（{n_days}日間{'・月の途中' if partial else ''}）　"
+                       f"比較: {p_since.month}/{p_since.day}〜{p_until.month}/{p_until.day}（{label}）　"
+                       "FULLMARKS STORE の Google広告 + Instagram・Facebook広告（Meta）", S["sub"]), Spacer(1, 3 * mm)]
     if partial:
         story.append(Paragraph(f"※ {until.month}/{until.day + 1}〜{month_end.month}/{month_end.day} の"
                                f"{(month_end - until).days}日分は含まれていません（月末見込みは日割りで算出）。", S["note"]))
 
-    story.append(Paragraph("1. サマリー（通常運用。イベント枠は別計上）", S["h1"]))
-    story.append(wr.kpi_tiles(normal, normal_p, vs=label))
+    # 1. まとめ
+    story.append(Paragraph("1. 今月のまとめ", S["h1"]))
+    if narr.get("conclusion"):
+        story += [wr.boxed([Paragraph("ひとことで言うと", S["note"]), Paragraph(narr["conclusion"], S["lead"])]),
+                  Spacer(1, 3 * mm)]
+    if ec:
+        story += [Paragraph("お店全体（EC）", S["h2"]), ec_tiles(ec, normal["spend"] + event["spend"], normal["rev"] + event["rev"])]
+    story += [Paragraph(f"広告（通常の運用。イベント広告は別）　{label}との比較", S["h2"]), wr.kpi_tiles(normal, normal_p, vs=label)]
+    sig = ec_signals(ec) if ec else []
+    sig.append(wr.pace_signal(normal["spend"], budget, n_days, dim, "広告の予算"))
+    if not partial:
+        r = normal["spend"] / budget if budget else 0
+        sig[-1] = ("○" if 0.9 <= r <= 1.0 else "△", "広告の予算", f"{man(normal['spend'])}（予算 {man(budget)} の {r:.0%}）",
+                   "予算内で、ほぼ使い切れた。" if 0.9 <= r <= 1.0 else ("予算を超えた。" if r > 1 else "使い残しが出た。"))
+    sig.append(wr.roas_signal(normal, "広告の効率（広告1円あたりの売上）"))
+    story += [Paragraph("信号（○◎は問題なし、△×は対応が必要）", S["h2"]), wr.signal_table(sig)]
+    if narr.get("asks"):
+        story.append(wr.boxed([Paragraph("承認をお願いしたいこと", S["h2"])] +
+                              [Paragraph(x, S["bullet"], bulletText=f"{i}.") for i, x in enumerate(narr["asks"], 1)],
+                              bg=colors.HexColor("#fff6e8"), border=wr.WARN))
     story.append(Paragraph("今月のポイント", S["h2"]))
-    for line in narr.get("points", []) or ["（copy/monthly に文章がありません）"]:
+    for line in narr.get("points", []) or wr.plain_points(brand_cur, cur["g_camps"] + cm, prev["g_camps"] + pm, vs=label):
         story.append(Paragraph(line, S["bullet"], bulletText="■"))
-    story.append(KeepTogether([Paragraph("予算の消化", S["h2"]), sec_budget(t, normal, event, since, until, narr.get("normal_budget_ex_tax"))]))
 
-    story.append(Paragraph("2. 媒体別・週別", S["h1"]))
-    story.append(KeepTogether([Paragraph(f"媒体別（{label}との比較）", S["h2"]),
-                               sec_media(cur_m, cur_g, prev_m, prev_g, label)]))
-    story.append(KeepTogether([Paragraph("週別推移（通常運用）", S["h2"]), sec_weeks(cur, ev_ids, since, until)]))
+    # 2. お店全体
+    if ec:
+        story += [CondPageBreak(170 * mm), Paragraph("2. お店全体の売上と広告", S["h1"])]
+        story += sec_ec(ec, brand_cur)
 
-    story.append(Paragraph("3. 何が売れたか", S["h1"]))
-    story.append(KeepTogether([Paragraph("ブランド別（広告経由の売上順）", S["h2"]),
-                               sec_brand(wr.by_brand(cur["g_camps"], cur["g_shop"], cads),
-                                         wr.by_brand(prev["g_camps"], prev["g_shop"], pads), label)]))
-    story.append(Paragraph("ブランドの判定: 指名検索と静止画はキャンペーン名、ショッピングは商品のブランド属性、"
-                           "Metaカタログは広告（ブランド／シリーズ別）から。店舗指名はブランド横断のため別建て。", S["note"]))
-    story.append(KeepTogether([Paragraph("枠別", S["h2"]),
-                               sec_frame(wr.by_frame(cur["g_camps"], cm), wr.by_frame(prev["g_camps"], pm), label)]))
-    story.append(KeepTogether([Paragraph("Googleショッピングで売れた商品", S["h2"]), sec_products(cur["g_products"])]))
+    # 3. 広告の成績
+    story += [PageBreak(), Paragraph(f"{3 if ec else 2}. 広告の成績", S["h1"])]
+    story.append(KeepTogether([Paragraph("Google と Instagram・Facebook の比較（購入以外も）", S["h2"]),
+                               wr.media_compare(cur_g, cur_m),
+                               Paragraph("Instagram・Facebook の購入には、広告を見ただけ（クリックなし）で後日買った分も含まれる。"
+                                         f"{label}は Google {roas(prev_g):.1f}円・Instagram・Facebook {roas(prev_m):.1f}円。", S["note"])]))
+    story.append(KeepTogether([Paragraph("週ごとの広告費と、広告がきっかけの売上", S["h2"]), week_chart(cur, ev_ids, since, until)]))
+    story.append(KeepTogether([Paragraph("ブランド別：広告がきっかけの売上", S["h2"]), wr.brand_chart(brand_cur),
+                               Paragraph("棒の色は判定（緑◎・青○・橙△・赤×・灰＝件数が少なく判断保留）。", S["note"])]))
 
-    story.append(Paragraph("4. キャンペーン別（通常運用）", S["h1"]))
-    story.append(sec_campaigns([("Google", c) for c in cur["g_camps"]] + [("Meta", c) for c in cm],
-                               prev["g_camps"] + pm))
+    # 4. 成績表
+    story += [PageBreak(), Paragraph(f"{4 if ec else 3}. 広告ごとの成績表（通常の運用）", S["h1"]), wr.mark_legend(),
+              Spacer(1, 2 * mm),
+              wr.scorecard([("Google", c) for c in cur["g_camps"]] + [("Meta", c) for c in cm], prev["g_camps"] + pm, vs=label)]
 
+    # 5. 施策と来月
+    n5 = 5 if ec else 4
+    story += [CondPageBreak(80 * mm), Paragraph(f"{n5}. 今月やったことと結果 / 来月に向けて", S["h1"])]
     if narr.get("actions"):
-        story.append(Paragraph("5. 今月の施策と結果", S["h1"]))
         data = [["日付", "やったこと", "結果"]] + [
             [a[0], Paragraph(a[1], S["cell"]), Paragraph(a[2], S["cell"])] for a in narr["actions"]]
         story.append(table(data, [18 * mm, 92 * mm, 70 * mm], align_right_from=9))
+    if narr.get("next"):
+        story.append(Paragraph("来月に向けて", S["h2"]))
+        for line in narr["next"]:
+            story.append(Paragraph(line, S["bullet"], bulletText="→"))
+    story.append(KeepTogether([Paragraph("言葉の説明", S["h2"]), wr.glossary_table()]))
 
-    story.append(Paragraph("6. イベント枠（通常運用と別予算・別計上）", S["h1"]))
+    # 参考資料
+    story += [PageBreak(), Paragraph("参考資料（担当者向けの詳細）", S["h1"])]
+    story.append(KeepTogether([Paragraph("予算の消化", S["h2"]), sec_budget(t, normal, event, since, until, budget)]))
+    story.append(KeepTogether([Paragraph(f"媒体別（{label}との比較）", S["h2"]), sec_media(cur_m, cur_g, prev_m, prev_g, label)]))
+    story.append(KeepTogether([Paragraph("週別（通常運用）", S["h2"]), sec_weeks(cur, ev_ids, since, until)]))
+    story.append(KeepTogether([Paragraph("ブランド別（表）", S["h2"]), sec_brand(brand_cur, brand_prev, label)]))
+    story.append(KeepTogether([Paragraph("広告の種類別", S["h2"]),
+                               wr.sec_frame(wr.by_frame(cur["g_camps"], cm), wr.by_frame(prev["g_camps"], pm), vs=label)]))
+    story.append(KeepTogether([Paragraph("Googleショッピングで売れた商品", S["h2"]), sec_products(cur["g_products"])]))
+    story.append(Paragraph("イベント広告（通常と別予算・使った分だけ計上）", S["h2"]))
     if ce:
-        data = [["キャンペーン", "広告費", "購入", "売上", "ROAS"]] + [
-            [disp(c["name"]), yen(c["spend"]), f"{c['cv']:.0f}", yen(c["rev"]), f"{roas(c):.1f}"] for c in ce]
+        data = [["キャンペーン", "広告費", "購入", "売上", "1円あたり"]] + [
+            [disp(c["name"]), yen(c["spend"]), f"{c['cv']:.0f}", yen(c["rev"]), f"{roas(c):.1f}円"] for c in ce]
         story.append(table(data, [80 * mm, 26 * mm, 16 * mm, 30 * mm, 18 * mm]))
-        story.append(Paragraph("イベント枠は使った分だけを計上し、通常運用の予算とは分けて管理する。", S["note"]))
     else:
         story.append(Paragraph("今月のイベント広告はありません。", S["body"]))
-
-    if narr.get("next"):
-        story.append(Paragraph("7. 来月に向けて", S["h1"]))
-        for line in narr["next"]:
-            story.append(Paragraph(line, S["bullet"], bulletText="■"))
-
-    story.append(Paragraph("8. 監査", S["h1"]))
+    story.append(Paragraph("点検（リンク切れ・使ってはいけない口座・アウトレット品の表示）", S["h2"]))
     story.extend(wr.sec_audit(meta, google, cur["g_labels"]))
 
     out = Path(args.out or ROOT / "reports" / f"広告月次レポート_{args.month}.pdf")

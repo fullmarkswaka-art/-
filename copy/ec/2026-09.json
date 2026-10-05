@@ -1,0 +1,106 @@
+{
+  "_comment": "scripts/ec_import.py が予実資料（ユーザー提供の Excel）から生成。すべて税抜。新作=今シーズン品（会社の消化率の対象）、旧品=前シーズン以前（セール品の大半）",
+  "month": "2026-09",
+  "sales": 18878337,
+  "budget": 15000000,
+  "last_year": 9504761,
+  "ytd": {
+    "sales": 99793478,
+    "budget": 86000000,
+    "last_year": 64867967
+  },
+  "next_month": {
+    "budget": 29000000,
+    "last_year": 16850103,
+    "new_target": 27000000
+  },
+  "new_season": {
+    "label": "26FW",
+    "sales": 6777420,
+    "target": 13000000
+  },
+  "old_items": 12100917,
+  "brands": [
+    {
+      "brand": "HOUDINI",
+      "sales": 13478050,
+      "prev_month": 21025500,
+      "new": 3859500,
+      "old": 9618550,
+      "new_target": 5980000,
+      "next_new_target": 12420000
+    },
+    {
+      "brand": "NORRØNA",
+      "sales": 2517970,
+      "prev_month": 1909520,
+      "new": 1305500,
+      "old": 1212470,
+      "new_target": 3120000,
+      "next_new_target": 6480000
+    },
+    {
+      "brand": "POC",
+      "sales": 1258800,
+      "prev_month": 1889400,
+      "new": 512500,
+      "old": 746300,
+      "new_target": 1105000,
+      "next_new_target": 2295000
+    },
+    {
+      "brand": "ACLIMA",
+      "sales": 1072900,
+      "prev_month": 1476600,
+      "new": 392000,
+      "old": 680900,
+      "new_target": 910000,
+      "next_new_target": 1890000
+    },
+    {
+      "brand": "HESTRA",
+      "sales": 648060,
+      "prev_month": 119070,
+      "new": 526400,
+      "old": 121660,
+      "new_target": 1170000,
+      "next_new_target": 2430000
+    },
+    {
+      "brand": "SAIL RACING",
+      "sales": 385000,
+      "prev_month": 530750,
+      "new": 52000,
+      "old": 333000,
+      "new_target": 130000,
+      "next_new_target": 270000
+    },
+    {
+      "brand": "PERMANENT UNION",
+      "sales": 192520,
+      "prev_month": 134679,
+      "new": 129520,
+      "old": 63000,
+      "new_target": 325000,
+      "next_new_target": 675000
+    },
+    {
+      "brand": "PLUS ONE WORKS",
+      "sales": 65500,
+      "prev_month": 32500,
+      "new": 0,
+      "old": 65500,
+      "new_target": 0.0,
+      "next_new_target": 0.0
+    },
+    {
+      "brand": "KANG",
+      "sales": 0,
+      "prev_month": 103800,
+      "new": 0,
+      "old": 0,
+      "new_target": 130000,
+      "next_new_target": 270000
+    }
+  ]
+}
