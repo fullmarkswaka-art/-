@@ -17,3 +17,4 @@ venv/
 previews/
 reports/google_refresh_token.txt
 reports/*.pdf
+reports/**/*.pdf
