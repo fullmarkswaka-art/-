@@ -204,8 +204,8 @@ FULLMARKS（fullmarksstore.jp）の広告運用ツール。Meta/Google広告のA
   9/1〜27 の通常運用 592,180円、残り 57,820円（3日）。Meta は利用上限（残り約1.9万円）で 9/30 ごろ自動停止の見込み。
 - 【2026-10-01 確定・制作担当へ渡し済み】新入荷広告の画像制作依頼書 `reports/新入荷広告_画像制作依頼書_2026-09-29.docx`
   （`scripts/build_new_arrival_image_brief.js`）。【2026-10-05 ユーザー指示「ブランド別に、見やすく」】1ブランド＝1ファイル・2ページに
-  作り直し（reports/新入荷広告_画像制作依頼書/画像制作依頼書_<BRAND>_NEW_ARRIVAL.docx・.pdf。1ページ目＝伝えること・◯選ぶ／×選ばない写真・
-  コピー・ファイル名、2ページ目＝共通仕様）。生成: `node scripts/build_new_arrival_image_brief.js copy/creatives/202609 reports/新入荷広告_画像制作依頼書`
+  作り直し（reports/新入荷広告_画像制作依頼書/画像制作依頼書_<BRAND>_NEW_ARRIVAL.docx・.pdf）。同日ユーザー指示で
+  「写真の選び方・コピー・入れないもの・最終チェック」を削除し1ページに（伝えたいこと・仕上がりイメージ・サイズ・納品ファイル名）。生成: `node scripts/build_new_arrival_image_brief.js copy/creatives/202609 reports/新入荷広告_画像制作依頼書`
   （npm の docx が必要）。内容（写真の指定・コピー）は 10/1 確定版から変えていない。ACLIMA / NORRØNA / HOUDINI / HESTRA / POC、ブランドの広告（特定商品にしない）。
   ユーザー指摘「スキーウェアの写真では“だから何？”」を受け、写真は『このブランドだから欲しい』理由が写るもの
   （ブランドと分かる・商品が主役・良さが写る・リンク先で買える）を選ぶ指定に変更。画像が届いたら creative_swap.py で配置別に入れ、
