@@ -286,7 +286,7 @@ FULLMARKS（fullmarksstore.jp）の広告運用ツール。Meta/Google広告のA
   10/8 ユーザー指示「HESTRA は検索広告（テキストだけ）を先に」で作成:
   キャンペーン 24329536721（UC_SK_1_指名_HESTRA、1,000円/日、コンバージョン数の最大化、**PAUSED**）、広告グループ 203962967034、
   キーワード6（hestra / ヘストラ / ＋グローブ・手袋 / army leather heli ski、フレーズ一致）、RSA 827271540604（copy/hestra_google_rsa.json、
-  リンク先 /category/HESTRA/）。配信開始はユーザー確認後（`google set-status 24329536721 ENABLED --apply`）。
+  リンク先 /category/HESTRA/）。**10/8 ユーザー承認で配信開始（ENABLED）**、広告文は Google 審査中だった。
   旧 指名_ヘストラ 20299964799 は REMOVED。HESTRA の画像広告（Meta）はユーザー側で制作中。
 - 【2026-10-07 10月途中経過（10/1〜7）】通常運用 129,474円 → 売上 86.0万（6.6、購入47）。9/1〜7（5.1）より改善。
   Google 7.6（フルマークス 10.5・ポック 17.2・フーディ二 6.1＝9/1〜7 の21.6から悪化、CPC 32円）、Meta 5.5。予算消化は予定の72%
