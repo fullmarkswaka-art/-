@@ -318,7 +318,7 @@ def main():
         story += sec_ec(ec, brand_cur)
 
     # 3. 広告の成績
-    story += [PageBreak(), Paragraph(f"{3 if ec else 2}. 広告の成績", S["h1"])]
+    story += [CondPageBreak(150 * mm), Paragraph(f"{3 if ec else 2}. 広告の成績", S["h1"])]
     story.append(KeepTogether([Paragraph("Google と Instagram・Facebook の比較（購入以外も）", S["h2"]),
                                wr.media_compare(cur_g, cur_m),
                                Paragraph("Instagram・Facebook の購入には、広告を見ただけ（クリックなし）で後日買った分も含まれる。"
