@@ -40,6 +40,23 @@
      "ad_id": "52608939640135"
     }
    ]
+  },
+  {
+   "apply": true,
+   "adset_id": "52597386278935",
+   "pause": [],
+   "create": [
+    {
+     "name": "houdini-pace-202610_v1",
+     "creative_id": "1091080230208994",
+     "ad_id": "52612337679735"
+    },
+    {
+     "name": "houdini-pace-202610_v2",
+     "creative_id": "1844804103527765",
+     "ad_id": "52612337686935"
+    }
+   ]
   }
  ],
  "old_to_pause": [
