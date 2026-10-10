@@ -282,7 +282,7 @@ FULLMARKS（fullmarksstore.jp）の広告運用ツール。Meta/Google広告のA
   PACE 一覧 `https://www.fullmarksstore.jp/category/HOUDINI/?&keyword=pace#FILTER_BRAND=FILTER_BRAND_HO&FILTER_TYPE=FILTER_TYPE_MENS%FILTER_TYPE_WOMENS`
   （ユーザー指定のまま）に変更。PACE 一覧の1ページ目は40点中28点がセール品だが「セール品を含むシリーズの広告なので問題ない」（ユーザー）。
   同じ画像・本文で新広告 52612337679735（v1）/ 52612337686935（v2）を RTG フーディニ広告セット 52597386278935 に作成（審査中）。
-  審査通過後に旧広告 52608939624735 / 52608939633335 を停止する（約2時間後に確認を予約済み）。
+  10/11 0:13 JST に新広告2本の審査通過（ACTIVE）を確認し、旧広告 52608939624735 / 52608939633335 を PAUSED にした。
 - 【2026-10-08 JST 実施済み（ユーザー承認「上の内容で反映して」）】10月日予算案を反映（apply_budget_plan.py --apply、確認済み）:
   Google 指名_フルマークス 4,000・目標ROAS 15 / 指名_フーディ二 5,000・18 / 指名_ポック 800 / 指名_ノローナ 1,000 / PLA_v2 500、
   Meta カタログ 7,000 / RTG フーディニ 2,000 / RTG ポック 800 / RTG ノローナ 800 / アクリマ 500。配信先テストの反映で
