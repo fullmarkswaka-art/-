@@ -48,6 +48,9 @@ WEIGHTS = [0.11575, 0.16449, 0.18727, 0.14203, 0.16231, 0.11666, 0.11]
 # 他EC（HOUDINI / NORRONA / PU STORE）の予算シェア（各）。ユーザーが「実施します」と言うまで 0 にして
 # 通常運用の予算を FULLMARKS に集める（2026-09-28 ユーザー指示）。開店が決まったら 0.15 などに戻す。
 STORE_R = 0.0
+# 10月の確定実績（通常運用、FULLMARKS）。月末に確定したら入れる。None のうちは計画どおり。
+# 2026-10-14 ユーザー指示「10月の使い残しは11〜12月に回して」: 計画との差額を11月・12月に比率で上乗せする（1〜4月は変えない）。
+OCT_ACTUAL = None
 BRANDS = [  # (名称, 9月比率, 10月〜比率, 備考)
     ("HOUDINI", 0.27, 0.26, "広告売上の半分以上（9月 ROAS 11.8）。FULLMARKS で継続"),
     ("商品連動(ショッピング/カタログ)", 0.30, 0.23, "通常価格品のみ（アウトレットは広告しない）。9月 ROAS: カタログ 4.6 / ショッピング 2.5。ショッピングを絞る"),
@@ -153,8 +156,16 @@ def build(out: str) -> None:
     ws.cell(row=wr_end + 2, column=1, value="10〜4月 通常運用の総額（上限−実績−9月−イベント）").font = bold
     cell = ws.cell(row=wr_end + 2, column=2, value=f"={K_ANNUAL}-{K_ACT}-{K_SEP}-{K_EV}"); cell.font = bold; cell.number_format = YEN
     K_ALLOC = f"前提!$B${wr_end+2}"
+    ws.cell(row=wr_end + 3, column=1, value="10月 通常運用の確定実績（月末に入力。空欄なら計画どおり）").font = black
+    cell = ws.cell(row=wr_end + 3, column=2, value=OCT_ACTUAL); cell.font = blue; cell.number_format = YEN; cell.fill = yellow
+    K_OCT = f"前提!$B${wr_end+3}"
+    ws.cell(row=wr_end + 4, column=1, value="10月の使い残し（11月・12月に比率で上乗せ。2026-10-14 ユーザー指示）").font = black
+    cell = ws.cell(row=wr_end + 4, column=2,
+                   value=f'=IF(ISBLANK({K_OCT}),0,{K_ALLOC}*前提!$B${w_rows["2026-10"]}-{K_OCT})')
+    cell.number_format = YEN
+    K_OCT_LEFT = f"前提!$B${wr_end+4}"
     # ブランド比率
-    b0 = wr_end + 5
+    b0 = wr_end + 7
     ws.cell(row=b0 - 1, column=1, value="FULLMARKS 内のブランド配分比率").font = bold
     for c_, h in enumerate(["ブランド/枠", "9月 比率", "10月〜 比率", "備考"], 1):
         cell = ws.cell(row=b0, column=c_, value=h); cell.font = wb_; cell.fill = hdr; cell.alignment = center
@@ -205,9 +216,18 @@ def build(out: str) -> None:
     ws2.cell(row=row, column=13, value=f"FULLMARKSのみ。9月 確定実績 ¥{SEP_MTD:,}。SW企画は使用分 ¥48,422 を別枠で計上（予備費の残りは10〜4月へ）").font = small
     month_rows["2026-09"] = row; row += 1
     for m in MONTHS_OCT:
-        ws2.cell(row=row, column=1, value=m); ws2.cell(row=row, column=2, value="計画")
-        ws2.cell(row=row, column=8, value=(f"={K_ALLOC}*前提!$B${w_rows[m]}" if m != "2027-04"
-                                            else f"={K_ALLOC}-SUM(H{month_rows['2026-10']}:H{row-1})"))
+        ws2.cell(row=row, column=1, value=m)
+        ws2.cell(row=row, column=2, value=("実績" if m == "2026-10" and OCT_ACTUAL is not None else "計画"))
+        wn, wd = f"前提!$B${w_rows['2026-11']}", f"前提!$B${w_rows['2026-12']}"
+        if m == "2026-10":
+            h_val = f"=IF(ISBLANK({K_OCT}),{K_ALLOC}*前提!$B${w_rows[m]},{K_OCT})"
+        elif m in ("2026-11", "2026-12"):
+            h_val = f"={K_ALLOC}*前提!$B${w_rows[m]}+{K_OCT_LEFT}*前提!$B${w_rows[m]}/({wn}+{wd})"
+        elif m == "2027-04":
+            h_val = f"={K_ALLOC}-SUM(H{month_rows['2026-10']}:H{row-1})"
+        else:
+            h_val = f"={K_ALLOC}*前提!$B${w_rows[m]}"
+        ws2.cell(row=row, column=8, value=h_val)
         for c_ in (4, 5, 6): ws2.cell(row=row, column=c_, value=f"=ROUND(H{row}*{K_STORE},0)")
         ws2.cell(row=row, column=3, value=f"=H{row}-D{row}-E{row}-F{row}")
         ws2.cell(row=row, column=7, value=0)
@@ -216,7 +236,8 @@ def build(out: str) -> None:
         ws2.cell(row=row, column=10, value=f"=H{row}+I{row}")
         ws2.cell(row=row, column=11, value=f"=K{row-1}+J{row}")
         ws2.cell(row=row, column=12, value=f"={K_ANNUAL}-K{row}")
-        note = {"2026-10": "冬物の立ち上がり前。約80万に抑え、11〜12月の通常品の冬物へ回す", "2026-12": "年末年始企画 予備10万", "2027-02": "冬セール 予備25万",
+        note = {"2026-10": "冬物の立ち上がり前。約80万に抑え、使い残しも11〜12月の通常品の冬物へ回す（10/14 ユーザー指示）",
+                "2026-11": "10月の使い残しを上乗せ（ブラックフライデー期間に厚く）", "2026-12": "10月の使い残しを上乗せ。年末年始企画 予備10万", "2027-02": "冬セール 予備25万",
                 "2027-03": "イベント告知予備5万", "2027-04": "調整月（残額を全額割当）"}.get(m, "")
         ws2.cell(row=row, column=13, value=note).font = small
         month_rows[m] = row; row += 1
