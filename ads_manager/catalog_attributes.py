@@ -40,6 +40,7 @@ def load_excluded_ids() -> set[str]:
     return {ln.strip() for ln in EXCLUDED_FILE.read_text(encoding="utf-8").splitlines()
             if ln.strip() and not ln.startswith("#")}
 SUPPLEMENT_CSV = REPORT_DIR / "catalog_attributes.csv"
+SEASON_SETS_FILE = Path(__file__).resolve().parent.parent / "config" / "season_sets.json"
 
 # サイトのブランド絞り込みカテゴリ → ブランド表記
 BRAND_CATEGORIES = {
@@ -313,14 +314,49 @@ def _id_filter(rows: list[dict], brand: str | None = None, series: str | None = 
     return {"retailer_id": {"is_any": ids}}
 
 
+def load_season_sets(path: Path = SEASON_SETS_FILE) -> dict:
+    """config/season_sets.json を読み、指定カテゴリを巡回して商品IDを入れる。
+
+    返り値: {"exclude": [語], "sets": {セット名: {"brand", "categories", "category_ids"}}}
+    """
+    if not path.exists():
+        return {"exclude": [], "sets": {}}
+    conf = json.loads(path.read_text(encoding="utf-8"))
+    crawled: dict[str, list[str]] = {}
+    sets = {}
+    for name, c in conf.get("sets", {}).items():
+        ids = None
+        if c.get("categories"):
+            ids = set()
+            for cat in c["categories"]:
+                if cat not in crawled:
+                    crawled[cat] = crawl_category(cat)
+                ids.update(crawled[cat])
+        sets[name] = {**c, "category_ids": ids}
+    return {"season": conf.get("season"), "exclude": conf.get("exclude_title_words", []), "sets": sets}
+
+
+def _season_filter(flt: dict, rows: list[dict], conf: dict, exclude: list[str]) -> dict:
+    """retailer_id 条件を、季節のカテゴリと夏物の語で絞り込む。"""
+    pat = re.compile(r"(?<![A-Za-z])(" + "|".join(re.escape(w) for w in exclude) + r")(?![A-Za-z])",
+                     re.I) if exclude else None
+    title = {r["id"]: r.get("title", "") for r in rows}
+    ids = [i for i in flt["retailer_id"]["is_any"]
+           if (conf["category_ids"] is None or i in conf["category_ids"])
+           and not (pat and pat.search(title.get(i, "")))]
+    return {"retailer_id": {"is_any": ids}}
+
+
 def meta_product_sets(client: MetaAdsClient, catalog_id: str, rows: list[dict],
-                      apply: bool = False, by_id: bool = True) -> dict:
+                      apply: bool = False, by_id: bool = True, season: dict | None = None) -> dict:
     """通常価格×ブランド(×シリーズ)の商品セットを作成/更新する。
 
     by_id=True（既定）: 条件を retailer_id の列挙にする。Meta は本体フィードを取得するたびに
     補助フィードの属性（brand / custom_label）を消すため、ラベル条件のセットは毎日空になり
     広告セットが自動停止する（error 4469006）。ID列挙なら取得後も維持される。
     既存の同名セットは filter を更新する。
+    season（load_season_sets() の結果）に載っているセットは、そのカテゴリの商品だけに絞り、
+    夏物の語を含む商品を外す（brand 付きのセットは season 側だけで定義される新しいセット）。
     """
     existing = {ps["name"]: ps for ps in client.get_all(
         f"{catalog_id}/product_sets", fields="id,name,product_count,filter")}
@@ -330,10 +366,17 @@ def meta_product_sets(client: MetaAdsClient, catalog_id: str, rows: list[dict],
                   and r["custom_label_0"] == LABEL_OUTLET]
     planned.append({"name": "アウトレット_全ブランド（在庫あり）", "filter": None,
                     "expected": len(outlet_ids), "_ids": outlet_ids})
+    season = season or {"exclude": [], "sets": {}}
+    names = {s["name"] for s in planned}
+    for name, c in season["sets"].items():
+        if c.get("brand") and name not in names:
+            planned.append({"name": name, "filter": None, "expected": None, "_brand": c["brand"]})
     for s in planned:
         cur = existing.get(s["name"])
         if s.get("_ids") is not None:
             flt = {"retailer_id": {"is_any": s["_ids"]}}
+        elif s.get("_brand"):
+            flt = _id_filter(rows, s["_brand"])
         elif by_id:
             name = s["name"].replace("通常価格_", "")
             if name == "全ブランド":
@@ -344,10 +387,20 @@ def meta_product_sets(client: MetaAdsClient, catalog_id: str, rows: list[dict],
                 flt = _id_filter(rows, name)
         else:
             flt = s["filter"]
+        conf = season["sets"].get(s["name"])
+        if conf and "retailer_id" in flt:
+            flt = _season_filter(flt, rows, conf, season["exclude"])
         n_ids = len(flt.get("retailer_id", {}).get("is_any", [])) if by_id else None
         item = {"name": s["name"], "expected": s["expected"], "ids_in_filter": n_ids,
                 "existing_id": cur["id"] if cur else None,
                 "current_count": cur.get("product_count") if cur else None}
+        if conf:
+            item["season"] = season.get("season")
+            if cur and cur.get("filter"):
+                cf = json.loads(cur["filter"]) if isinstance(cur["filter"], str) else cur["filter"]
+                before = set(cf.get("retailer_id", {}).get("is_any", []))
+                after = set(flt["retailer_id"]["is_any"])
+                item["removed"], item["added"] = len(before - after), len(after - before)
         if apply:
             if cur is None:
                 res = client.post(f"{catalog_id}/product_sets", name=s["name"], filter=json.dumps(flt))

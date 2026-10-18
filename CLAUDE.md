@@ -287,6 +287,15 @@ FULLMARKS（fullmarksstore.jp）の広告運用ツール。Meta/Google広告のA
   （POC 41 / ACLIMA 25 / NORRØNA 19 / HESTRA 14 / HOUDINI 5、うち 2026FW 新作12）→ reports/フィード未掲載_在庫あり_2026-10-17.csv。
   提案（未実施・トークン復旧待ち）: HOUDINI/ACLIMA のカタログ広告を FW 新作のみのセットへ、NORRØNA は senja（トレラン）を止めて冬のシリーズ中心、
   POC はスキー用（ヘルメット・ゴーグル）に絞る、FW 新作セットは毎週月曜に *_NEW を巡回して更新。
+- 【2026-10-18 Meta トークン復旧】システムユーザー waka（122123036223442860、画面表示ID 61593285812681）の**無期限トークン**を
+  API（POST 61593285812681/access_tokens、business_app=2559664041137913、set_token_expires_in_60_days=false、appsecret_proof 付き）で発行。
+  権限 ads_management / ads_read / catalog_management / business_management / pages_manage_ads。appsecret_proof なしでも API は通る。
+  Lambda の META_ACCESS_TOKEN への反映はユーザー作業（一時変数 META_TMP_USER_TOKEN / META_APP_SECRET は削除依頼。Discord の環境変数は使っていないので戻さない）。
+- 【2026-10-18 カタログ広告の冬物入れ替え案（未適用・承認待ち）】9/26〜10/17 のカタログ広告費の83%が新作以外（Wadi Pants・キャップ・自転車用バッグなど）。
+  `config/season_sets.json` で商品セットを季節に合わせて絞る仕組みを追加（`meta product-sets` が毎週読み、指定カテゴリを巡回）:
+  HOUDINI→HOUDINI_NEW（158→35）/ ACLIMA→ACLIMA_NEW（149→18）/ POC→POC_SNOW（169→69）/ NORRØNA 各シリーズと HESTRA は
+  夏物の語（Shorts・Tee・T-Shirt・Tank・Skirt など）を除くだけ。新セット FW新作_NORRONA（NORRONA_NEW、20）を作り、全員向けの senja 広告
+  52608801149935 を `swap-catalog-ads` でこれに置き換える案。明細 reports/カタログ広告_冬入れ替え案_2026-10-18.csv。季節が変わったら json を書き換える。
 - 【2026-10-14 ユーザー指示「10月の使い残しは11〜12月に回して」】build_ad_budget_plan.py に OCT_ACTUAL を追加。
   月末に10月の確定実績を入れると、計画（801,761）との差額を11月・12月の通常運用へ比率（0.164:0.187）で上乗せし、1〜4月は変えない
   （年間合計は不変、pycel で確認済み。例: 実績61万なら 11月 +9.0万・12月 +10.2万）。11/1 11:00 JST に確定作業の予約あり

@@ -238,14 +238,17 @@ def main(argv=None) -> int:
                 Path(args.csv) if args.csv else SUPPLEMENT_CSV, apply=args.apply))
         elif args.action == "product-sets":
             import csv as _csv
-            from .catalog_attributes import SUPPLEMENT_CSV, load_feed, meta_product_sets
+            from .catalog_attributes import (SUPPLEMENT_CSV, load_feed, load_season_sets,
+                                             meta_product_sets)
             feed = load_feed()
             rows = []
             with open(SUPPLEMENT_CSV, encoding="utf-8") as fh:
                 for r in _csv.DictReader(fh):
                     r["availability"] = feed.get(r["id"], {}).get("availability", "")
+                    r["title"] = feed.get(r["id"], {}).get("title", "")
                     rows.append(r)
-            _print(meta_product_sets(client, args.catalog_id, rows, apply=args.apply))
+            _print(meta_product_sets(client, args.catalog_id, rows, apply=args.apply,
+                                     season=load_season_sets()))
         elif args.action == "swap-catalog-ads":
             from .catalog_attributes import meta_swap_catalog_ads
             if args.sets_json:
