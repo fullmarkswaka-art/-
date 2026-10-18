@@ -337,12 +337,19 @@ def load_season_sets(path: Path = SEASON_SETS_FILE) -> dict:
 
 
 def _season_filter(flt: dict, rows: list[dict], conf: dict, exclude: list[str]) -> dict:
-    """retailer_id 条件を、季節のカテゴリと夏物の語で絞り込む。"""
-    pat = re.compile(r"(?<![A-Za-z])(" + "|".join(re.escape(w) for w in exclude) + r")(?![A-Za-z])",
-                     re.I) if exclude else None
+    """retailer_id 条件を、季節のカテゴリと夏物の語で絞り込む。
+
+    conf["include_title"] の語を商品名に含む商品は、カテゴリ外でも残す（新作ではない定番の冬物）。
+    conf["exclude_title_words"] はそのセットだけで外す語（共通の exclude に足す）。
+    """
+    words = exclude + conf.get("exclude_title_words", [])
+    pat = re.compile(r"(?<![A-Za-z])(" + "|".join(re.escape(w) for w in words) + r")(?![A-Za-z])",
+                     re.I) if words else None
+    keep = [w.lower() for w in conf.get("include_title", [])]
     title = {r["id"]: r.get("title", "") for r in rows}
     ids = [i for i in flt["retailer_id"]["is_any"]
-           if (conf["category_ids"] is None or i in conf["category_ids"])
+           if (conf["category_ids"] is None or i in conf["category_ids"]
+               or any(w in title.get(i, "").lower() for w in keep))
            and not (pat and pat.search(title.get(i, "")))]
     return {"retailer_id": {"is_any": ids}}
 

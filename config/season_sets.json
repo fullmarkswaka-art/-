@@ -1,16 +1,84 @@
 {
-  "_comment": "カタログ広告の商品セットを季節に合わせて絞る設定（meta product-sets が毎週読む）。categories はサイトのカテゴリ名（例 HOUDINI_NEW）で、その一覧に載っている通常価格品だけを入れる。exclude_title_words は商品名に含まれていたら外す語（半袖・ショーツなど夏物）。ここに無いセットは従来どおりブランド（×シリーズ）の通常価格品すべて。季節が変わったら書き換える。",
+  "_comment": "カタログ広告の商品セットを季節に合わせて絞る設定（meta product-sets が毎週読む）。categories はサイトのカテゴリ名（例 HOUDINI_NEW）で、その一覧に載っている通常価格品だけを入れる。exclude_title_words は商品名に含まれていたら外す語（半袖・ショーツなど夏物）。ここに無いセットは従来どおりブランド（×シリーズ）の通常価格品すべて。季節が変わったら書き換える。 include_title はカテゴリ外でも残す定番の冬物（商品名の一部、大文字小文字は無視）。セットごとの exclude_title_words はそのセットだけで外す語。",
   "season": "2026FW",
-  "exclude_title_words": ["Shorts", "Tee", "T-Shirt", "Tank", "Skirt", "Singlet", "Short Sleeve", "S/S", "Trucker"],
+  "exclude_title_words": [
+    "Shorts",
+    "Tee",
+    "T-Shirt",
+    "Tank",
+    "Skirt",
+    "Singlet",
+    "Short Sleeve",
+    "S/S",
+    "Trucker"
+  ],
   "sets": {
-    "通常価格_HOUDINI": {"categories": ["HOUDINI_NEW"]},
-    "通常価格_ACLIMA": {"categories": ["ACLIMA_NEW"]},
-    "通常価格_POC": {"categories": ["POC_SNOW"]},
+    "通常価格_HOUDINI": {
+      "categories": [
+        "HOUDINI_NEW"
+      ],
+      "include_title": [
+        "One Parka",
+        "BFF Jacket",
+        "BFF Pants",
+        "Ride Insulated",
+        "Puff Up Insulated",
+        "Enfold Jacket",
+        "Dunfri",
+        "Alto",
+        "Activist",
+        "Lykan",
+        "Power Houdi",
+        "Power Up",
+        "Power Hat",
+        "Power Top Hat",
+        "Power Wrist Gaiters",
+        "Boxer Houdi",
+        "Moonwalk Vest",
+        "Moonwalk Headband",
+        "Pace Flow",
+        "Desoli Thermal"
+      ],
+      "exclude_title_words": [
+        "Cap"
+      ]
+    },
+    "通常価格_ACLIMA": {
+      "categories": [
+        "ACLIMA_NEW"
+      ],
+      "include_title": [
+        "WARMWOOL",
+        "DOUBLEWOOL",
+        "DESIGNWOOL",
+        "FLEECEWOOL",
+        "WOOLSHELL",
+        "HOTWOOL",
+        "BEANIE",
+        "BALACLAVA",
+        "LINER GLOVES",
+        "NORWEGIAN WOOL SOCKS"
+      ],
+      "exclude_title_words": [
+        "Hipster",
+        "Boxer"
+      ]
+    },
+    "通常価格_POC": {
+      "categories": [
+        "POC_SNOW"
+      ]
+    },
     "通常価格_HESTRA": {},
     "通常価格_NORRONA_falketind": {},
     "通常価格_NORRONA_femund": {},
     "通常価格_NORRONA_lofoten": {},
     "通常価格_NORRONA_trollveggen": {},
-    "FW新作_NORRONA": {"brand": "NORRONA", "categories": ["NORRONA_NEW"]}
+    "FW新作_NORRONA": {
+      "brand": "NORRONA",
+      "categories": [
+        "NORRONA_NEW"
+      ]
+    }
   }
 }
