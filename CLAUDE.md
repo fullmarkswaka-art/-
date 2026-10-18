@@ -296,7 +296,7 @@ FULLMARKS（fullmarksstore.jp）の広告運用ツール。Meta/Google広告のA
   【ユーザー選択 B: 新作＋定番の冬物】HOUDINI→HOUDINI_NEW＋定番の冬物（include_title: One Parka・BFF・Ride Insulated・Dunfri・Alto・Lykan・Power 等、158→95）/
   ACLIMA→ACLIMA_NEW＋WARMWOOL・DOUBLEWOOL・DESIGNWOOL・WOOLSHELL・帽子類（149→84）/ POC→POC_SNOW（169→69）/ NORRØNA 各シリーズと HESTRA は
   夏物の語（Shorts・Tee・T-Shirt・Tank・Skirt など）を除くだけ。新セット FW新作_NORRONA（NORRONA_NEW、20）を作り、全員向けの senja 広告
-  52608801149935 を `swap-catalog-ads` でこれに置き換える案。明細 reports/カタログ広告_冬入れ替え案_2026-10-18.xlsx（`scripts/catalog_season_diff.py` で再生成）。季節が変わったら json を書き換える。
+  52608801149935 を `swap-catalog-ads` でこれに置き換える案。明細 reports/カタログ広告_冬入れ替え案_社内確認用_2026-10-18.xlsx（概要＋全商品一覧、確認欄つき。`scripts/catalog_season_diff.py` で再生成）。季節が変わったら json を書き換える。
 - 【2026-10-14 ユーザー指示「10月の使い残しは11〜12月に回して」】build_ad_budget_plan.py に OCT_ACTUAL を追加。
   月末に10月の確定実績を入れると、計画（801,761）との差額を11月・12月の通常運用へ比率（0.164:0.187）で上乗せし、1〜4月は変えない
   （年間合計は不変、pycel で確認済み。例: 実績61万なら 11月 +9.0万・12月 +10.2万）。11/1 11:00 JST に確定作業の予約あり
