@@ -290,7 +290,8 @@ FULLMARKS（fullmarksstore.jp）の広告運用ツール。Meta/Google広告のA
 - 【2026-10-18 Meta トークン復旧】システムユーザー waka（122123036223442860、画面表示ID 61593285812681）の**無期限トークン**を
   API（POST 61593285812681/access_tokens、business_app=2559664041137913、set_token_expires_in_60_days=false、appsecret_proof 付き）で発行。
   権限 ads_management / ads_read / catalog_management / business_management / pages_manage_ads。appsecret_proof なしでも API は通る。
-  Lambda の META_ACCESS_TOKEN への反映はユーザー作業（一時変数 META_TMP_USER_TOKEN / META_APP_SECRET は削除依頼。Discord の環境変数は使っていないので戻さない）。
+  【10/19 完了】ユーザーが Lambda の META_ACCESS_TOKEN をこの無期限トークンに更新し、一時変数 META_TMP_USER_TOKEN / META_APP_SECRET を削除済み
+  （通常の取得経路で API 動作確認済み）。Discord の環境変数は使っていないので戻さない。
 - 【2026-10-18 カタログ広告の冬物入れ替え案 → 2026-10-19 反映済み（ユーザー承認「反映して」）】9/26〜10/17 のカタログ広告費の83%が新作以外（Wadi Pants・キャップ・自転車用バッグなど）。
   `config/season_sets.json` で商品セットを季節に合わせて絞る仕組みを追加（`meta product-sets` が毎週読み、指定カテゴリを巡回）:
   【ユーザー選択 B: 新作＋定番の冬物】HOUDINI→HOUDINI_NEW＋定番の冬物（include_title: One Parka・BFF・Ride Insulated・Dunfri・Alto・Lykan・Power 等、158→95）/
@@ -301,7 +302,6 @@ FULLMARKS（fullmarksstore.jp）の広告運用ツール。Meta/Google広告のA
   femund 32 / lofoten 26 / trollveggen 22 / HESTRA 137、新セット FW新作_NORRONA 1129897746287300＝20）→ `swap-catalog-ads 52608801149935
   --sets-json copy/catalog_ads_norrona_new.json --apply`（新広告 52613854679335「NORRØNA｜Fall / Winter 2026」審査中、senja 広告は停止）。
   予算 7,000円/日・全員向けは不変。1週間後（10/26）に前週（10/12〜18）と購入件数・売上を比較して判断する。
-  反映時点で Lambda の META_ACCESS_TOKEN はまだ旧トークン（作業は控えの新トークンで実施）。
 - 【2026-10-14 ユーザー指示「10月の使い残しは11〜12月に回して」】build_ad_budget_plan.py に OCT_ACTUAL を追加。
   月末に10月の確定実績を入れると、計画（801,761）との差額を11月・12月の通常運用へ比率（0.164:0.187）で上乗せし、1〜4月は変えない
   （年間合計は不変、pycel で確認済み。例: 実績61万なら 11月 +9.0万・12月 +10.2万）。11/1 11:00 JST に確定作業の予約あり
