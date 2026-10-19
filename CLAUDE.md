@@ -33,6 +33,8 @@ FULLMARKS（fullmarksstore.jp）の広告運用ツール。Meta/Google広告のA
   2.グラフ（日別・Google vs Instagram・Facebook の表示/来訪/購入・ブランド別）/ 3.広告ごとの成績表（判定つき）/
   参考資料（担当者向けの表・点検）。文章は copy/weekly/<最終日>.json（conclusion/points/next/asks）、無ければ自動。
   イベント広告は通常運用と分けて数える。フォントは IPAPGothic（無ければ HeiseiKakuGo）、日本語は CJK 折り返し。
+  【2026-10-19 ユーザー指示】**週次レポートは会社の人へ出す一般的な報告書**。「承認をお願いしたいこと」（asks）や
+  「要相談」など社内向けの依頼は入れない（承認はチャットで取る）。実施した変更は plan（表）に「○/○ に行った変更」として書く。
 - 月次レポート: `python scripts/monthly_report.py --month YYYY-MM [--until YYYY-MM-DD]` で
   reports/広告月次レポート_<月>.pdf（通常運用とイベント枠を分けて集計、前月の同じ日数と比較）。
   文章（conclusion・points・actions・next・asks）は copy/monthly/<月>.json に書く（専門用語を使わない）。
