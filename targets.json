@@ -6,7 +6,9 @@
   "event_reserve": 0,
   "event_reserve_note": "10月はEC企画なし。11月のブラックフライデー予備費は10万（予算計画のイベント予備費）",
   "min_roas": 10,
-  "event_campaign_ids": [],
+  "event_campaign_ids": [
+    "52613872650335"
+  ],
   "events": [
     {
       "key": "sw2026",
@@ -43,6 +45,24 @@
       },
       "spent_ex_tax": 48422,
       "spent_note": "使った分（Meta 48,422円）だけをイベント枠として計上。予備費90,909円との差 42,487円は年間計画の10〜4月へ戻した"
+    },
+    {
+      "key": "doublepoint2026",
+      "label": "秋のダブルポイントキャンペーン",
+      "start": "2026-10-17",
+      "end": "2026-11-03",
+      "reserve_ex_tax": 51000,
+      "reserve_note": "上限の目安（3,000円/日、最後の2日 6,000円）。使った分だけをイベント枠として計上し、年間計画の調整月 2027-04 から差し引く",
+      "meta_campaign_ids": [
+        "52613872650335"
+      ],
+      "google_asset_ids": [
+        "431297407172"
+      ],
+      "utm_campaign": "doublepoint2026",
+      "image": "copy/creatives/doublepoint2026/doublepoint_1080x1080.jpg",
+      "offer": "対象商品のお買い物ポイントが2倍",
+      "ads_start": "2026-10-19"
     }
   ],
   "_events_note": "イベント広告は通常運用と別枠。events[] で企画ごとに予算・Metaキャンペーン・Googleアセットを管理し、scripts/event_report.py と週次レポートの「イベント枠」で集計する。event_campaign_ids は月間ペースの除外用（events の meta_campaign_ids と同じ）"

@@ -188,3 +188,92 @@ def google_remove_promotion_asset(gclient, asset_id: str, apply: bool = False) -
     resp = svc.mutate_campaign_assets(customer_id=gclient.customer_id, operations=ops)
     plan["removed"] = [x.resource_name for x in resp.results]
     return plan
+
+
+# ---------- 3サイズ（配置別）の企画広告・コールアウト ----------
+
+def meta_create_event_campaign_placement(client: MetaAdsClient, name: str, images: dict[str, str], message: str,
+                                         headline: str, link: str, daily_budget: int, end_date: str,
+                                         template_adset: str, end_hm: str = "23:50",
+                                         apply: bool = False) -> dict:
+    """企画用の CBO キャンペーン＋全員向け（Advantage+、除外なし＝既存客も含む）広告セット＋配置別画像の広告を作る。
+    images: {"1x1": path, "4x5": path, "9x16": path}。template_adset の地域・年齢をそのまま使う。"""
+    from .creative_swap import create_placement_creative, upload
+    acct = client.config.ad_account_id
+    end_time = f"{end_date}T{end_hm}:00+0900"
+    plan = {"apply": apply, "campaign": f"UC_DN_3_CVS_{name}", "daily_budget": daily_budget, "end_time": end_time,
+            "adset": f"UCDN3_CVS_{name}_全員_Advantage+", "headline": headline, "message": message, "link": link,
+            "images": images}
+    if not apply:
+        return plan
+    hashes = {k: upload(client, p) for k, p in images.items()}
+    cr = create_placement_creative(client, f"{name.lower()}_placement", hashes, message, headline, link)
+    camp = client.post(f"{acct}/campaigns", name=plan["campaign"], objective="OUTCOME_SALES", status="ACTIVE",
+                       special_ad_categories="[]", daily_budget=str(daily_budget),
+                       bid_strategy="LOWEST_COST_WITHOUT_CAP", stop_time=end_time)
+    t = client.get(template_adset, fields="targeting")["targeting"]
+    for k in ("custom_audiences", "excluded_custom_audiences"):
+        t.pop(k, None)
+    adset = client.post(f"{acct}/adsets", name=plan["adset"], campaign_id=camp["id"], status="ACTIVE",
+                        billing_event="IMPRESSIONS", optimization_goal="OFFSITE_CONVERSIONS",
+                        promoted_object=json.dumps({"pixel_id": PIXEL_ID, "custom_event_type": "PURCHASE"}),
+                        targeting=json.dumps(t, ensure_ascii=False), end_time=end_time,
+                        attribution_spec=json.dumps([{"event_type": "CLICK_THROUGH", "window_days": 7},
+                                                     {"event_type": "VIEW_THROUGH", "window_days": 1}]))
+    ad = client.post(f"{acct}/ads", name=f"{name.lower()}_placement", adset_id=adset["id"],
+                     creative=json.dumps({"creative_id": cr}), status="ACTIVE")
+    plan.update(campaign_id=camp["id"], adset_id=adset["id"], creative_id=cr, ad_id=ad["id"])
+    return plan
+
+
+def google_create_callout_asset(gclient, campaign_ids: list[str], text: str, start_date: str, end_date: str,
+                                apply: bool = False) -> dict:
+    """コールアウト アセット（例「11/3までポイント2倍」、25文字以内）を作り、キャンペーンにリンクする。追加費用なし。"""
+    rows = gclient.search("SELECT campaign.id, campaign.name, campaign.status FROM campaign WHERE campaign.id IN ("
+                          + ",".join(str(int(c)) for c in campaign_ids) + ")")
+    camps = [{"id": str(r.campaign.id), "name": r.campaign.name, "status": r.campaign.status.name} for r in rows]
+    plan = {"apply": apply, "text": text, "period": f"{start_date}〜{end_date}", "campaigns": camps}
+    if not apply:
+        return plan
+    client = gclient.client
+    op = client.get_type("AssetOperation")
+    a = op.create
+    a.name = f"callout_{text}_{start_date}"
+    a.callout_asset.callout_text = text
+    a.callout_asset.start_date = start_date
+    a.callout_asset.end_date = end_date
+    asset_rn = client.get_service("AssetService").mutate_assets(
+        customer_id=gclient.customer_id, operations=[op]).results[0].resource_name
+    plan["asset"] = asset_rn
+    ops = []
+    for c in camps:
+        cop = client.get_type("CampaignAssetOperation")
+        ca = cop.create
+        ca.campaign = client.get_service("CampaignService").campaign_path(gclient.customer_id, c["id"])
+        ca.asset = asset_rn
+        ca.field_type = client.enums.AssetFieldTypeEnum.CALLOUT
+        ops.append(cop)
+    r2 = client.get_service("CampaignAssetService").mutate_campaign_assets(customer_id=gclient.customer_id, operations=ops)
+    plan["campaign_assets"] = [x.resource_name for x in r2.results]
+    return plan
+
+
+def google_remove_callout_asset(gclient, asset_id: str, apply: bool = False) -> dict:
+    """コールアウト アセットのキャンペーン紐付けを外す（企画の締切時刻に止めるため）。"""
+    rows = gclient.search(
+        "SELECT campaign.name, campaign_asset.resource_name, campaign_asset.status FROM campaign_asset "
+        f"WHERE campaign_asset.field_type='CALLOUT' AND asset.id = {int(asset_id)}")
+    links = [{"campaign": r.campaign.name, "resource_name": r.campaign_asset.resource_name,
+              "status": r.campaign_asset.status.name} for r in rows]
+    plan = {"apply": apply, "asset_id": str(asset_id), "links": links}
+    if not apply or not links:
+        return plan
+    client = gclient.client
+    ops = []
+    for link in links:
+        op = client.get_type("CampaignAssetOperation")
+        op.remove = link["resource_name"]
+        ops.append(op)
+    resp = client.get_service("CampaignAssetService").mutate_campaign_assets(customer_id=gclient.customer_id, operations=ops)
+    plan["removed"] = [x.resource_name for x in resp.results]
+    return plan

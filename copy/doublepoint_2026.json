@@ -1,13 +1,24 @@
 {
-  "_comment": "秋のダブルポイントキャンペーン（10/17〜11/3、EC企画）の広告案。2026-10-19 文言はユーザー確認済み（「このままでOK」）。配信はユーザーの合図待ち（「ダブルポイントはまだ待って」）。イベント予算として通常運用と別計上、リンク先はトップ。画像 10.17 (Sta) の誤字は未解決。",
+  "_comment": "秋のダブルポイントキャンペーン（10/17〜11/3、EC企画）の広告案。2026-10-19 文言はユーザー確認済み（「このままでOK」）。2026-10-19 ユーザー指示「ダブルポイントの広告を出して」で配信開始。イベント予算として通常運用と別計上、リンク先はトップ。画像は (Sta)→(Sat) に修正し下の文字を削除、3サイズ化（copy/creatives/doublepoint2026/）。",
   "key": "doublepoint2026",
   "label": "秋のダブルポイントキャンペーン",
-  "start": "2026-10-17", "end": "2026-11-03", "end_hm": "23:50",
+  "start": "2026-10-17",
+  "end": "2026-11-03",
+  "end_hm": "23:50",
   "headline": "秋のダブルポイントキャンペーン｜11/3（火）まで",
   "message": "11/3（火）まで、対象商品のお買い物ポイントが2倍。秋のダブルポイントキャンペーン開催中。",
   "link": "https://www.fullmarksstore.jp/",
   "utm_campaign": "doublepoint2026",
-  "meta": {"audience": "全員向け Advantage+（既存客も含める・除外なし）", "daily_budget": 3000, "last_two_days_daily_budget": 6000,
-           "estimated_total_ex_tax": 51000, "spend_cap_october": 470000},
-  "google_callout": "11/3までポイント2倍"
+  "meta": {
+    "audience": "全員向け Advantage+（既存客も含める・除外なし）",
+    "daily_budget": 3000,
+    "last_two_days_daily_budget": 6000,
+    "estimated_total_ex_tax": 51000,
+    "spend_cap_october": 470000,
+    "campaign_id": "52613872650335",
+    "adset_id": "52613872652335",
+    "ad_id": "52613872660135"
+  },
+  "google_callout": "11/3までポイント2倍",
+  "google_callout_asset": "customers/6803842189/assets/431297407172"
 }
