@@ -364,7 +364,10 @@ FULLMARKS（fullmarksstore.jp）の広告運用ツール。Meta/Google広告のA
   monthly_report.py は月が終わっていれば前月の全期間と比較、9月の予算は copy/monthly/2026-09.json の normal_budget_ex_tax。
   10/1 朝は Meta が利用上限 35万にほぼ到達（349,982）していたが、**同日ユーザーが広告マネージャで使用額をリセット**
   （spend_cap 350,000 / amount_spent 0）。10月の Meta は35万まで使える。上限の引き上げ提案は取り下げ。
-  運用: 利用上限は「月の Meta 予算の歯止め」として使い、毎月1日に使用額をリセットする（ユーザー操作）。
+  運用: 利用上限は「月の Meta 予算の歯止め」として使い、毎月1日に使用額をリセットする。
+  【2026-10-19 ユーザー指示「毎月こっちでやって」】リセットは Claude が行う（ユーザー操作は不要）。`python scripts/meta_spend_cap.py --reset --apply`
+  （spend_cap_action=reset）。毎月1日 00:05 JST の定例タスク trig_01Kt541SLvsnYPe6fNnC7rht がこのセッションで実行する。
+  上限額（spend_cap）はその月の予算の承認時に一緒に決めて `--cap <円> --apply` で設定する（10/19 時点 43万）。
   10月の日予算案（Meta 11,100円/日 + HESTRA）を全部反映すると約37万で月末に上限に届くため、その場合は月末前に要相談。
 
 ## 他EC（HOUDINI / NORRONA / PU STORE）の扱い（2026-09-28 ユーザー指示）
