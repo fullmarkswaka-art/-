@@ -1,0 +1,25 @@
+{
+  "_comment": "2026年10月 NEW ARRIVAL 静止画（ユーザー提供 POP 画像、1:1・4:5・9:16）。creative_swap.py で配置別に出し分ける。案（未適用）",
+  "ads": [
+    {"brand": "NORRØNA", "file": "norrona", "headline": "NORRØNA｜Fall / Winter 2026 新作入荷",
+     "message": "ノルウェーの山で鍛えられた NORRØNA の2026年秋冬の新作が入荷しました。tamok・lyngen・lofoten など、雪山で働くウェアをそろえています。",
+     "link": "https://www.fullmarksstore.jp/category/NORRONA_NEW/",
+     "adsets": ["52608801243135"], "pause": ["52608939640135"]},
+    {"brand": "HOUDINI", "file": "houdini", "headline": "HOUDINI｜Fall / Winter 2026 新作入荷",
+     "message": "HOUDINI の2026年秋冬コレクションが入荷しました。山でも街でも一枚で着られて、長く使えるウェアです。",
+     "link": "https://www.fullmarksstore.jp/category/HOUDINI_NEW/",
+     "adsets": ["52597386278935"], "pause": []},
+    {"brand": "POC", "file": "poc", "headline": "POC｜Fall / Winter 2026 新作入荷",
+     "message": "POC の2026年秋冬モデルが入荷しました。スウェーデン生まれ、命を守るためにデザインされたスキー用のヘルメットとゴーグル。",
+     "link": "https://www.fullmarksstore.jp/category/POC_SNOW/",
+     "adsets": ["52608801198135", "52597386782735"], "pause": ["52608801219335", "52604714193735"]},
+    {"brand": "ACLIMA", "file": "aclima", "headline": "ACLIMA｜Fall / Winter 2026 新作入荷",
+     "message": "汗冷えしにくく、暖かいメリノウール。ACLIMA の2026年秋冬の新作が入荷しました。冬の外遊びの一枚目に。",
+     "link": "https://www.fullmarksstore.jp/category/ACLIMA_NEW/",
+     "adsets": ["52598747483935"], "pause": ["52604714222135"]},
+    {"brand": "HESTRA", "file": "hestra", "headline": "HESTRA｜Fall / Winter 2026 新作入荷",
+     "message": "1936年から手袋だけをつくり続ける HESTRA。2026年秋冬のグローブが入荷しました。",
+     "link": "https://www.fullmarksstore.jp/category/HESTRA/",
+     "adsets": ["（新設: 全員向け 1,000円/日）"], "pause": []}
+  ]
+}
