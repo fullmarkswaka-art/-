@@ -332,8 +332,7 @@ FULLMARKS（fullmarksstore.jp）の広告運用ツール。Meta/Google広告のA
   **Permanent Union（/category/PU/、商品ID 17xxxxxxxx）**: サイト表記は Permanent Union だが、catalog_attributes.py は FILTER_BRAND_PU / ID先頭17 を
   "PLUS ONE WORKS" と付けている（予実資料の表記も PLUS ONE WORKS）。同じブランドの扱いか確認待ち。ユーザーは PU の画像広告を今後出したい
   （リンク先が FULLMARKS STORE か PU STORE〈別EC＝「実施します」まで扱わない〉か、粗利、画像3サイズ、予算を確認中）。
-  【2026-10-19 ユーザー指示】Permanent Union の広告は **FULLMARKS STORE の一覧へ飛ばすのは NG**。PU の EC サイト（PU STORE）へ飛ばす。
-  あわせて PU STORE の「EC としてのデザイン」を作る依頼あり（サイトURL・範囲は確認中）。PU STORE についてはユーザーの依頼の範囲で扱ってよい。
+  （10/19 の「FULLMARKS STORE の一覧へ飛ばすのはNG・ECのデザインを作って」は別チャット宛ての誤送信。取り消し。PU は広告だけ検討する）
 - 【2026-10-14 ユーザー指示「10月の使い残しは11〜12月に回して」】build_ad_budget_plan.py に OCT_ACTUAL を追加。
   月末に10月の確定実績を入れると、計画（801,761）との差額を11月・12月の通常運用へ比率（0.164:0.187）で上乗せし、1〜4月は変えない
   （年間合計は不変、pycel で確認済み。例: 実績61万なら 11月 +9.0万・12月 +10.2万）。11/1 11:00 JST に確定作業の予約あり
