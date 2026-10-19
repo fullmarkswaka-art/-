@@ -807,7 +807,7 @@ def sec_audit(meta_client, google_client, g_labels):
 # ---------------- main ----------------
 
 def _narrative(until: date) -> dict:
-    """copy/weekly/<最終日>.json（任意）: conclusion / points / next / asks。無ければ自動の文章を使う。"""
+    """copy/weekly/<最終日>.json（任意）: conclusion / points / next / asks / plan（変更案の表）。無ければ自動の文章を使う。"""
     p = Path(__file__).resolve().parent.parent / "copy" / "weekly" / f"{until}.json"
     return json.loads(p.read_text(encoding="utf-8")) if p.exists() else {}
 
@@ -918,6 +918,14 @@ def main():
         story.append(boxed([Paragraph("承認をお願いしたいこと", S["h2"])] +
                             [Paragraph(x, S["bullet"], bulletText=f"{i}.") for i, x in enumerate(narr["asks"], 1)],
                            bg=colors.HexColor("#fff6e8"), border=WARN))
+    plan = narr.get("plan")  # 任意: {"title", "header", "rows", "widths_mm", "notes"} 承認待ちの変更案の表
+    if plan:
+        rows = [plan["header"]] + plan["rows"]
+        story.append(KeepTogether(
+            [Paragraph(plan["title"], S["h2"]),
+             table([[Paragraph(str(c), S["body"]) for c in r] for r in rows],
+                   [w * mm for w in plan["widths_mm"]], align_right_from=99)] +
+            [Paragraph(x, S["bullet"], bulletText="・") for x in plan.get("notes", [])]))
     story.append(Paragraph("今週のポイント", S["h2"]))
     for line in narr.get("points") or plain_points(brand_cur, [c for _, c in camps_cur], g_camps_p + m_camps_p) or ["特筆事項なし"]:
         story.append(Paragraph(line, S["bullet"], bulletText="■"))
