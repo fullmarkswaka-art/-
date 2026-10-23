@@ -1,0 +1,83 @@
+{
+  "name": "HOUDINI_TECHINS",
+  "end_date": "2026-11-06",
+  "meta": {
+    "daily_budget": 1500,
+    "template_adset": "52608801243135",
+    "instagram_positions": [
+      "stream",
+      "story",
+      "reels",
+      "explore_home",
+      "profile_feed"
+    ],
+    "message": "中綿は PrimaLoft® Black 40g、重さ420g（メンズ）。ミッドレイヤーにも、軽い保温ジャケットにも。山でも街でも一着で完結するインサレーション。メンズ4色・ウィメンズ3色。",
+    "link": "https://www.fullmarksstore.jp/category/HOUDINI/?keyword=tech%20insulation",
+    "utm": "utm_source=meta&utm_medium=paid_social&utm_campaign=houdini_techins",
+    "cards": [
+      {
+        "image": "card1_ms_model_1080x1080.jpg",
+        "name": "Ms Tech Insulation Houdi",
+        "description": "39,600円（税込）",
+        "link": "https://www.fullmarksstore.jp/item/1308200420.html"
+      },
+      {
+        "image": "card2_ws_model_1080x1080.jpg",
+        "name": "Ws Tech Insulation Houdi",
+        "description": "39,600円（税込）",
+        "link": "https://www.fullmarksstore.jp/item/1308200410.html"
+      },
+      {
+        "image": "card3_true_black_1080x1080.jpg",
+        "name": "True Black",
+        "description": "Tech Insulation Houdi",
+        "link": "https://www.fullmarksstore.jp/item/1308200420.html"
+      },
+      {
+        "image": "card4_sandstorm_1080x1080.jpg",
+        "name": "Sandstorm",
+        "description": "Tech Insulation Houdi",
+        "link": "https://www.fullmarksstore.jp/item/1308200420.html"
+      },
+      {
+        "image": "card5_brown_illusion_1080x1080.jpg",
+        "name": "Brown Illusion",
+        "description": "Tech Insulation Houdi",
+        "link": "https://www.fullmarksstore.jp/item/1308200420.html"
+      },
+      {
+        "image": "card6_green_illusion_1080x1080.jpg",
+        "name": "Green Illusion",
+        "description": "Tech Insulation Houdi（メンズ）",
+        "link": "https://www.fullmarksstore.jp/item/1308200420.html"
+      }
+    ],
+    "offset_budget": {
+      "id": "52597385880935",
+      "name": "RTG フーディニ（CBO）",
+      "from": 5000,
+      "to": 3500
+    },
+    "campaign_id": "52614789162135",
+    "adset_id": "52614789166935",
+    "creative_id": "4743644062533007",
+    "ad_id": "52614789178735"
+  },
+  "google": {
+    "campaign_id": "20299964805",
+    "campaign_name": "UC_SK_1_指名_フーディ二",
+    "experiment_name": "TIH sitelink test 2610",
+    "suffix": "[TIH]",
+    "start_date": "2026-10-24",
+    "end_date": "2026-11-06",
+    "sitelink": {
+      "link_text": "Tech Insulation Houdi",
+      "description1": "PrimaLoft Black 40gの中綿",
+      "description2": "ミッドレイヤーにも保温着にも",
+      "final_url": "https://www.fullmarksstore.jp/category/HOUDINI/?keyword=tech%20insulation"
+    },
+    "experiment": "customers/6803842189/experiments/10061822155",
+    "treatment_campaign": "customers/6803842189/campaigns/281495276675461",
+    "sitelink_asset": "customers/6803842189/assets/432642832339"
+  }
+}
