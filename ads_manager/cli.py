@@ -150,6 +150,10 @@ def main(argv=None) -> int:
                 "mc-supplement", help="Merchant Center にAPI補助データソースを作り属性を登録")
             mc.add_argument("--apply", action="store_true")
             mc.add_argument("--limit", type=int, default=None)
+            action_sub.add_parser("shopping-titles",
+                                  help="Google 用の商品名・カテゴリ・性別を作る（reports/google_shopping_titles.csv。mc-supplement が読む）")
+            pn = action_sub.add_parser("pla-negatives", help="ショッピングに除外キーワード（他社ブランド名など）を追加")
+            pn.add_argument("campaign_id"); pn.add_argument("--apply", action="store_true")
             mcp = action_sub.add_parser("mc-product", help="Merchant Center の商品を1件表示")
             mcp.add_argument("offer_id")
             px = action_sub.add_parser("pla-exclude", help="商品グループに custom_label_0=値 の除外ノードを追加")
@@ -292,6 +296,16 @@ def main(argv=None) -> int:
             mc = MerchantClient()
             _print(mc.ensure_supplemental(apply=args.apply))
             _print(mc.upsert_attributes(SUPPLEMENT_CSV, apply=args.apply, limit=args.limit))
+            return 0
+        if args.action == "shopping-titles":
+            from .shopping_titles import build_titles, write_titles
+            rows = build_titles()
+            _print({"rows": len(rows), "path": str(write_titles(rows)), "sample": rows[:3]})
+            return 0
+        if args.action == "pla-negatives":
+            from .google_ads_client import GoogleAdsClientWrapper
+            from .shopping_titles import pla_negatives
+            _print(pla_negatives(GoogleAdsClientWrapper(load_google_config()), args.campaign_id, apply=args.apply))
             return 0
         if args.action == "mc-product":
             from .merchant_api import MerchantClient

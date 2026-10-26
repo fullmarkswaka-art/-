@@ -133,6 +133,10 @@ class MerchantClient:
             rows = rows[:limit]
         result = {"data_source": sup["name"] if sup else None, "rows": len(rows), "apply": apply,
                   "ok": 0, "errors": []}
+        # Google 用の商品名・カテゴリ・性別（shopping_titles.py が作る。無ければ従来どおり）
+        from .shopping_titles import load_titles
+        titles = load_titles()
+        result["with_titles"] = sum(1 for r in rows if r["id"] in titles)
         if not apply:
             result["sample"] = rows[:3]
             return result
@@ -144,6 +148,13 @@ class MerchantClient:
                 attrs["customLabel1"] = r["custom_label_1"]
             if r.get("product_type"):
                 attrs["productTypes"] = [r["product_type"]]
+            t = titles.get(r["id"])
+            if t:
+                attrs["title"] = t["title"]
+                attrs["gender"] = t["gender"]
+                attrs["ageGroup"] = t["age_group"]
+                if t.get("google_product_category"):
+                    attrs["googleProductCategory"] = t["google_product_category"]
             body = {"offerId": r["id"], "contentLanguage": lang, "feedLabel": fl,
                     "productAttributes": attrs}
             for attempt in range(3):

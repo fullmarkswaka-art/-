@@ -552,3 +552,17 @@ FULLMARKS（fullmarksstore.jp）の広告運用ツール。Meta/Google広告のA
   指名_ノローナ 0件継続。10月 61.1万（月末 約75.8万）、Meta 利用 33.2万/47万。ダブルポイント Meta 1.97万・購入0。
   weekly_report.py: CVS_HESTRA を「新しいお客さん向け写真広告」、TECHINS を「1商品の特集広告」、[TIH] を「テスト側」と表示するよう修正、
   event_report.py はコールアウトの文言を表示、購入件数の信号文言を「ほぼ同じ／増えている」に分けた。
+- 【2026-10-26 Googleショッピング（PLA_v2）の診断と改善案（ユーザー「①と②で進めて、変更内容を見せて」→ 変更内容の確認待ち・未反映）】
+  9/28 以降 500円/日・予算による損失90%で、4週間の購入1件。検索語（8/1〜10/25、表示されたもの クリック5,498）は4万種類超で、
+  自社ブランド名を含む検索は約6%、他社ブランド（モンベル・ノースフェイス・マムート等）は約26%で購入ほぼ0。原因はフィードの商品名が英語の型番だけ
+  （ブランド・日本語の種類・カテゴリ・性別・GTIN なし）で、Google が関係の薄い検索に出していること。8月（4,000円/日）の通常品は 6.2・購入率0.86%、
+  9月は 3.3・0.39%。対策: ①除外キーワード67語（`google pla-negatives 24136223642 [--apply]`、`ads_manager/shopping_titles.py` の NEGATIVES。
+  パタゴニア・アークテリクス・ホグロフスは購入があったので残す）②Google 上の商品名を「ブランド＋元の商品名｜性別 種類」に、Google 商品カテゴリ・性別・年齢層も
+  （`google shopping-titles` → reports/google_shopping_titles.csv → `google mc-supplement --apply` が一緒に登録。Meta には流さない。
+  週次の定例は catalog-attributes → shopping-titles → mc-supplement の順）。確認用 reports/Googleショッピング_改善案_2026-10-26.xlsx
+  （`scripts/shopping_review.py <検索語JSON>`）。③冬物に絞る ④11月に 1,500〜2,000円/日 は 11/1 の予算案で。
+  ブランド表記: サイトでは FILTER_BRAND_PU＝Permanent Union（ID 17）、FILTER_BRAND_POW＝PLUS ONE WORKS（ID 16）。Google の商品名はこのサイト表記を使う
+  （catalog_attributes.py の brand 属性は 17→"PLUS ONE WORKS"・16→"POW" のまま。直すかはユーザー確認）。
+  ユーザー提供の「JAN データ」zip（item (2)〜(14).csv＝EC 商品マスタ 6,372件、cp932）には JAN の列が無い（商品コード・バリエーション・在庫・カテゴリ・
+  カラー名・GA用ブランド名・Google Shopping 連携フラグ等）。フィードは商品単位（色・サイズ別でない）なので、GTIN を付けるにはフィードを
+  バリエーション単位にする EC 側の改修も必要。
