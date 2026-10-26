@@ -1,5 +1,5 @@
 {
-  "_comment": "カタログ広告の商品セットを季節に合わせて絞る設定（meta product-sets が毎週読む）。categories はサイトのカテゴリ名（例 HOUDINI_NEW）で、その一覧に載っている通常価格品だけを入れる。exclude_title_words は商品名に含まれていたら外す語（半袖・ショーツなど夏物）。ここに無いセットは従来どおりブランド（×シリーズ）の通常価格品すべて。季節が変わったら書き換える。 include_title はカテゴリ外でも残す定番の冬物（商品名の一部、大文字小文字は無視）。セットごとの exclude_title_words はそのセットだけで外す語。",
+  "_comment": "カタログ広告の商品セットを季節に合わせて絞る設定（meta product-sets が毎週読む）。categories はサイトのカテゴリ名（例 HOUDINI_NEW）で、その一覧に載っている通常価格品だけを入れる。exclude_title_words は商品名に含まれていたら外す語（半袖・ショーツなど夏物）。ここに無いセットは従来どおりブランド（×シリーズ）の通常価格品すべて。季節が変わったら書き換える。 include_title はカテゴリ外でも残す定番の冬物（商品名の一部、大文字小文字は無視）。セットごとの exclude_title_words はそのセットだけで外す語。 min_price は税込価格の下限（2026-10-26 ユーザー承認: HOUDINI・POC・ACLIMA は1万円未満の小物を外す）。",
   "season": "2026FW",
   "exclude_title_words": [
     "Shorts",
@@ -41,7 +41,8 @@
       ],
       "exclude_title_words": [
         "Cap"
-      ]
+      ],
+      "min_price": 10000
     },
     "通常価格_ACLIMA": {
       "categories": [
@@ -62,12 +63,14 @@
       "exclude_title_words": [
         "Hipster",
         "Boxer"
-      ]
+      ],
+      "min_price": 10000
     },
     "通常価格_POC": {
       "categories": [
         "POC_SNOW"
-      ]
+      ],
+      "min_price": 10000
     },
     "通常価格_HESTRA": {},
     "通常価格_NORRONA_falketind": {},

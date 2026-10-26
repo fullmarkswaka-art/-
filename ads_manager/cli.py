@@ -250,6 +250,7 @@ def main(argv=None) -> int:
                 for r in _csv.DictReader(fh):
                     r["availability"] = feed.get(r["id"], {}).get("availability", "")
                     r["title"] = feed.get(r["id"], {}).get("title", "")
+                    r["price"] = feed.get(r["id"], {}).get("price", "")
                     rows.append(r)
             _print(meta_product_sets(client, args.catalog_id, rows, apply=args.apply,
                                      season=load_season_sets()))

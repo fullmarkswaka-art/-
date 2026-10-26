@@ -341,16 +341,20 @@ def _season_filter(flt: dict, rows: list[dict], conf: dict, exclude: list[str]) 
 
     conf["include_title"] の語を商品名に含む商品は、カテゴリ外でも残す（新作ではない定番の冬物）。
     conf["exclude_title_words"] はそのセットだけで外す語（共通の exclude に足す）。
+    conf["min_price"] は税込価格の下限（例 10000 → 1万円未満の小物を外す）。
     """
     words = exclude + conf.get("exclude_title_words", [])
     pat = re.compile(r"(?<![A-Za-z])(" + "|".join(re.escape(w) for w in words) + r")(?![A-Za-z])",
                      re.I) if words else None
     keep = [w.lower() for w in conf.get("include_title", [])]
     title = {r["id"]: r.get("title", "") for r in rows}
+    price = {r["id"]: int(r.get("price") or 0) for r in rows}
+    floor = int(conf.get("min_price") or 0)  # これ未満（税込）の小物は外す。価格が分からない商品は残す
     ids = [i for i in flt["retailer_id"]["is_any"]
            if (conf["category_ids"] is None or i in conf["category_ids"]
                or any(w in title.get(i, "").lower() for w in keep))
-           and not (pat and pat.search(title.get(i, "")))]
+           and not (pat and pat.search(title.get(i, "")))
+           and not (floor and 0 < price.get(i, 0) < floor)]
     return {"retailer_id": {"is_any": ids}}
 
 
