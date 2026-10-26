@@ -1,16 +1,49 @@
 {
   "name": "PU_SHELL_AB",
-  "start_date": "2026-10-24",
-  "end_date": "2026-11-06",
+  "start_date": "2026-10-26",
+  "end_date": "2026-11-09",
   "business_id": "701256860335646",
   "template_adset": "52608801243135",
-  "instagram_positions": ["stream", "explore_home", "profile_feed"],
-  "headline": "Permanent Union｜Snow Shell",
-  "message": "あ、僕らの冬がくる。Permanent Union の3レイヤー スノーシェル。NO TEN・KOVAL・EYGUEBELLE・GIN のジャケットと、KOVAL のビブパンツ。",
+  "instagram_positions": [
+    "stream",
+    "story",
+    "reels",
+    "explore_home",
+    "profile_feed"
+  ],
+  "headline": "Permanent Union｜winter collection",
+  "message": "あれも着たい、これも着たい、僕らの冬がやってくる。",
   "link": "https://www.fullmarksstore.jp/category/PU_SHELL/",
   "utm": "utm_source=meta&utm_medium=paid_social&utm_campaign=pu_shell_ab",
+  "images": [
+    "pu_1_green",
+    "pu_2_brown",
+    "pu_3_white"
+  ],
   "cells": [
-    {"key": "A", "label": "A_男性ブラウン_1x1", "image": "A_man_1080x1080.jpg", "daily_budget": 1000},
-    {"key": "B", "label": "B_女性グリーン_4x5", "image": "B_woman_1080x1350.jpg", "daily_budget": 1000}
-  ]
+    {
+      "key": "A",
+      "label": "A_カルーセル3枚",
+      "type": "carousel",
+      "daily_budget": 1000,
+      "adset_id": "52615235864135",
+      "ad_ids": [
+        "52615235884735"
+      ]
+    },
+    {
+      "key": "B",
+      "label": "B_1枚ずつ3本",
+      "type": "single",
+      "daily_budget": 1000,
+      "adset_id": "52615235891335",
+      "ad_ids": [
+        "52615235907535",
+        "52615235920135",
+        "52615235935935"
+      ]
+    }
+  ],
+  "campaign_id": "52615235857935",
+  "ad_study_id": "2674004973049598"
 }
