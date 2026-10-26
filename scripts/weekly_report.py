@@ -115,6 +115,10 @@ def frame_of(name: str) -> str:
         return "指名検索"
     if "UC_PL" in n or "PLA" in n or "ショッピング" in n:
         return "ショッピング"
+    if "TECHINS" in n:
+        return "商品の特集（カルーセル）"
+    if "CVS_HESTRA" in n:
+        return "新規向け（静止画）"
     if "CVS" in n or "カタログ" in n or "DPA" in n:
         return "カタログ"
     if "RTG" in n:
@@ -255,7 +259,8 @@ MEDIA_PLAIN = {"Google": "Google", "Meta": "Instagram・Facebook"}
 FRAME_PLAIN = {"指名検索": "ブランド名・店名で検索した人（Google）", "ショッピング": "Googleショッピング（商品の写真と価格）",
                "カタログ": "商品カタログ広告（Instagram・Facebook）",
                "リターゲティング（静止画）": "写真広告・サイト訪問者＋全員向け（Instagram・Facebook）",
-               "新規向け（静止画）": "写真広告・新しいお客さん向け（Instagram・Facebook）", "その他": "その他"}
+               "新規向け（静止画）": "写真広告・新しいお客さん向け（Instagram・Facebook）",
+               "商品の特集（カルーセル）": "1商品の特集広告（Instagram）", "その他": "その他"}
 
 
 def plain_name(name: str, short=False) -> str:
@@ -264,7 +269,11 @@ def plain_name(name: str, short=False) -> str:
     if b.startswith("店舗指名") or ("フルマークス" in n and fr == "指名検索"):
         b = "フルマークス"
     if fr == "指名検索":
+        if "[TIH]" in n:
+            return f"「{b}」で検索した人に出す広告（テスト側：Tech Insulation のリンクあり）"
         return f"「{b}」で検索した人に出す広告"
+    if fr == "商品の特集（カルーセル）":
+        return "Tech Insulation Houdi の特集広告（インスタ）"
     if fr == "ショッピング":
         return "Googleショッピング（通常品の写真と価格）" if "outlet" not in n.lower() else "Googleショッピング（アウトレット）"
     if fr == "カタログ":
@@ -905,7 +914,8 @@ def main():
     sig = [roas_signal(cur, "今週の効率（広告1円あたりの売上）")]
     d_cv = (cur["cv"] - prev["cv"]) / prev["cv"] if prev["cv"] else 0
     sig.append(("○" if d_cv >= -0.1 else "△", "今週の購入件数", f"{cur['cv']:.0f}件（前週 {prev['cv']:.0f}件、{pct(cur['cv'], prev['cv'])}）",
-                "前週と同じか増えている。" if d_cv >= -0.1 else "前週より減っている。理由は下の「ポイント」を参照。"))
+                ("前週より増えている。" if d_cv > 0.02 else "前週とほぼ同じ。") if d_cv >= -0.1
+                else "前週より減っている。理由は下の「ポイント」を参照。"))
     if mtd:
         sig.insert(0, pace_signal(mtd["normal"]["spend"], mtd["budget"], mtd["elapsed"], mtd["days"],
                                   f"今月の広告費（{mtd['since'].month}月）"))

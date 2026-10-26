@@ -53,11 +53,14 @@ def google_event_rows(gclient, asset_ids: list[str], since: date, until: date) -
     ids = ",".join(str(int(a)) for a in asset_ids)
     rows = []
     for r in gclient.search(
-            "SELECT campaign.name, asset.id, asset.promotion_asset.promotion_target, metrics.impressions, "
+            "SELECT campaign.name, asset.id, asset.promotion_asset.promotion_target, asset.callout_asset.callout_text, "
+            "campaign_asset.field_type, metrics.impressions, "
             "metrics.clicks, metrics.cost_micros, metrics.conversions, metrics.conversions_value "
             f"FROM campaign_asset WHERE asset.id IN ({ids}) AND segments.date BETWEEN '{since}' AND '{until}'"):
         m = r.metrics
-        rows.append({"media": "Google", "name": f"{r.campaign.name} / プロモーション「{r.asset.promotion_asset.promotion_target}」",
+        kind, text = (("コールアウト", r.asset.callout_asset.callout_text) if r.campaign_asset.field_type.name == "CALLOUT"
+                      else ("プロモーション", r.asset.promotion_asset.promotion_target))
+        rows.append({"media": "Google", "name": f"{r.campaign.name} / {kind}「{text}」",
                      "spend": m.cost_micros / 1e6, "imp": m.impressions, "reach": None, "clicks": m.clicks,
                      "cv": m.conversions, "rev": m.conversions_value})
     return rows
