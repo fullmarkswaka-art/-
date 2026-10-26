@@ -582,3 +582,7 @@ FULLMARKS（fullmarksstore.jp）の広告運用ツール。Meta/Google広告のA
   残る全員向けカタログ広告は HOUDINI / POC / HESTRA / NORRØNA 新作の4本（CBO 5,000円/日は不変）。
   【10/26 夜 ユーザー指示「1万円未満の小物も大事な商品なので掲載したい」】min_price を外して `meta product-sets --apply` で元の点数（HOUDINI 95 / POC 69 / ACLIMA 84）に戻す。
   停止した5本（ACLIMA・NORRØNA シリーズ4本）は「2週間購入0」が理由で、カタログが古いからではないと説明。続けて止めるか再開するかはユーザー判断待ち。
+  【10/26 夜】PU 画像の色: 元画像は CMYK（Japan Color 2001 Coated）。PIL の convert("RGB") で色変換せず保存したため濃く出ていた。ICC で sRGB に変換し直した
+  *_srgb.jpg で新広告 A 52615278868535 / B 52615278885335（①②セット）・52615278903335（③）を作成（ユーザー承認）、審査通過後に旧3本を停止する。
+  **今後、ユーザー提供の画像は mode と ICC を確認し、CMYK・非 sRGB は ImageCms で sRGB に変換してから使う。**
+  同日ユーザーが Merchant Center の属性ルール（補助データ優先）を「変更を適用」。商品名の切り替わりを後で確認する。
