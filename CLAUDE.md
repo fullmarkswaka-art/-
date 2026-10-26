@@ -580,3 +580,5 @@ FULLMARKS（fullmarksstore.jp）の広告運用ツール。Meta/Google広告のA
   毎週の `meta product-sets --apply` でも維持）。通常価格_HOUDINI 95→83 / POC 69→52 / ACLIMA 84→53、他は不変。カタログ広告 ACLIMA_all 52608801189735 と
   NORRØNA femund 52608801152735・falketind 52608801159335・trollveggen 52608801134135・lofoten 52608801155335（全員向け）を PAUSED。
   残る全員向けカタログ広告は HOUDINI / POC / HESTRA / NORRØNA 新作の4本（CBO 5,000円/日は不変）。
+  【10/26 夜 ユーザー指示「1万円未満の小物も大事な商品なので掲載したい」】min_price を外して `meta product-sets --apply` で元の点数（HOUDINI 95 / POC 69 / ACLIMA 84）に戻す。
+  停止した5本（ACLIMA・NORRØNA シリーズ4本）は「2週間購入0」が理由で、カタログが古いからではないと説明。続けて止めるか再開するかはユーザー判断待ち。
