@@ -1,74 +1,348 @@
 {
   "sections": {
-    "bg": { "type": "top-background", "settings": { "dim": 10 } },
-    "opening": { "type": "opening", "settings": { "enabled": true, "logo_width": 30, "logo_max": 440, "logo_width_sp": 60 } },
-    "fv": { "type": "first-view", "settings": { "opacity": 72, "header_mode": "dark", "focal_x_sp": 72 } },
-    "story1": { "type": "story", "settings": {
-      "chapter": 1, "color_name": "Muku", "layout": "vt-right", "focal_y": 34, "focal_x_sp": 58, "dim": 30,
-      "vt_text": "森に抱かれ、山で遊ぶ時間は、\n私たちにとって至福のものです。",
-      "en": "Held by the forest, let loose in the mountains—\nthis is our kind of bliss."
-    } },
-    "story2": { "type": "story", "settings": {
-      "chapter": 2, "color_name": "Kakishibu", "layout": "bottom", "focal_x_sp": 66, "dim": 35,
-      "vt_text": "", "heading": "だからこそ", "sub": "（例えばデートに出かけるときのように）",
-      "en": "Which is why I choose outerwear that's true to who I am"
-    } },
-    "story3": { "type": "story", "settings": {
-      "chapter": 3, "color_name": "Wakaba", "layout": "vt-left", "focal_y": 30, "dim": 30,
-      "vt_text": "自分らしいウェアを\n身に纏いたいのです。",
-      "en": "- Just like I would when heading out on a date."
-    } },
-    "interlude1": { "type": "interlude", "settings": { "height": 70 } },
-    "story4": { "type": "story", "settings": {
-      "chapter": 4, "color_name": "Slate Blue", "layout": "block-l", "focal_x_sp": 70, "dim": 50,
-      "vt_text": "", "label": "Sustainability",
-      "heading": "私たちが考える環境への配慮は、\n長く使えること。",
-      "heading_sp": "私たちが考える\n環境への配慮は、\n長く使えること。",
-      "sub": "そのために日本の山に必要な撥水性能と、\nタフな使用でも耐え得る強い生地を開発しました。",
-      "en": "We believe sustainability starts with making things that last. Engineered for Japan's demanding mountain conditions, our fabric delivers the water repellency and durability to perform wherever the mountains take you."
-    } },
-    "story5": { "type": "story", "settings": {
-      "chapter": 5, "color_name": "Muku", "layout": "block-r", "focal_y": 60, "dim": 40,
-      "vt_text": "", "label": "Clothing is in our DNA",
-      "heading": "Permanent Unionの\nものづくりはあくまで洋服。",
-      "sub": "縫製の仕方、革の採用、\nスポーツウェアにはないオリジナリティをインプットしています。",
-      "en": "Clothing is in our DNA. From construction and stitching to our choice of leather materials, details drawn from garment design are woven throughout—bringing a character rarely seen in conventional sportswear."
-    } },
-    "story6": { "type": "story", "settings": {
-      "chapter": 6, "color_name": "Midnight", "layout": "vt-sub", "focal_y": 20, "focal_x_sp": 100, "focal_y_sp": 30, "dim": 35,
-      "vt_text": "受け継いだ羊毛を、\n新しい温もりに。", "sub": "― 古着から作り出す再生ウール ―", "label": "Recycled wool",
-      "en": "Passing warmth from one life to the next.\n- Recycled wool made from used garments. -"
-    } },
-    "interlude2": { "type": "interlude", "settings": { "height": 70 } },
-    "story7": { "type": "story", "settings": {
-      "chapter": 7, "color_name": "Midnight", "layout": "center", "focal_y": 40, "dim": 50,
-      "vt_text": "", "heading": "山へ　街へ　その先へ",
-      "sub": "行き先を選ばない洋服で\n旅をもっと日常に、日常をもっと自由に。",
-      "en": "From the mountains to the city— and anywhere in between.\nClothing without boundaries.\nMake travel part of the everyday. Make the everyday feel more free.",
-      "button_label": "ONLINE STORE", "button_link": "/collections/all"
-    } },
-    "interlude3": { "type": "interlude", "settings": { "height": 70 } },
-    "products": { "type": "products-categories", "blocks": {
-      "c1": { "type": "category", "settings": { "title": "OUTERWEAR", "sub": "アウター", "link": "/collections/outerwear", "tentative": true } },
-      "c2": { "type": "category", "settings": { "title": "TOPS", "sub": "トップス", "link": "/collections/tops", "focal_y": 30, "tentative": true } },
-      "c3": { "type": "category", "settings": { "title": "BOTTOMS", "sub": "ボトムス", "link": "/collections/bottoms", "focal_y": 60, "tentative": true } },
-      "c4": { "type": "category", "settings": { "title": "ACCESSORIES", "sub": "小物", "link": "/collections/accessories", "focal_x": 70, "tentative": true } }
-    }, "block_order": ["c1", "c2", "c3", "c4"], "settings": {} },
-    "arrivals": { "type": "new-arrivals", "settings": {} },
-    "riders": { "type": "riders", "blocks": {
-      "r1": { "type": "rider", "settings": { "name": "山内 一志", "name_en": "Kazushi Yamauchi", "role": "SNOWBOARDER" } },
-      "r2": { "type": "rider", "settings": { "name": "畔田 正志", "name_en": "Masashi Kuroda", "role": "SNOWBOARDER" } },
-      "r3": { "type": "rider", "settings": { "name": "舎川 朋弘", "name_en": "Tomohiro Tonegawa", "role": "SKIER" } },
-      "r4": { "type": "rider", "settings": { "name": "上村 愛子", "name_en": "Aiko Uemura", "role": "SKIER" } },
-      "r5": { "type": "rider", "settings": { "name": "永島 秀之", "name_en": "Hideyuki Nagashima", "role": "TELEMARK SKIER" } },
-      "r6": { "type": "rider", "settings": { "name": "立花 透", "name_en": "Toru Tachibana", "role": "SKIER" } },
-      "r7": { "type": "rider", "settings": { "name": "石川 睦", "name_en": "Makoto Ishikawa", "role": "SKIER" } },
-      "r8": { "type": "rider", "settings": { "name": "笹田 知里", "name_en": "Chisato Sasada", "role": "SKIER" } }
-    }, "block_order": ["r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8"], "settings": { "link": "/pages/riders" } },
-    "journal": { "type": "journal", "settings": { "blog": "journal" } },
-    "instagram": { "type": "instagram", "blocks": {
-      "i1": { "type": "image" }, "i2": { "type": "image" }, "i3": { "type": "image" }, "i4": { "type": "image" }, "i5": { "type": "image" }, "i6": { "type": "image" }
-    }, "block_order": ["i1", "i2", "i3", "i4", "i5", "i6"], "settings": {} }
+    "bg": {
+      "type": "top-background",
+      "settings": {
+        "dim": 10
+      }
+    },
+    "opening": {
+      "type": "opening",
+      "settings": {
+        "enabled": true,
+        "logo_width": 30,
+        "logo_max": 440,
+        "logo_width_sp": 60
+      }
+    },
+    "fv": {
+      "type": "first-view",
+      "settings": {
+        "opacity": 72,
+        "header_mode": "dark",
+        "focal_x_sp": 72
+      }
+    },
+    "story1": {
+      "type": "story",
+      "settings": {
+        "chapter": 1,
+        "color_name": "Muku",
+        "layout": "vt-right",
+        "focal_y": 34,
+        "focal_x_sp": 58,
+        "dim": 30,
+        "vt_text": "森に抱かれ、山で遊ぶ時間は、\n私たちにとって至福のものです。",
+        "en": "Held by the forest, let loose in the mountains—\nthis is our kind of bliss."
+      }
+    },
+    "story2": {
+      "type": "story",
+      "settings": {
+        "chapter": 2,
+        "color_name": "Kakishibu",
+        "layout": "bottom",
+        "focal_x_sp": 66,
+        "dim": 35,
+        "vt_text": "",
+        "heading": "だからこそ",
+        "sub": "（例えばデートに出かけるときのように）",
+        "en": "Which is why I choose outerwear that's true to who I am"
+      }
+    },
+    "story3": {
+      "type": "story",
+      "settings": {
+        "chapter": 3,
+        "color_name": "Wakaba",
+        "layout": "vt-left",
+        "focal_y": 30,
+        "dim": 30,
+        "vt_text": "自分らしいウェアを\n身に纏いたいのです。",
+        "en": "- Just like I would when heading out on a date."
+      }
+    },
+    "interlude1": {
+      "type": "interlude",
+      "settings": {
+        "height": 70
+      }
+    },
+    "story4": {
+      "type": "story",
+      "settings": {
+        "chapter": 4,
+        "color_name": "Slate Blue",
+        "layout": "block-l",
+        "focal_x_sp": 70,
+        "dim": 50,
+        "vt_text": "",
+        "label": "Sustainability",
+        "heading": "私たちが考える環境への配慮は、\n長く使えること。",
+        "heading_sp": "私たちが考える\n環境への配慮は、\n長く使えること。",
+        "sub": "そのために日本の山に必要な撥水性能と、\nタフな使用でも耐え得る強い生地を開発しました。",
+        "en": "We believe sustainability starts with making things that last. Engineered for Japan's demanding mountain conditions, our fabric delivers the water repellency and durability to perform wherever the mountains take you."
+      }
+    },
+    "story5": {
+      "type": "story",
+      "settings": {
+        "chapter": 5,
+        "color_name": "Muku",
+        "layout": "block-r",
+        "focal_y": 60,
+        "dim": 40,
+        "vt_text": "",
+        "label": "Clothing is in our DNA",
+        "heading": "Permanent Unionの\nものづくりはあくまで洋服。",
+        "sub": "縫製の仕方、革の採用、\nスポーツウェアにはないオリジナリティをインプットしています。",
+        "en": "Clothing is in our DNA. From construction and stitching to our choice of leather materials, details drawn from garment design are woven throughout—bringing a character rarely seen in conventional sportswear."
+      }
+    },
+    "story6": {
+      "type": "story",
+      "settings": {
+        "chapter": 6,
+        "color_name": "Midnight",
+        "layout": "vt-sub",
+        "focal_y": 20,
+        "focal_x_sp": 100,
+        "focal_y_sp": 30,
+        "dim": 35,
+        "vt_text": "受け継いだ羊毛を、\n新しい温もりに。",
+        "sub": "― 古着から作り出す再生ウール ―",
+        "label": "Recycled wool",
+        "en": "Passing warmth from one life to the next.\n- Recycled wool made from used garments. -"
+      }
+    },
+    "interlude2": {
+      "type": "interlude",
+      "settings": {
+        "height": 70
+      }
+    },
+    "story7": {
+      "type": "story",
+      "settings": {
+        "chapter": 7,
+        "color_name": "Midnight",
+        "layout": "center",
+        "focal_y": 40,
+        "dim": 50,
+        "vt_text": "",
+        "heading": "山へ　街へ　その先へ",
+        "sub": "行き先を選ばない洋服で\n旅をもっと日常に、日常をもっと自由に。",
+        "en": "From the mountains to the city— and anywhere in between.\nClothing without boundaries.\nMake travel part of the everyday. Make the everyday feel more free.",
+        "button_label": "ONLINE STORE",
+        "button_link": "/collections/all"
+      }
+    },
+    "interlude3": {
+      "type": "interlude",
+      "settings": {
+        "height": 70
+      }
+    },
+    "products": {
+      "type": "products-categories",
+      "blocks": {
+        "c1": {
+          "type": "category",
+          "settings": {
+            "title": "OUTERWEAR",
+            "sub": "アウター",
+            "link": "/collections/outerwear",
+            "tentative": true
+          }
+        },
+        "c2": {
+          "type": "category",
+          "settings": {
+            "title": "TOPS",
+            "sub": "トップス",
+            "link": "/collections/tops",
+            "focal_y": 30,
+            "tentative": true
+          }
+        },
+        "c3": {
+          "type": "category",
+          "settings": {
+            "title": "BOTTOMS",
+            "sub": "ボトムス",
+            "link": "/collections/bottoms",
+            "focal_y": 60,
+            "tentative": true
+          }
+        },
+        "c4": {
+          "type": "category",
+          "settings": {
+            "title": "ACCESSORIES",
+            "sub": "小物",
+            "link": "/collections/accessories",
+            "focal_x": 70,
+            "tentative": true
+          }
+        }
+      },
+      "block_order": [
+        "c1",
+        "c2",
+        "c3",
+        "c4"
+      ],
+      "settings": {}
+    },
+    "arrivals": {
+      "type": "new-arrivals",
+      "settings": {}
+    },
+    "riders": {
+      "type": "riders",
+      "blocks": {
+        "r1": {
+          "type": "rider",
+          "settings": {
+            "name": "山内 一志",
+            "name_en": "Kazushi Yamauchi",
+            "role": "SNOWBOARDER"
+          }
+        },
+        "r2": {
+          "type": "rider",
+          "settings": {
+            "name": "畔田 正志",
+            "name_en": "Masashi Kuroda",
+            "role": "SNOWBOARDER"
+          }
+        },
+        "r3": {
+          "type": "rider",
+          "settings": {
+            "name": "舎川 朋弘",
+            "name_en": "Tomohiro Tonegawa",
+            "role": "SKIER"
+          }
+        },
+        "r4": {
+          "type": "rider",
+          "settings": {
+            "name": "上村 愛子",
+            "name_en": "Aiko Uemura",
+            "role": "SKIER"
+          }
+        },
+        "r5": {
+          "type": "rider",
+          "settings": {
+            "name": "永島 秀之",
+            "name_en": "Hideyuki Nagashima",
+            "role": "TELEMARK SKIER"
+          }
+        },
+        "r6": {
+          "type": "rider",
+          "settings": {
+            "name": "立花 透",
+            "name_en": "Toru Tachibana",
+            "role": "SKIER"
+          }
+        },
+        "r7": {
+          "type": "rider",
+          "settings": {
+            "name": "石川 睦",
+            "name_en": "Makoto Ishikawa",
+            "role": "SKIER"
+          }
+        },
+        "r8": {
+          "type": "rider",
+          "settings": {
+            "name": "笹田 知里",
+            "name_en": "Chisato Sasada",
+            "role": "SKIER"
+          }
+        }
+      },
+      "block_order": [
+        "r1",
+        "r2",
+        "r3",
+        "r4",
+        "r5",
+        "r6",
+        "r7",
+        "r8"
+      ],
+      "settings": {
+        "link": "/pages/riders"
+      }
+    },
+    "journal": {
+      "type": "journal",
+      "settings": {
+        "blog": "journal"
+      }
+    },
+    "instagram": {
+      "type": "instagram",
+      "blocks": {
+        "i1": {
+          "type": "image",
+          "settings": {}
+        },
+        "i2": {
+          "type": "image",
+          "settings": {}
+        },
+        "i3": {
+          "type": "image",
+          "settings": {}
+        },
+        "i4": {
+          "type": "image",
+          "settings": {}
+        },
+        "i5": {
+          "type": "image",
+          "settings": {}
+        },
+        "i6": {
+          "type": "image",
+          "settings": {}
+        }
+      },
+      "block_order": [
+        "i1",
+        "i2",
+        "i3",
+        "i4",
+        "i5",
+        "i6"
+      ],
+      "settings": {}
+    }
   },
-  "order": ["bg", "opening", "fv", "story1", "story2", "story3", "interlude1", "story4", "story5", "story6", "interlude2", "story7", "interlude3", "products", "arrivals", "riders", "journal", "instagram"]
+  "order": [
+    "bg",
+    "opening",
+    "fv",
+    "story1",
+    "story2",
+    "story3",
+    "interlude1",
+    "story4",
+    "story5",
+    "story6",
+    "interlude2",
+    "story7",
+    "interlude3",
+    "products",
+    "arrivals",
+    "riders",
+    "journal",
+    "instagram"
+  ]
 }

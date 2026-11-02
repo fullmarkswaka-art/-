@@ -311,7 +311,7 @@
     try { seen = sessionStorage.getItem('pu_opening_seen') === '1'; } catch (e) {}
     if (seen || reduceMotion) { op.remove(); return; }
     try { sessionStorage.setItem('pu_opening_seen', '1'); } catch (e) {}
-    const fin = parseFloat(op.dataset.fadeIn || 0.8) * 1000, hold = parseFloat(op.dataset.hold || 1.2) * 1000, fout = parseFloat(op.dataset.fadeOut || 0.8) * 1000;
+    const fin = parseFloat(op.dataset.fadeIn || 800), hold = parseFloat(op.dataset.hold || 1200), fout = parseFloat(op.dataset.fadeOut || 800);
     op.style.setProperty('--op-in', fin + 'ms'); op.style.setProperty('--op-out', fout + 'ms');
     document.body.classList.add('is-opening');
     op.classList.add('is-active');

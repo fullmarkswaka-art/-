@@ -27,9 +27,9 @@
     { "type": "range", "id": "logo_width", "label": "ロゴ幅（PC・画面幅に対する%）", "min": 20, "max": 50, "step": 1, "unit": "%", "default": 30 },
     { "type": "range", "id": "logo_max", "label": "ロゴ最大幅（PC）", "min": 300, "max": 800, "step": 10, "unit": "px", "default": 440 },
     { "type": "range", "id": "logo_width_sp", "label": "ロゴ幅（スマホ・画面幅に対する%）", "min": 40, "max": 80, "step": 1, "unit": "%", "default": 60 },
-    { "type": "range", "id": "fade_in", "label": "フェードイン", "min": 0.2, "max": 2, "step": 0.1, "unit": "s", "default": 0.8 },
-    { "type": "range", "id": "hold", "label": "表示を保つ時間", "min": 0.2, "max": 3, "step": 0.1, "unit": "s", "default": 1.2 },
-    { "type": "range", "id": "fade_out", "label": "フェードアウト", "min": 0.2, "max": 2, "step": 0.1, "unit": "s", "default": 0.8 },
+    { "type": "range", "id": "fade_in", "label": "フェードイン", "min": 200, "max": 2000, "step": 100, "unit": "ms", "default": 800 },
+    { "type": "range", "id": "hold", "label": "表示を保つ時間", "min": 200, "max": 3000, "step": 100, "unit": "ms", "default": 1200 },
+    { "type": "range", "id": "fade_out", "label": "フェードアウト", "min": 200, "max": 2000, "step": 100, "unit": "ms", "default": 800 },
     { "type": "paragraph", "content": "初回訪問時のみ再生。同じセッション内の2回目以降は表示しません。クリック・スクロール・キー操作で即スキップ。" }
   ],
   "presets": [{ "name": "オープニング（ロゴ）" }]
