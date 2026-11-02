@@ -83,7 +83,7 @@ def create_campaign(gclient, apply: bool = False) -> dict:
     op = client.get_type("CampaignOperation"); c = op.create
     c.name = CAMPAIGN_NAME
     c.advertising_channel_type = client.enums.AdvertisingChannelTypeEnum.SHOPPING
-    c.status = client.enums.CampaignStatusEnum.ENABLED
+    c.status = client.enums.CampaignStatusEnum.PAUSED  # 商品グループを作り終えてから配信開始
     c.campaign_budget = budget_rn
     c.contains_eu_political_advertising = client.enums.EuPoliticalAdvertisingStatusEnum.DOES_NOT_CONTAIN_EU_POLITICAL_ADVERTISING
     c.target_spend.cpc_bid_ceiling_micros = CPC_CEILING * 1_000_000
@@ -124,6 +124,10 @@ def create_campaign(gclient, apply: bool = False) -> dict:
     o.listing_group.type_ = lg.UNIT; o.listing_group.parent_ad_group_criterion = root_rn
     o.listing_group.case_value.product_custom_attribute.index = idx.INDEX2; ops.append(op)
     agcs.mutate_ad_group_criteria(customer_id=cid, operations=ops)
+    op = client.get_type("CampaignOperation"); cu = op.update
+    cu.resource_name = camp_rn; cu.status = client.enums.CampaignStatusEnum.ENABLED
+    op.update_mask.paths.append("status")
+    client.get_service("CampaignService").mutate_campaigns(customer_id=cid, operations=[op])
     new_id = camp_rn.split("/")[-1]
     plan.update(campaign_id=new_id, ad_group=ag_rn,
                 negatives_added=pla_negatives(gclient, new_id, apply=True).get("added", 0))
