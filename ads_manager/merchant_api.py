@@ -137,6 +137,10 @@ class MerchantClient:
         from .shopping_titles import load_titles
         titles = load_titles()
         result["with_titles"] = sum(1 for r in rows if r["id"] in titles)
+        # 値段の高い冬物だけのショッピングキャンペーン用のラベル（pla_highprice.py）
+        from .pla_highprice import LABEL as HIGH_LABEL, high_price_ids
+        high = high_price_ids()
+        result["custom_label_2"] = {HIGH_LABEL: sum(1 for r in rows if r["id"] in high)}
         if not apply:
             result["sample"] = rows[:3]
             return result
@@ -148,6 +152,8 @@ class MerchantClient:
                 attrs["customLabel1"] = r["custom_label_1"]
             if r.get("product_type"):
                 attrs["productTypes"] = [r["product_type"]]
+            if r["id"] in high:
+                attrs["customLabel2"] = HIGH_LABEL
             t = titles.get(r["id"])
             if t:
                 attrs["title"] = t["title"]

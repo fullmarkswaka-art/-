@@ -154,6 +154,8 @@ def main(argv=None) -> int:
                                   help="Google 用の商品名・カテゴリ・性別を作る（reports/google_shopping_titles.csv。mc-supplement が読む）")
             pn = action_sub.add_parser("pla-negatives", help="ショッピングに除外キーワード（他社ブランド名など）を追加")
             pn.add_argument("campaign_id"); pn.add_argument("--apply", action="store_true")
+            ph = action_sub.add_parser("pla-high", help="値段の高い冬物だけのショッピングキャンペーンを作る（pla_highprice.py）")
+            ph.add_argument("--apply", action="store_true")
             mcp = action_sub.add_parser("mc-product", help="Merchant Center の商品を1件表示")
             mcp.add_argument("offer_id")
             px = action_sub.add_parser("pla-exclude", help="商品グループに custom_label_0=値 の除外ノードを追加")
@@ -307,6 +309,11 @@ def main(argv=None) -> int:
             from .google_ads_client import GoogleAdsClientWrapper
             from .shopping_titles import pla_negatives
             _print(pla_negatives(GoogleAdsClientWrapper(load_google_config()), args.campaign_id, apply=args.apply))
+            return 0
+        if args.action == "pla-high":
+            from .google_ads_client import GoogleAdsClientWrapper
+            from .pla_highprice import create_campaign
+            _print(create_campaign(GoogleAdsClientWrapper(load_google_config()), apply=args.apply))
             return 0
         if args.action == "mc-product":
             from .merchant_api import MerchantClient
