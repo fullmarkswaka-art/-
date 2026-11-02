@@ -8,13 +8,13 @@
 数値の表は API から作り、文章（今月のポイント・施策・来月に向けて）は copy/monthly/<月>.json から読む。
 イベント枠（targets.json の events[]）は通常運用と分けて計上する。
 
-お店全体（EC）の売上は API で取れないため、copy/ec/<月>.json（scripts/ec_import.py でユーザー提供の
+EC全体の売上は API で取れないため、copy/ec/<月>.json（scripts/ec_import.py でユーザー提供の
 予実資料から作る）があれば読み込んで、広告の数字と並べる。
 
 広告に詳しくない人が読んでも分かるように書く（ROAS は「広告1円あたりの売上」、判定は ◎○△×）。
 構成:
-  1. 今月のまとめ … ひとことで言うと、お店全体と広告の数字、信号、ポイント、承認のお願い
-  2. お店全体の売上と広告 … 予算・前年・新作目標の進み具合、新作／旧品、ブランド別
+  1. 今月のまとめ … ひとことで言うと、EC全体と広告の数字、信号、ポイント、承認のお願い
+  2. EC全体の売上と広告 … 予算・前年・新作目標の進み具合、新作／旧品、ブランド別
   3. 広告の成績 … Google と Instagram・Facebook の比較、週ごとの推移、ブランド別
   4. 広告ごとの成績表（判定つき）
   5. 今月やったことと結果 / 来月に向けて
@@ -48,7 +48,7 @@ from ads_manager.google_ads_client import GoogleAdsClientWrapper  # noqa: E402
 from ads_manager.meta_ads import MetaAdsClient  # noqa: E402
 
 S, yen, roas, pct, table, disp, man = wr.S, wr.yen, wr.roas, wr.pct, wr.table, wr.disp, wr.man
-TAX = 1.1  # 媒体の売上（税込）をお店の売上（税抜）と比べるときに割る
+TAX = 1.1  # 媒体の売上（税込）をEC全体の売上（税抜）と比べるときに割る
 
 
 def _targets() -> dict:
@@ -154,14 +154,14 @@ def sec_budget(t: dict, normal: dict, event: dict, since: date, until: date, bud
 
 
 def ec_tiles(ec, ad_spend, ad_rev):
-    """お店全体（EC、税抜）の4タイル。"""
-    items = [("お店全体の売上（税抜）", man(ec["sales"]),
+    """EC全体（EC、税抜）の4タイル。"""
+    items = [("EC全体の売上（税抜）", man(ec["sales"]),
               f"予算比 {ec['sales'] / ec['budget']:.0%}・前年比 {ec['sales'] / ec['last_year']:.0%}", ec["sales"] >= ec["budget"]),
              (f"うち新作（{ec['new_season']['label']}）", man(ec["new_season"]["sales"]),
               f"新作目標 {man(ec['new_season']['target'])} の {ec['new_season']['sales'] / ec['new_season']['target']:.0%}",
               ec["new_season"]["sales"] >= ec["new_season"]["target"]),
-             ("広告費（イベント込み・税抜）", man(ad_spend), f"お店の売上の {ad_spend / ec['sales']:.1%}", None),
-             ("広告がきっかけの売上（税抜換算）", man(ad_rev / TAX), f"お店の売上の {ad_rev / TAX / ec['sales']:.0%}", None)]
+             ("広告費（イベント込み・税抜）", man(ad_spend), f"EC全体の売上の {ad_spend / ec['sales']:.1%}", None),
+             ("広告がきっかけの売上（税抜換算）", man(ad_rev / TAX), f"EC全体の売上の {ad_rev / TAX / ec['sales']:.0%}", None)]
     rows = [[Paragraph(a, S["tile_label"]) for a, _, _, _ in items],
             [Paragraph(b, S["tile_value"]) for _, b, _, _ in items],
             [Paragraph(f'<font color="{(wr.GREY if ok is None else (wr.GOOD if ok else wr.BAD)).hexval()}">{c}</font>',
@@ -177,7 +177,7 @@ def ec_tiles(ec, ad_spend, ad_rev):
 
 def ec_signals(ec):
     r = ec["sales"] / ec["budget"]; rn = ec["new_season"]["sales"] / ec["new_season"]["target"]
-    out = [("◎" if r >= 1 else ("△" if r >= 0.9 else "×"), "お店全体の売上",
+    out = [("◎" if r >= 1 else ("△" if r >= 0.9 else "×"), "EC全体の売上",
             f"{man(ec['sales'])}（会社予算 {man(ec['budget'])} の {r:.0%}）",
             f"前年（{man(ec['last_year'])}）の {ec['sales'] / ec['last_year']:.1f}倍。"
             f"年度累計も予算の {ec['ytd']['sales'] / ec['ytd']['budget']:.0%}。"),
@@ -188,7 +188,7 @@ def ec_signals(ec):
 
 
 def sec_ec(ec, brand_ads):
-    """お店全体の売上の進み具合と、ブランド別（お店の売上・新作・広告）。"""
+    """EC全体の売上の進み具合と、ブランド別（ECの売上・新作・広告）。"""
     nx = ec.get("next_month", {})
     prog = wr.chart_progress([
         ("今月の売上 vs 会社予算", ec["sales"], ec["budget"], None,
@@ -204,7 +204,7 @@ def sec_ec(ec, brand_ads):
         (f"新作（{ec['new_season']['label']}）", ec["new_season"]["sales"],
          f"{man(ec['new_season']['sales'])}（{ec['new_season']['sales'] / ec['sales']:.0%}）", wr.GOOD),
         ("旧品（前シーズン以前）", ec["old_items"], f"{man(ec['old_items'])}（{ec['old_items'] / ec['sales']:.0%}）", wr.SPEND_C)])
-    data = [["ブランド", "お店の売上", "前月比", "新作の売上", "新作目標\nの達成", "広告がきっかけ\n（税抜換算）",
+    data = [["ブランド", "ECの売上", "前月比", "新作の売上", "新作目標\nの達成", "広告がきっかけ\n（税抜換算）",
              "広告費", "来月の\n新作目標"]]
     for b in ec["brands"]:
         ad = brand_ads.get(b["brand"], {"spend": 0, "rev": 0})
@@ -221,9 +221,9 @@ def sec_ec(ec, brand_ads):
            KeepTogether([Paragraph("売上の中身：新作と旧品", S["h2"]), mix,
                          Paragraph("新作＝今シーズンの商品（会社の消化率の対象）。旧品＝前シーズン以前の商品で、セール品が中心。"
                                    "広告は新作・通常品だけに出している（アウトレット品は広告しない方針）。", S["note"])]),
-           KeepTogether([Paragraph("ブランド別：お店の売上・新作・広告", S["h2"]), tb,
-                         Paragraph("お店の売上は受注データ（税抜）。広告がきっかけの売上は媒体の計測（税込）を1.1で割って税抜に"
-                                   "そろえた参考値で、広告を見ずに買った人もお店の売上には含まれる。新作目標の達成: ◎100%以上 "
+           KeepTogether([Paragraph("ブランド別：ECの売上・新作・広告", S["h2"]), tb,
+                         Paragraph("EC全体の売上は受注データ（税抜）。広告がきっかけの売上は媒体の計測（税込）を1.1で割って税抜に"
+                                   "そろえた参考値で、広告を見ずに買った人もEC全体の売上には含まれる。新作目標の達成: ◎100%以上 "
                                    "△50%以上 ×50%未満。", S["note"])])]
     if nx:
         out.append(Paragraph(f"来月の会社予算は {man(nx.get('budget', 0))}（前年 {man(nx.get('last_year', 0))}）、"
@@ -294,7 +294,7 @@ def main():
         story += [wr.boxed([Paragraph("ひとことで言うと", S["note"]), Paragraph(narr["conclusion"], S["lead"])]),
                   Spacer(1, 3 * mm)]
     if ec:
-        story += [Paragraph("お店全体（EC）", S["h2"]), ec_tiles(ec, normal["spend"] + event["spend"], normal["rev"] + event["rev"])]
+        story += [Paragraph("EC全体", S["h2"]), ec_tiles(ec, normal["spend"] + event["spend"], normal["rev"] + event["rev"])]
     story += [Paragraph(f"広告（通常の運用。イベント広告は別）　{label}との比較", S["h2"]), wr.kpi_tiles(normal, normal_p, vs=label)]
     sig = ec_signals(ec) if ec else []
     sig.append(wr.pace_signal(normal["spend"], budget, n_days, dim, "広告の予算"))
@@ -312,9 +312,9 @@ def main():
     for line in narr.get("points", []) or wr.plain_points(brand_cur, cur["g_camps"] + cm, prev["g_camps"] + pm, vs=label):
         story.append(Paragraph(line, S["bullet"], bulletText="■"))
 
-    # 2. お店全体
+    # 2. EC全体
     if ec:
-        story += [CondPageBreak(170 * mm), Paragraph("2. お店全体の売上と広告", S["h1"])]
+        story += [CondPageBreak(170 * mm), Paragraph("2. EC全体の売上と広告", S["h1"])]
         story += sec_ec(ec, brand_cur)
 
     # 3. 広告の成績

@@ -38,8 +38,8 @@ FULLMARKS（fullmarksstore.jp）の広告運用ツール。Meta/Google広告のA
 - 月次レポート: `python scripts/monthly_report.py --month YYYY-MM [--until YYYY-MM-DD]` で
   reports/広告月次レポート_<月>.pdf（通常運用とイベント枠を分けて集計、前月の同じ日数と比較）。
   文章（conclusion・points・actions・next・asks）は copy/monthly/<月>.json に書く（専門用語を使わない）。
-  お店全体（EC）の数字は `python scripts/ec_import.py <予実資料のzip/フォルダ> --month YYYY-MM` で
-  copy/ec/<月>.json を作ると、月次レポートに「お店全体の売上と広告」（予算・前年・新作目標の進み具合、
+  EC全体の数字は `python scripts/ec_import.py <予実資料のzip/フォルダ> --month YYYY-MM` で
+  copy/ec/<月>.json を作ると、月次レポートに「EC全体の売上と広告」（予算・前年・新作目標の進み具合、
   新作／旧品、ブランド別の新作達成と広告）が入る。予実資料はユーザーが毎月くれる3ファイル
   （WEB売上実績 / 消化率 / 売上内訳、すべて税抜）。
 - リンク切れ監視: `python -m ads_manager meta audit`
@@ -621,3 +621,4 @@ FULLMARKS（fullmarksstore.jp）の広告運用ツール。Meta/Google広告のA
 - 【2026-11-02 10月予実資料（ユーザー提供 zip）を反映】copy/ec/2026-10.json: 売上 2,053万（予算 2,900万の71%・前年 1,685万の122%）、5〜10月累計 1億2,032万（予算比105%）、
   新作 1,003万／目標 2,700万（37%）・旧品 1,049万。ブランド: HOUDINI 1,258万（新作 406万・33%）/ NORRØNA 372万（304万・47%）/ ACLIMA 154万（56%）/ HESTRA 118万（45%）/ POC 116万（25%）。
   11月は会社予算 3,000万・新作目標 2,800万。広告費（DP込み 83.4万）は売上の4.1%、広告がきっかけの売上（税抜 581万）は28%。月次レポートを再生成。
+- 【2026-11-02 ユーザー指示】レポートでは EC の売上を「お店全体」ではなく **「EC全体」** と書く（表の見出しは「ECの売上」）。monthly_report.py・weekly_report.py・copy/monthly を修正済み。
