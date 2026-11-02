@@ -1,0 +1,9 @@
+{
+  "sections": {
+    "main": { "type": "legal-notice", "blocks": {
+      "l1": { "type": "row", "settings": { "label": "販売業者" } }, "l2": { "type": "row", "settings": { "label": "運営責任者" } }, "l3": { "type": "row", "settings": { "label": "所在地" } }, "l4": { "type": "row", "settings": { "label": "電話番号" } }, "l5": { "type": "row", "settings": { "label": "メールアドレス" } },
+      "l6": { "type": "row", "settings": { "label": "販売価格" } }, "l7": { "type": "row", "settings": { "label": "商品代金以外の必要料金" } }, "l8": { "type": "row", "settings": { "label": "お支払い方法" } }, "l9": { "type": "row", "settings": { "label": "引き渡し時期" } }, "l10": { "type": "row", "settings": { "label": "返品・交換" } }
+    }, "block_order": ["l1", "l2", "l3", "l4", "l5", "l6", "l7", "l8", "l9", "l10"], "settings": {} }
+  },
+  "order": ["main"]
+}

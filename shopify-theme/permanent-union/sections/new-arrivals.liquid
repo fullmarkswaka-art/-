@@ -1,0 +1,45 @@
+{%- liquid
+  comment
+    New Arrivals: Ordify → Shopify に同期された商品を新着順で4点。コレクション未指定なら全商品から公開日の新しい順。
+  endcomment
+  assign s = section.settings
+  assign col = s.collection
+  if col == blank
+    assign col = collections.all
+  endif
+  assign prods = col.products
+  if s.sort_newest
+    assign prods = col.products | sort: 'published_at' | reverse
+  endif
+-%}
+<section class="paper sec sec--arrivals" data-header="dark">
+  <div class="container">
+    <div class="sec__head">
+      <div><h2 class="sec-h sec-h--m">{{ s.heading }}</h2><div class="sec-s">{{ s.sub }}</div></div>
+      {%- if s.link_label != blank -%}<a class="more" href="{{ col.url | default: routes.all_products_collection_url }}">{{ s.link_label }}　→</a>{%- endif -%}
+    </div>
+    <div class="cards cards--4">
+      {%- for product in prods limit: s.limit -%}
+        {% render 'product-card', product: product, index: forloop.index0 %}
+      {%- else -%}
+        {%- for i in (1..4) -%}
+          <div class="card"><div class="card__ph card__ph--empty"><span>{{ 'products.product.no_image' | t }}</span></div><div class="card__nm">Product Name</div><div class="card__pr">¥00,000{{ settings.tax_label }}</div></div>
+        {%- endfor -%}
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+{% schema %}
+{
+  "name": "New Arrivals（新着）",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "見出し", "default": "New Arrivals" },
+    { "type": "text", "id": "sub", "label": "和文小見出し", "default": "新着アイテム" },
+    { "type": "collection", "id": "collection", "label": "コレクション", "info": "未設定なら全商品から。Ordify から同期された商品が自動で入ります" },
+    { "type": "checkbox", "id": "sort_newest", "label": "公開日の新しい順に並べる", "default": true },
+    { "type": "range", "id": "limit", "label": "表示数", "min": 4, "max": 8, "step": 4, "default": 4 },
+    { "type": "text", "id": "link_label", "label": "右上のリンク文言", "default": "VIEW ALL" }
+  ],
+  "presets": [{ "name": "New Arrivals（新着）" }]
+}
+{% endschema %}

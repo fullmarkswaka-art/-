@@ -1,22 +1,50 @@
-<section class="container section">
-  <article class="article">
-    <div class="article__meta"><span>{{ article.published_at | date: '%Y.%m.%d' }}</span>{%- if article.tags.size > 0 -%}<span>{{ article.tags | join: ' / ' }}</span>{%- endif -%}{%- if section.settings.show_author -%}<span>{{ article.author }}</span>{%- endif -%}</div>
-    <h1 class="h1 article__title">{{ article.title }}</h1>
-    {%- if article.image and section.settings.show_image -%}<div class="media article__hero">{{ article.image | image_url: width: 1600 | image_tag: loading: 'eager', alt: article.title }}</div>{%- endif -%}
-    <div class="rte article__body">{{ article.content }}</div>
-    <div class="article__nav">
-      {%- if blog.previous_article -%}<a class="link-line" href="{{ blog.previous_article.url }}">← {{ 'blogs.previous' | t }}</a>{%- else -%}<span></span>{%- endif -%}
-      <a class="link-line" href="{{ blog.url }}">{{ 'blogs.back' | t }}</a>
-      {%- if blog.next_article -%}<a class="link-line" href="{{ blog.next_article.url }}">{{ 'blogs.next' | t }} →</a>{%- else -%}<span></span>{%- endif -%}
-    </div>
-  </article>
-</section>
+{%- liquid
+  assign s = section.settings
+  assign item = article.metafields.custom.related_product
+  if item == blank and s.fallback_product != blank
+    assign item = s.fallback_product
+  endif
+-%}
+<article class="lp container" data-header="dark">
+  <div class="art">
+    <div class="crumb crumb--static"><a href="{{ routes.root_url }}">HOME</a> ／ <a href="{{ blog.url }}">{{ blog.title | upcase }}</a>{% if article.tags.size > 0 %} ／ {{ article.tags | first | upcase }}{% endif %}</div>
+    <div class="jcard__meta art__meta">{{ article.published_at | date: '%Y.%m.%d' }}　{{ article.tags | first | upcase }}</div>
+    <h1 class="art__h">{{ article.title }}</h1>
+    {%- if article.image and s.show_image -%}
+      <div class="art__media">{{ article.image | image_url: width: 1800 | image_tag: loading: 'eager', sizes: '(max-width: 900px) 100vw, 800px', widths: '600, 900, 1200, 1800', alt: article.title, class: 'cover-img' }}</div>
+    {%- endif -%}
+    <div class="art__body rte">{{ article.content }}</div>
+
+    {%- if item != blank -%}
+      <a class="itemcard" href="{{ item.url }}">
+        <div class="itemcard__ph">{% if item.featured_media %}{{ item.featured_media | image_url: width: 300 | image_tag: loading: 'lazy', alt: item.title }}{% endif %}</div>
+        <div class="itemcard__b">
+          <div class="lbl2">{{ 'blogs.article.item_in_article' | t }}</div>
+          <div class="itemcard__n">{{ item.title }}</div>
+          <div class="itemcard__p">{{ item.price | money }}{{ settings.tax_label }}</div>
+        </div>
+        <span class="btn-o btn-o--s">{{ 'blogs.article.view_item' | t }}</span>
+      </a>
+    {%- endif -%}
+
+    {%- if s.show_share -%}
+      <div class="art__share">
+        <span class="lbl2">SHARE</span>
+        <a href="https://twitter.com/intent/tweet?url={{ shop.url | append: article.url | url_encode }}&text={{ article.title | url_encode }}" target="_blank" rel="noopener">X</a>
+        <a href="https://www.facebook.com/sharer/sharer.php?u={{ shop.url | append: article.url | url_encode }}" target="_blank" rel="noopener">FACEBOOK</a>
+        <a href="https://social-plugins.line.me/lineit/share?url={{ shop.url | append: article.url | url_encode }}" target="_blank" rel="noopener">LINE</a>
+      </div>
+    {%- endif -%}
+    <div class="art__back"><a class="more" href="{{ blog.url }}">← {{ 'blogs.article.back' | t }}</a></div>
+  </div>
+</article>
 {% schema %}
 {
-  "name": "記事",
+  "name": "Journal（記事）",
   "settings": [
-    { "type": "checkbox", "id": "show_image", "label": "アイキャッチを表示", "default": true },
-    { "type": "checkbox", "id": "show_author", "label": "著者を表示", "default": false }
+    { "type": "checkbox", "id": "show_image", "label": "メイン画像を表示", "default": true },
+    { "type": "checkbox", "id": "show_share", "label": "シェアボタンを表示", "default": true },
+    { "type": "product", "id": "fallback_product", "label": "記事内の商品カード（共通）", "info": "記事ごとに変えるには記事のメタフィールド custom.related_product（商品参照）を使用" }
   ]
 }
 {% endschema %}

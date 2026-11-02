@@ -1,16 +1,17 @@
-<section class="container container--wide">
-  <div class="page-title"><p class="eyebrow reveal">Products</p><h1 class="display mt-2 reveal" data-delay="1">{{ section.settings.title }}</h1></div>
-  <div class="cats" style="margin-bottom: clamp(56px, 8vw, 120px)">
-    {%- for col in collections -%}
-      {%- unless col.handle == 'frontpage' or col.handle == 'all' -%}
-        <a class="cat reveal" data-delay="{{ forloop.index0 | modulo: 4 }}" href="{{ col.url }}">
-          {%- if col.featured_image -%}{{ col.featured_image | image_url: width: 900 | image_tag: loading: 'lazy', alt: col.title }}{%- elsif col.products.first.featured_media -%}{{ col.products.first.featured_media | image_url: width: 900 | image_tag: loading: 'lazy', alt: col.title }}{%- endif -%}
-          <div class="cat__body"><span class="cat__title">{{ col.title }}</span><span class="cat__sub">{{ 'collections.product_count' | t: count: col.all_products_count }}</span></div>
+<section class="lp container" data-header="dark">
+  <div class="crumb"><a href="{{ routes.root_url }}">HOME</a> ／ COLLECTIONS</div>
+  <div class="ptitle"><h1 class="ptitle__h">{{ 'collections.general.title' | t }}</h1><div class="ptitle__s">{{ section.settings.sub }}</div></div>
+  <div class="cats cats--list">
+    {%- for c in collections -%}
+      {%- unless c.handle == 'frontpage' -%}
+        <a class="cat" href="{{ c.url }}">
+          <div class="cat__media">{% if c.image %}{{ c.image | image_url: width: 1200 | image_tag: loading: 'lazy', alt: c.title, class: 'cat__img' }}{% elsif c.products.first.featured_media %}{{ c.products.first.featured_media | image_url: width: 1200 | image_tag: loading: 'lazy', alt: c.title, class: 'cat__img' }}{% endif %}<div class="cat__dim"></div></div>
+          <div class="cat__text"><div class="cat__t">{{ c.title }}</div><div class="cat__s">{{ c.products_count }} items</div></div>
         </a>
       {%- endunless -%}
     {%- endfor -%}
   </div>
 </section>
 {% schema %}
-{ "name": "コレクション一覧", "settings": [ { "type": "text", "id": "title", "label": "見出し", "default": "All Categories" } ] }
+{ "name": "コレクション一覧", "settings": [ { "type": "text", "id": "sub", "label": "和文小見出し", "default": "カテゴリ一覧" } ] }
 {% endschema %}

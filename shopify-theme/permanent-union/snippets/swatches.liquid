@@ -1,0 +1,29 @@
+{%- comment -%}
+  カラーチップ: render 'swatches', product: product, size: 'small' | 'large', selected: 'Slate Blue'
+  テーマ設定「カラー名とカラーコード」（1行に 名前:#hex）から色を引く。見つからない名前は灰色。
+{%- endcomment -%}
+{%- liquid
+  assign option = product.options_by_name[settings.color_option_name]
+  assign map_lines = settings.color_swatches | newline_to_br | split: '<br />'
+-%}
+{%- if option and option.values.size > 0 -%}
+  <div class="swatches swatches--{{ size | default: 'small' }}">
+    {%- for value in option.values -%}
+      {%- assign hex = '#CFC6BA' -%}
+      {%- for line in map_lines -%}
+        {%- assign pair = line | strip | split: ':' -%}
+        {%- assign key = pair[0] | strip | downcase -%}
+        {%- assign v = value | downcase -%}
+        {%- if key == v -%}{%- assign hex = pair[1] | strip -%}{%- endif -%}
+      {%- endfor -%}
+      {%- if size == 'large' -%}
+        <label class="cbig{% if value == selected %} is-on{% endif %}" data-swatch="{{ value | escape }}">
+          <i style="background:{{ hex }}"></i><span>{{ value }}</span>
+        </label>
+      {%- else -%}
+        <i class="chip" style="background:{{ hex }}" title="{{ value | escape }}"></i>
+      {%- endif -%}
+    {%- endfor -%}
+    {%- if size != 'large' -%}<span class="swatches__count">{{ option.values.size }} colors</span>{%- endif -%}
+  </div>
+{%- endif -%}

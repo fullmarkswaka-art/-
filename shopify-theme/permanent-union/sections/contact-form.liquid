@@ -1,26 +1,73 @@
-<section class="container container--narrow section">
-  <div class="page-title" style="padding-top:0">
-    <p class="eyebrow reveal">{{ section.settings.eyebrow }}</p>
-    <h1 class="display mt-2 reveal" data-delay="1">{{ section.settings.title | default: page.title }}</h1>
-    {%- if page.content != blank -%}<div class="page-title__desc body-copy reveal" data-delay="2">{{ page.content }}</div>{%- endif -%}
+{%- assign s = section.settings -%}
+<section class="lp container" data-header="dark">
+  <div class="crumb"><a href="{{ routes.root_url }}">HOME</a> ／ CONTACT</div>
+  <div class="ptitle"><h1 class="ptitle__h">{{ s.heading | default: page.title }}</h1><div class="ptitle__s">{{ s.sub }}</div></div>
+  <div class="contact">
+    <div class="contact__form">
+      {%- if s.intro != blank -%}<p class="contact__intro">{{ s.intro }}</p>{%- endif -%}
+      {% form 'contact', class: 'cform' %}
+        {%- if form.posted_successfully? -%}
+          <p class="cform__ok">{{ 'contact.form.success' | t }}</p>
+        {%- endif -%}
+        {%- if form.errors -%}
+          <div class="cform__err">{{ form.errors | default_errors }}</div>
+        {%- endif -%}
+        {%- if s.types != blank -%}
+          <label class="flab" for="ContactType">{{ 'contact.form.type' | t }}</label>
+          <div class="field field--select">
+            <select id="ContactType" name="contact[{{ 'contact.form.type' | t }}]">
+              <option value="">{{ 'contact.form.select' | t }}</option>
+              {%- assign types = s.types | newline_to_br | split: '<br />' -%}
+              {%- for t in types -%}<option value="{{ t | strip }}">{{ t | strip }}</option>{%- endfor -%}
+            </select><span class="sel__caret">▾</span>
+          </div>
+        {%- endif -%}
+        <label class="flab" for="ContactName">{{ 'contact.form.name' | t }}</label>
+        <input class="field" type="text" id="ContactName" name="contact[name]" required value="{% if form.name %}{{ form.name }}{% elsif customer %}{{ customer.name }}{% endif %}">
+        <label class="flab" for="ContactEmail">{{ 'contact.form.email' | t }}</label>
+        <input class="field" type="email" id="ContactEmail" name="contact[email]" required value="{% if form.email %}{{ form.email }}{% elsif customer %}{{ customer.email }}{% endif %}">
+        <label class="flab" for="ContactOrder">{{ 'contact.form.order' | t }}</label>
+        <input class="field" type="text" id="ContactOrder" name="contact[{{ 'contact.form.order' | t }}]">
+        <label class="flab" for="ContactBody">{{ 'contact.form.message' | t }}</label>
+        <textarea class="field field--area" id="ContactBody" name="contact[body]" required>{{ form.body }}</textarea>
+        <button type="submit" class="btn-d btn-d--w">{{ 'contact.form.send' | t }}</button>
+      {% endform %}
+    </div>
+    {%- if s.show_legal -%}
+      <div class="contact__legal">
+        <h2 class="contact__h">{{ s.legal_heading }}</h2>
+        <div class="ptitle__s">{{ s.legal_sub }}</div>
+        <table class="spec spec--legal">
+          {%- for block in section.blocks -%}
+            <tr {{ block.shopify_attributes }}><th>{{ block.settings.label }}</th><td>{% if block.settings.value != blank %}{{ block.settings.value | newline_to_br }}{% else %}<span class="is-pending">{{ 'general.legal.pending' | t }}</span>{% endif %}</td></tr>
+          {%- endfor -%}
+        </table>
+      </div>
+    {%- endif -%}
   </div>
-  {% form 'contact', class: 'form' %}
-    {%- if form.posted_successfully? -%}<p class="form__success">{{ 'contact.success' | t }}</p>{%- endif -%}
-    {%- if form.errors -%}<div class="form__errors">{{ form.errors | default_errors }}</div>{%- endif -%}
-    <div class="field"><label for="ContactName">{{ 'contact.name' | t }}</label><input type="text" id="ContactName" name="contact[name]" value="{{ form.name }}" required></div>
-    <div class="field"><label for="ContactEmail">{{ 'contact.email' | t }}</label><input type="email" id="ContactEmail" name="contact[email]" value="{{ form.email }}" required></div>
-    <div class="field"><label for="ContactPhone">{{ 'contact.phone' | t }}</label><input type="tel" id="ContactPhone" name="contact[phone]" value="{{ form.phone }}"></div>
-    <div class="field"><label for="ContactBody">{{ 'contact.message' | t }}</label><textarea id="ContactBody" name="contact[body]" required>{{ form.body }}</textarea></div>
-    <div><button type="submit" class="button">{{ 'contact.send' | t }}</button></div>
-  {% endform %}
 </section>
 {% schema %}
 {
-  "name": "お問い合わせフォーム",
+  "name": "お問い合わせ／特商法",
   "settings": [
-    { "type": "text", "id": "eyebrow", "label": "小見出し", "default": "Contact" },
-    { "type": "text", "id": "title", "label": "見出し" }
+    { "type": "text", "id": "heading", "label": "見出し", "default": "Contact" },
+    { "type": "text", "id": "sub", "label": "和文小見出し", "default": "お問い合わせ" },
+    { "type": "text", "id": "intro", "label": "説明文", "default": "商品・ご注文・修理についてのお問い合わせはこちらから。" },
+    { "type": "textarea", "id": "types", "label": "お問い合わせ種別（1行に1つ）", "default": "商品について\nご注文について\n修理について\n取材・お取引について\nその他" },
+    { "type": "header", "content": "特定商取引法に基づく表記（右側）" },
+    { "type": "checkbox", "id": "show_legal", "label": "表示する", "default": true },
+    { "type": "text", "id": "legal_heading", "label": "見出し", "default": "Legal Notice" },
+    { "type": "text", "id": "legal_sub", "label": "和文", "default": "特定商取引法に基づく表記" }
   ],
-  "presets": [{ "name": "お問い合わせフォーム" }]
+  "blocks": [
+    { "type": "row", "name": "項目", "settings": [
+      { "type": "text", "id": "label", "label": "項目名", "default": "販売業者" },
+      { "type": "textarea", "id": "value", "label": "内容" }
+    ] }
+  ],
+  "presets": [{ "name": "お問い合わせ／特商法", "blocks": [
+    { "type": "row", "settings": { "label": "販売業者" } }, { "type": "row", "settings": { "label": "運営責任者" } }, { "type": "row", "settings": { "label": "所在地" } }, { "type": "row", "settings": { "label": "電話番号" } }, { "type": "row", "settings": { "label": "メールアドレス" } },
+    { "type": "row", "settings": { "label": "販売価格" } }, { "type": "row", "settings": { "label": "商品代金以外の必要料金" } }, { "type": "row", "settings": { "label": "お支払い方法" } }, { "type": "row", "settings": { "label": "引き渡し時期" } }, { "type": "row", "settings": { "label": "返品・交換" } }
+  ] }]
 }
 {% endschema %}

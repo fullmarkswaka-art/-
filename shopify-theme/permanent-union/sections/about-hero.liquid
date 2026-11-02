@@ -1,0 +1,35 @@
+{%- liquid
+  # 下層のキービジュアル（About Us・Riders・Shop List のみ使用）。パンくず＋英字見出し＋和文
+  assign s = section.settings
+  assign title = s.title | default: page.title
+-%}
+<section class="kv" data-header="light" style="--pos:{{ s.focal_x }}% {{ s.focal_y }}%;--kv-h:{{ s.height }}px">
+  <div class="kv__media">
+    {%- if s.image != blank -%}
+      {{ s.image | image_url: width: 2800 | image_tag: loading: 'eager', fetchpriority: 'high', sizes: '100vw', widths: '800, 1200, 1800, 2400, 2800', alt: '', class: 'cover-img' }}
+    {%- else -%}
+      <img class="cover-img" src="{{ 'pu-bg-still.jpg' | asset_url }}" alt="" width="2560" height="1707" loading="eager">
+    {%- endif -%}
+    <div class="kv__dim"></div>
+  </div>
+  <div class="container kv__text">
+    <div class="kv__crumb"><a href="{{ routes.root_url }}">HOME</a> ／ {{ s.crumb | default: title | upcase }}</div>
+    <h1 class="kv__h">{{ title }}</h1>
+    {%- if s.sub != blank -%}<div class="kv__s">{{ s.sub }}</div>{%- endif -%}
+  </div>
+</section>
+{% schema %}
+{
+  "name": "キービジュアル（下層）",
+  "settings": [
+    { "type": "image_picker", "id": "image", "label": "写真", "info": "未設定の場合は白馬の雲海" },
+    { "type": "range", "id": "focal_x", "label": "トリミング位置 横", "min": 0, "max": 100, "step": 5, "unit": "%", "default": 50 },
+    { "type": "range", "id": "focal_y", "label": "トリミング位置 縦", "min": 0, "max": 100, "step": 5, "unit": "%", "default": 45 },
+    { "type": "range", "id": "height", "label": "高さ（PC）", "min": 300, "max": 700, "step": 20, "unit": "px", "default": 420 },
+    { "type": "text", "id": "title", "label": "英字見出し", "info": "未設定ならページ名" },
+    { "type": "text", "id": "crumb", "label": "パンくず表記", "info": "未設定なら見出しを大文字で" },
+    { "type": "text", "id": "sub", "label": "和文（見出しの下）", "default": "〜 山にいるときこそ最高であれ 〜" }
+  ],
+  "presets": [{ "name": "キービジュアル（下層）" }]
+}
+{% endschema %}

@@ -1,49 +1,16 @@
 {
   "sections": {
-    "main": {
-      "type": "shoplist",
-      "blocks": {
-        "nagano": {
-          "type": "region",
-          "settings": {
-            "title": "Nagano",
-            "subtitle": "長野県"
-          }
-        },
-        "fm": {
-          "type": "shop",
-          "settings": {
-            "name": "FULLMARKS STORE",
-            "address": "長野県松本市",
-            "url": "https://www.fullmarksstore.jp/"
-          }
-        },
-        "online": {
-          "type": "region",
-          "settings": {
-            "title": "Online",
-            "subtitle": "オンラインストア"
-          }
-        },
-        "os": {
-          "type": "shop",
-          "settings": {
-            "name": "PERMANENT UNION Official Online Store",
-            "address": "",
-            "url": "/pages/shop"
-          }
-        }
-      },
-      "block_order": [
-        "nagano",
-        "fm",
-        "online",
-        "os"
-      ],
-      "settings": {}
-    }
+    "main": { "type": "shoplist", "blocks": {
+      "nagano": { "type": "region", "settings": { "title": "NAGANO", "sub": "長野" } },
+      "fm": { "type": "shop", "settings": { "name": "FULLMARKS STORE", "pref": "20", "address": "長野県松本市", "url": "https://www.fullmarksstore.jp/" } },
+      "s2": { "type": "shop", "settings": { "name": "店舗名（仮）", "pref": "20", "address": "長野県〇〇市〇〇 0-0-0", "tel": "000-000-0000", "hours": "10:00–19:00 ／ 水曜定休" } },
+      "tokyo": { "type": "region", "settings": { "title": "TOKYO", "sub": "東京" } },
+      "s3": { "type": "shop", "settings": { "name": "店舗名（仮）", "pref": "13", "address": "東京都〇〇区〇〇 0-0-0", "tel": "00-0000-0000" } },
+      "hokkaido": { "type": "region", "settings": { "title": "HOKKAIDO", "sub": "北海道" } },
+      "s4": { "type": "shop", "settings": { "name": "店舗名（仮）", "pref": "1", "address": "北海道〇〇市〇〇 0-0-0", "tel": "000-000-0000" } },
+      "taiwan": { "type": "region", "settings": { "title": "TAIWAN", "sub": "台湾", "flag": true } },
+      "s5": { "type": "shop", "settings": { "name": "店舗名（仮）", "pref": "tw", "address": "台北市〇〇", "tel": "+886-0-0000-0000" } }
+    }, "block_order": ["nagano", "fm", "s2", "tokyo", "s3", "hokkaido", "s4", "taiwan", "s5"], "settings": { "taiwan_message": "台湾についてのメッセージ（文言はブランド側で支給）" } }
   },
-  "order": [
-    "main"
-  ]
+  "order": ["main"]
 }

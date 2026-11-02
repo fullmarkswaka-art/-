@@ -1,0 +1,5 @@
+{%- comment -%} TOP 右端の章インジケーター（縄の線画・7章）。JS が現在の章を data-chapter から判定する {%- endcomment -%}
+<div class="ind" data-indicator aria-hidden="true">
+  {%- for i in (1..7) -%}<span class="ind__seg rope rope--v rope--white" data-seg="{{ i }}"></span>{%- endfor -%}
+  <span class="ind__lab" data-indicator-label></span>
+</div>

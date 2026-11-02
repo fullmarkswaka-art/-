@@ -1,0 +1,130 @@
+{%- liquid
+  comment
+    STORY 章（全画面写真 + 語りかけ）。7章を index.json に並べる。
+    layout:
+      vt-right   … 縦書きを右、英文を左下（STORY 01）
+      vt-left    … 縦書きを左、英文を右下（STORY 03）
+      bottom     … 左下に大きな一言＋補足＋英文（STORY 02）
+      block-l    … 左にラベル／見出し／本文／英文（STORY 04）
+      block-r    … 右に同上（STORY 05）
+      vt-sub     … 縦書きリード＋縦書きサブ、左下にラベルと英文（STORY 06）
+      center     … 中央揃え、ボタン付き（STORY 07）
+  endcomment
+  assign s = section.settings
+  assign colors = 'Muku:#E3DCCB,Kakishibu:#A85E35,Wakaba:#7FA05A,Slate Blue:#7D8B9B,Midnight:#2B3446,Babaji:#B9A88A' | split: ','
+  assign chapter_hex = '#FFFFFF'
+  assign ind_hex = '#FFFFFF'
+  for c in colors
+    assign pair = c | split: ':'
+    if pair[0] == s.color_name
+      assign chapter_hex = pair[1]
+      assign ind_hex = pair[1]
+    endif
+  endfor
+  if s.color_name == 'Midnight'
+    assign ind_hex = '#9FB0D0'
+  endif
+  assign fallback = 'pu-story-0' | append: s.chapter | append: '.jpg'
+  assign vt_lines = s.vt_text | newline_to_br | split: '<br />'
+-%}
+<section class="story story--{{ s.layout }} story--ch{{ s.chapter }}" id="story-{{ section.id }}" data-story data-chapter="{{ s.chapter }}" data-chapter-color="{{ ind_hex }}" data-chapter-name="{{ s.color_name }}" data-header="light"
+  style="--pos:{{ s.focal_x }}% {{ s.focal_y }}%;--pos-sp:{{ s.focal_x_sp }}% {{ s.focal_y_sp }}%;--dim:{{ s.dim | divided_by: 100.0 }};--chapter:{{ chapter_hex }}">
+  <div class="story__media{% if s.parallax %} story__media--parallax{% endif %}" data-parallax>
+    {%- if s.image != blank -%}
+      {{ s.image | image_url: width: 2800 | image_tag: loading: 'lazy', sizes: '100vw', widths: '800, 1200, 1800, 2400, 2800', alt: s.image.alt | default: '', class: 'story__img' }}
+    {%- else -%}
+      <img class="story__img" src="{{ fallback | asset_url }}" alt="" loading="lazy" width="2000" height="1333">
+    {%- endif -%}
+    {%- if s.image_sp != blank -%}
+      {{ s.image_sp | image_url: width: 1200 | image_tag: loading: 'lazy', sizes: '100vw', widths: '600, 900, 1200', alt: '', class: 'story__img story__img--sp' }}
+    {%- endif -%}
+  </div>
+  <div class="story__dim story__dim--{{ s.layout }}"></div>
+
+  {%- if s.show_counter -%}
+    <div class="counter reveal">
+      <span>0{{ s.chapter }} / 07</span>
+      <span class="rope rope--h rope--white counter__rope"></span>
+      <span class="counter__sw" style="background:{{ chapter_hex }}"></span>
+      <span class="counter__name">{{ s.color_name }}</span>
+    </div>
+  {%- endif -%}
+
+  <div class="story__inner container">
+    {%- case s.layout -%}
+    {%- when 'vt-right' or 'vt-left' -%}
+      <div class="vt story__vt reveal">{% for l in vt_lines %}<p>{{ l | strip }}</p>{% endfor %}</div>
+      {%- if s.en != blank -%}<div class="en story__en reveal" data-delay="1">{{ s.en | newline_to_br }}</div>{%- endif -%}
+    {%- when 'bottom' -%}
+      <div class="story__bottom">
+        {%- if s.heading != blank -%}<div class="h-jp story__big reveal">{{ s.heading | newline_to_br }}</div>{%- endif -%}
+        {%- if s.sub != blank -%}<div class="b-jp story__sub reveal" data-delay="1">{{ s.sub | newline_to_br }}</div>{%- endif -%}
+        {%- if s.en != blank -%}<div class="en story__en reveal" data-delay="2">{{ s.en | newline_to_br }}</div>{%- endif -%}
+      </div>
+    {%- when 'block-l' or 'block-r' -%}
+      <div class="story__block">
+        {%- if s.label != blank -%}<div class="lbl reveal">{{ s.label }}</div>{%- endif -%}
+        {%- if s.heading != blank -%}<h2 class="h-jp story__h reveal{% if s.heading_sp != blank %} story__h--pc{% endif %}" data-delay="1">{{ s.heading | newline_to_br }}</h2>{%- endif -%}
+        {%- if s.heading_sp != blank -%}<h2 class="h-jp story__h story__h--sp reveal" data-delay="1">{{ s.heading_sp | newline_to_br }}</h2>{%- endif -%}
+        {%- if s.sub != blank -%}<div class="b-jp story__body reveal" data-delay="2">{{ s.sub | newline_to_br }}</div>{%- endif -%}
+        {%- if s.en != blank -%}<div class="en story__en reveal" data-delay="3">{{ s.en | newline_to_br }}</div>{%- endif -%}
+      </div>
+    {%- when 'vt-sub' -%}
+      <div class="story__vtgroup">
+        <div class="vt story__vt reveal">{% for l in vt_lines %}<p>{{ l | strip }}</p>{% endfor %}</div>
+        {%- if s.sub != blank -%}<div class="vt story__vtsub reveal" data-delay="1">{{ s.sub }}</div>{%- endif -%}
+      </div>
+      <div class="story__corner">
+        {%- if s.label != blank -%}<div class="lbl reveal" data-delay="1">{{ s.label }}</div>{%- endif -%}
+        {%- if s.en != blank -%}<div class="en story__en reveal" data-delay="2">{{ s.en | newline_to_br }}</div>{%- endif -%}
+      </div>
+    {%- when 'center' -%}
+      <div class="story__center">
+        {%- if s.heading != blank -%}<h2 class="h-jp story__closing reveal">{{ s.heading }}</h2>{%- endif -%}
+        {%- if s.sub != blank -%}<div class="b-jp story__sub reveal" data-delay="1">{{ s.sub | newline_to_br }}</div>{%- endif -%}
+        {%- if s.en != blank -%}<div class="en story__en reveal" data-delay="2">{{ s.en | newline_to_br }}</div>{%- endif -%}
+        {%- if s.button_label != blank -%}<a class="btn reveal" data-delay="3" href="{{ s.button_link | default: routes.all_products_collection_url }}">{{ s.button_label }}　→</a>{%- endif -%}
+      </div>
+    {%- endcase -%}
+  </div>
+</section>
+{% schema %}
+{
+  "name": "STORY（章）",
+  "tag": "section",
+  "settings": [
+    { "type": "paragraph", "content": "全画面写真の上に語りかけの文章を置く章。7章を順に並べ、章と章の間に「映像の間」を挟みます。" },
+    { "type": "range", "id": "chapter", "label": "章番号", "min": 1, "max": 7, "step": 1, "default": 1 },
+    { "type": "select", "id": "color_name", "label": "章のカラー名（ジャケットのカラー）", "options": [ { "value": "Muku", "label": "Muku" }, { "value": "Kakishibu", "label": "Kakishibu" }, { "value": "Wakaba", "label": "Wakaba" }, { "value": "Slate Blue", "label": "Slate Blue" }, { "value": "Midnight", "label": "Midnight" }, { "value": "Babaji", "label": "Babaji" } ], "default": "Muku" },
+    { "type": "checkbox", "id": "show_counter", "label": "左上に章番号とカラー名を表示", "default": true },
+    { "type": "header", "content": "写真" },
+    { "type": "image_picker", "id": "image", "label": "写真（PC）", "info": "未設定の場合は章番号に対応するテーマ同梱の写真" },
+    { "type": "image_picker", "id": "image_sp", "label": "写真（スマホ・任意）" },
+    { "type": "range", "id": "focal_x", "label": "トリミング位置 横（PC）", "min": 0, "max": 100, "step": 2, "unit": "%", "default": 50 },
+    { "type": "range", "id": "focal_y", "label": "トリミング位置 縦（PC）", "min": 0, "max": 100, "step": 2, "unit": "%", "default": 50 },
+    { "type": "range", "id": "focal_x_sp", "label": "トリミング位置 横（スマホ）", "min": 0, "max": 100, "step": 2, "unit": "%", "default": 50 },
+    { "type": "range", "id": "focal_y_sp", "label": "トリミング位置 縦（スマホ）", "min": 0, "max": 100, "step": 2, "unit": "%", "default": 50 },
+    { "type": "range", "id": "dim", "label": "写真の暗さ", "min": 0, "max": 80, "step": 5, "unit": "%", "default": 35 },
+    { "type": "checkbox", "id": "parallax", "label": "軽いパララックス（約8%）", "default": true },
+    { "type": "header", "content": "文章" },
+    { "type": "select", "id": "layout", "label": "レイアウト", "options": [
+      { "value": "vt-right", "label": "縦書き・右（STORY 01 型）" },
+      { "value": "bottom", "label": "左下に大きな一言（STORY 02 型）" },
+      { "value": "vt-left", "label": "縦書き・左（STORY 03 型）" },
+      { "value": "block-l", "label": "ラベル＋見出し＋本文・左（STORY 04 型）" },
+      { "value": "block-r", "label": "ラベル＋見出し＋本文・右（STORY 05 型）" },
+      { "value": "vt-sub", "label": "縦書きリード＋サブ（STORY 06 型）" },
+      { "value": "center", "label": "中央揃え＋ボタン（STORY 07 型）" }
+    ], "default": "vt-right" },
+    { "type": "textarea", "id": "vt_text", "label": "縦書きの文章（1行＝1列）", "default": "森に抱かれ、山で遊ぶ時間は、\n私たちにとって至福のものです。" },
+    { "type": "text", "id": "label", "label": "英字ラベル（例 Sustainability）" },
+    { "type": "textarea", "id": "heading", "label": "見出し（和文）" },
+    { "type": "textarea", "id": "heading_sp", "label": "見出し（スマホ用の改行・任意）", "info": "スマホでキリよく改行したいときに。例：私たちが考える／環境への配慮は、／長く使えること。" },
+    { "type": "textarea", "id": "sub", "label": "本文・補足（和文）" },
+    { "type": "textarea", "id": "en", "label": "英文", "default": "Held by the forest, let loose in the mountains—\nthis is our kind of bliss." },
+    { "type": "text", "id": "button_label", "label": "ボタン（中央揃えのみ）" },
+    { "type": "url", "id": "button_link", "label": "ボタンのリンク先" }
+  ],
+  "presets": [{ "name": "STORY（章）" }]
+}
+{% endschema %}

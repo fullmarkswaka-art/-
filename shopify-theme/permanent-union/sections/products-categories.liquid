@@ -1,0 +1,81 @@
+{%- liquid
+  assign s = section.settings
+  assign fallbacks = 'pu-story-04.jpg,pu-story-06.jpg,pu-story-03.jpg,pu-story-02.jpg' | split: ','
+-%}
+<section class="paper sec sec--products" data-header="dark">
+  <div class="container">
+    <div class="rope rope--h rope--brown sec__rope"></div>
+    <div class="sec__head">
+      <div><h2 class="sec-h">{{ s.heading }}</h2><div class="sec-s">{{ s.sub }}</div></div>
+      {%- if s.link_label != blank -%}<a class="more" href="{{ s.link | default: routes.all_products_collection_url }}">{{ s.link_label }}　→</a>{%- endif -%}
+    </div>
+    <div class="cats">
+      {%- for block in section.blocks -%}
+        {%- liquid
+          assign b = block.settings
+          assign col = b.collection
+          assign img = b.image
+          if img == blank and col.image
+            assign img = col.image
+          endif
+          assign title = b.title
+          if title == blank and col
+            assign title = col.title
+          endif
+          assign url = b.link
+          if url == blank and col
+            assign url = col.url
+          endif
+          assign fb = fallbacks[forloop.index0]
+          if fb == blank
+            assign fb = fallbacks[0]
+          endif
+        -%}
+        <a class="cat reveal" data-delay="{{ forloop.index0 }}" href="{{ url | default: routes.all_products_collection_url }}" {{ block.shopify_attributes }} style="--pos:{{ b.focal_x }}% {{ b.focal_y }}%">
+          <div class="cat__media">
+            {%- if img != blank -%}
+              {{ img | image_url: width: 1200 | image_tag: loading: 'lazy', sizes: '(max-width: 768px) 50vw, 25vw', widths: '400, 600, 900, 1200', alt: title, class: 'cat__img' }}
+            {%- else -%}
+              <img class="cat__img" src="{{ fb | asset_url }}" alt="" loading="lazy" width="1200" height="800">
+            {%- endif -%}
+            <div class="cat__dim"></div>
+          </div>
+          {%- if b.tentative -%}<span class="kari">仮</span>{%- endif -%}
+          <div class="cat__text"><div class="cat__t">{{ title }}</div>{%- if b.sub != blank -%}<div class="cat__s">{{ b.sub }}</div>{%- endif -%}</div>
+        </a>
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+{% schema %}
+{
+  "name": "Products（カテゴリ）",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "見出し", "default": "Products" },
+    { "type": "text", "id": "sub", "label": "和文小見出し", "default": "商品一覧" },
+    { "type": "text", "id": "link_label", "label": "右上のリンク文言", "default": "VIEW ALL PRODUCTS" },
+    { "type": "url", "id": "link", "label": "リンク先", "info": "未設定なら全商品" }
+  ],
+  "blocks": [
+    {
+      "type": "category", "name": "カテゴリ", "limit": 4,
+      "settings": [
+        { "type": "collection", "id": "collection", "label": "コレクション", "info": "選ぶと名称・画像・リンクを自動で使用（下で上書き可）" },
+        { "type": "text", "id": "title", "label": "英字名（上書き）" },
+        { "type": "text", "id": "sub", "label": "和文名" },
+        { "type": "image_picker", "id": "image", "label": "写真（上書き）" },
+        { "type": "range", "id": "focal_x", "label": "トリミング位置 横", "min": 0, "max": 100, "step": 5, "unit": "%", "default": 50 },
+        { "type": "range", "id": "focal_y", "label": "トリミング位置 縦", "min": 0, "max": 100, "step": 5, "unit": "%", "default": 50 },
+        { "type": "url", "id": "link", "label": "リンク先（上書き）" },
+        { "type": "checkbox", "id": "tentative", "label": "「仮」ラベルを表示", "default": false, "info": "カテゴリ構成が決まるまで" }
+      ]
+    }
+  ],
+  "presets": [{ "name": "Products（カテゴリ）", "blocks": [
+    { "type": "category", "settings": { "title": "OUTERWEAR", "sub": "アウター" } },
+    { "type": "category", "settings": { "title": "TOPS", "sub": "トップス", "focal_y": 30 } },
+    { "type": "category", "settings": { "title": "BOTTOMS", "sub": "ボトムス", "focal_y": 60 } },
+    { "type": "category", "settings": { "title": "ACCESSORIES", "sub": "小物", "focal_x": 70 } }
+  ] }]
+}
+{% endschema %}

@@ -1,0 +1,41 @@
+{%- liquid
+  assign s = section.settings
+  assign fallbacks = 'pu-fv.jpg,pu-story-03.jpg,pu-story-01.jpg,pu-story-06.jpg,pu-story-05.jpg,pu-story-07.jpg' | split: ','
+-%}
+<section class="paper sec sec--ig" data-header="dark">
+  <div class="container">
+    <div class="ig__head">
+      <div class="ig__label">{{ s.label }}</div>
+      <a class="ig__handle" href="{{ settings.social_instagram }}" target="_blank" rel="noopener">{{ settings.instagram_handle }}</a>
+    </div>
+    <div class="ig__grid">
+      {%- for block in section.blocks -%}
+        <a class="ig__item" href="{{ block.settings.link | default: settings.social_instagram }}" target="_blank" rel="noopener" {{ block.shopify_attributes }}>
+          {%- if block.settings.image != blank -%}
+            {{ block.settings.image | image_url: width: 800 | image_tag: loading: 'lazy', sizes: '(max-width: 768px) 33vw, 16vw', widths: '300, 500, 800', alt: '', class: 'cover-img' }}
+          {%- else -%}
+            <img class="cover-img" src="{{ fallbacks[forloop.index0] | asset_url }}" alt="" loading="lazy" width="1600" height="1200">
+          {%- endif -%}
+        </a>
+      {%- endfor -%}
+    </div>
+    {%- if s.note != blank -%}<p class="ig__note">{{ s.note }}</p>{%- endif -%}
+  </div>
+</section>
+{% schema %}
+{
+  "name": "Instagram",
+  "settings": [
+    { "type": "text", "id": "label", "label": "ラベル", "default": "FOLLOW US" },
+    { "type": "paragraph", "content": "アカウント名とリンクは テーマ設定 > SNS。投稿を自動で取り込む場合は Instagram 連携アプリを導入し、このセクションを置き換えます。" },
+    { "type": "text", "id": "note", "label": "注記（任意）" }
+  ],
+  "blocks": [
+    { "type": "image", "name": "写真", "limit": 6, "settings": [
+      { "type": "image_picker", "id": "image", "label": "写真" },
+      { "type": "url", "id": "link", "label": "投稿のリンク" }
+    ] }
+  ],
+  "presets": [{ "name": "Instagram", "blocks": [ { "type": "image" }, { "type": "image" }, { "type": "image" }, { "type": "image" }, { "type": "image" }, { "type": "image" } ] }]
+}
+{% endschema %}

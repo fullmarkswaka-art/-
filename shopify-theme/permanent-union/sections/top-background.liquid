@@ -1,0 +1,40 @@
+{%- liquid
+  comment
+    LAYER 1: 最背面に固定する背景（白馬の雲海写真 / 映像）。TOP 全体を通して固定され、写真と文字がその上をスクロールする。
+  endcomment
+  assign s = section.settings
+-%}
+<div class="bg-layer" data-bg-layer aria-hidden="true">
+  {%- if s.video != blank -%}
+    {{ s.video | video_tag: autoplay: true, loop: true, muted: true, controls: false, playsinline: true, preload: 'auto', image_size: '2000x', class: 'bg-layer__media' }}
+  {%- elsif s.video_url != blank -%}
+    <video class="bg-layer__media" autoplay muted loop playsinline preload="auto" {% if s.image != blank %}poster="{{ s.image | image_url: width: 2000 }}"{% else %}poster="{{ 'pu-bg-still.jpg' | asset_url }}"{% endif %}>
+      <source src="{{ s.video_url }}" type="video/mp4">
+    </video>
+  {%- elsif s.image != blank -%}
+    {{ s.image | image_url: width: 2800 | image_tag: class: 'bg-layer__media', loading: 'eager', fetchpriority: 'high', sizes: '100vw', widths: '1000, 1600, 2000, 2800', alt: '' }}
+  {%- else -%}
+    <img class="bg-layer__media" src="{{ 'pu-bg-still.jpg' | asset_url }}" alt="" width="2560" height="1707" loading="eager" fetchpriority="high">
+  {%- endif -%}
+  {%- if s.image_sp != blank -%}
+    {{ s.image_sp | image_url: width: 1200 | image_tag: class: 'bg-layer__media bg-layer__media--sp', loading: 'eager', sizes: '100vw', widths: '600, 900, 1200', alt: '' }}
+  {%- endif -%}
+  <div class="bg-layer__dim" style="opacity:{{ s.dim | divided_by: 100.0 }}"></div>
+</div>
+{% schema %}
+{
+  "name": "TOP 背景（最背面・固定）",
+  "settings": [
+    { "type": "paragraph", "content": "3層構成の LAYER 1。画面に固定され、写真（LAYER 2）と文字（LAYER 3）がその上をスクロールします。章の区切り「映像の間」でこの背景だけが見えます。" },
+    { "type": "header", "content": "写真（初期：白馬の雲海）" },
+    { "type": "image_picker", "id": "image", "label": "背景写真（PC）", "info": "未設定の場合はテーマ同梱の雲海写真" },
+    { "type": "image_picker", "id": "image_sp", "label": "背景写真（スマホ・縦長）", "info": "任意。未設定なら PC と同じ写真を中央でトリミング" },
+    { "type": "header", "content": "映像を使う場合" },
+    { "type": "paragraph", "content": "1920×1080 / 15〜30秒 / H.264 MP4 / 音声なし / 10MB以下 を目安に書き出し、管理画面 > コンテンツ > ファイル にアップロードして選択。映像を設定すると写真はポスター（読み込み前・再生できない環境）として使われます。" },
+    { "type": "video", "id": "video", "label": "映像（Shopify）" },
+    { "type": "text", "id": "video_url", "label": "映像URL（MP4）", "info": "外部にホストした MP4 を使う場合" },
+    { "type": "range", "id": "dim", "label": "暗さ", "min": 0, "max": 60, "step": 5, "unit": "%", "default": 10 }
+  ],
+  "presets": [{ "name": "TOP 背景（最背面・固定）" }]
+}
+{% endschema %}

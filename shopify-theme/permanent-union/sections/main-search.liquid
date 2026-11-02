@@ -1,29 +1,33 @@
-<section class="container container--wide section">
-  <div class="page-title" style="padding-top:0">
-    <p class="eyebrow">Search</p>
-    <form action="{{ routes.search_url }}" method="get" class="search-form mt-3" role="search">
-      <input type="search" name="q" value="{{ search.terms | escape }}" placeholder="{{ 'general.search.placeholder' | t }}" aria-label="{{ 'general.search.search' | t }}">
-      <input type="hidden" name="type" value="product">
-      <button type="submit" aria-label="{{ 'general.search.search' | t }}">{% render 'icon', name: 'search' %}</button>
-    </form>
-    {%- if search.performed -%}<p class="muted mt-3">{{ 'general.search.results' | t: count: search.results_count, terms: search.terms }}</p>{%- endif -%}
-  </div>
+<section class="lp container" data-header="dark">
+  <div class="crumb"><a href="{{ routes.root_url }}">HOME</a> ／ SEARCH</div>
+  <div class="ptitle"><h1 class="ptitle__h">Search</h1><div class="ptitle__s">{% if search.performed %}{{ 'general.search.results_count' | t: count: search.results_count, terms: search.terms }}{% else %}{{ 'general.search.title' | t }}{% endif %}</div></div>
+  <form class="sform" action="{{ routes.search_url }}" method="get" role="search">
+    <input class="field" type="search" name="q" value="{{ search.terms | escape }}" placeholder="{{ 'general.search.placeholder' | t }}" aria-label="{{ 'general.search.search' | t }}">
+    <button class="btn-d btn-d--s" type="submit">{{ 'general.search.search' | t }}</button>
+  </form>
   {%- if search.performed -%}
     {%- paginate search.results by 24 -%}
-      {%- if search.results_count > 0 -%}
-        <div class="product-grid" style="--cols: 4">
+      {%- if search.results_count == 0 -%}
+        <div class="cart-empty cart-empty--page"><p>{{ 'general.search.no_results' | t: terms: search.terms }}</p></div>
+      {%- else -%}
+        <div class="cards cards--4">
           {%- for item in search.results -%}
-            {%- if item.object_type == 'product' -%}{% render 'product-card', product: item, index: forloop.index0 %}
-            {%- else -%}<a class="journal-card" href="{{ item.url }}"><div class="journal-card__meta"><span>{{ item.object_type }}</span></div><h3 class="journal-card__title">{{ item.title }}</h3></a>{%- endif -%}
+            {%- if item.object_type == 'product' -%}
+              {% render 'product-card', product: item, index: forloop.index0 %}
+            {%- else -%}
+              <a class="jcard" href="{{ item.url }}">
+                {%- if item.image -%}<div class="jcard__media">{{ item.image | image_url: width: 900 | image_tag: loading: 'lazy', alt: item.title, class: 'cover-img' }}</div>{%- endif -%}
+                <div class="jcard__meta">{{ item.object_type | upcase }}</div>
+                <div class="jcard__t">{{ item.title }}</div>
+              </a>
+            {%- endif -%}
           {%- endfor -%}
         </div>
-      {%- else -%}
-        <div class="empty-state"><p class="lead">{{ 'general.search.no_results' | t }}</p></div>
       {%- endif -%}
       {% render 'pagination', paginate: paginate %}
     {%- endpaginate -%}
   {%- endif -%}
 </section>
 {% schema %}
-{ "name": "検索", "settings": [] }
+{ "name": "検索結果", "settings": [] }
 {% endschema %}

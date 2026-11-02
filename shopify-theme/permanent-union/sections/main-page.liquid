@@ -1,18 +1,14 @@
-<section class="container container--narrow section">
-  {%- if section.settings.show_title -%}
-    <div class="page-title" style="padding-top:0">
-      <p class="eyebrow reveal">{{ section.settings.eyebrow }}</p>
-      <h1 class="display mt-2 reveal" data-delay="1">{{ page.title }}</h1>
-    </div>
-  {%- endif -%}
-  <div class="rte body-copy reveal" data-delay="2">{{ page.content }}</div>
+<section class="lp container" data-header="dark">
+  <div class="crumb"><a href="{{ routes.root_url }}">HOME</a> ／ {{ page.title | upcase }}</div>
+  <div class="ptitle"><h1 class="ptitle__h">{{ section.settings.heading | default: page.title }}</h1>{% if section.settings.sub != blank %}<div class="ptitle__s">{{ section.settings.sub }}</div>{% endif %}</div>
+  <div class="art"><div class="rte art__body">{{ page.content }}</div></div>
 </section>
 {% schema %}
 {
   "name": "ページ本文",
   "settings": [
-    { "type": "checkbox", "id": "show_title", "label": "タイトルを表示", "default": true },
-    { "type": "text", "id": "eyebrow", "label": "小見出し", "default": "Information" }
+    { "type": "text", "id": "heading", "label": "英字見出し（上書き）" },
+    { "type": "text", "id": "sub", "label": "和文小見出し" }
   ]
 }
 {% endschema %}

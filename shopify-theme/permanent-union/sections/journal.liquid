@@ -1,44 +1,50 @@
-{%- assign s = section.settings -%}
-{%- assign blog = blogs[s.blog] -%}
-<section class="section">
-  <div class="container container--wide">
-    <div class="section-head reveal">
-      <div class="section-head__title">
-        <span class="section-number">{{ s.number }}</span>
-        <div><p class="eyebrow">{{ s.eyebrow }}</p><h2 class="h1 mt-1">{{ s.title }}</h2></div>
-      </div>
-      {%- if blog != blank -%}<a class="link-line section-head__link" href="{{ blog.url }}">{{ s.link_label }} {% render 'icon', name: 'arrow' %}</a>{%- endif -%}
+{%- liquid
+  assign s = section.settings
+  assign blog = blogs[s.blog]
+  assign fallbacks = 'pu-story-02.jpg,pu-story-05.jpg,pu-story-04.jpg' | split: ','
+-%}
+<section class="paper sec sec--journal" data-header="dark">
+  <div class="container">
+    <div class="sec__head">
+      <div><h2 class="sec-h sec-h--s">{{ s.heading }}</h2><div class="sec-s">{{ s.sub }}</div></div>
+      {%- if s.link_label != blank -%}<a class="more" href="{{ blog.url | default: '/blogs/journal' }}">{{ s.link_label }}　→</a>{%- endif -%}
     </div>
-    <div class="journal">
-      {%- if blog != blank and blog.articles.size > 0 -%}
-        {%- for article in blog.articles limit: s.limit -%}
-          <a class="journal-card reveal" data-delay="{{ forloop.index0 }}" href="{{ article.url }}">
-            <div class="media journal-card__media">
-              {%- if article.image -%}{{ article.image | image_url: width: 1000 | image_tag: loading: 'lazy', sizes: '(max-width: 800px) 100vw, 33vw', alt: article.title }}{%- else -%}{{ 'lifestyle-2' | placeholder_svg_tag: 'cover-media' }}{%- endif -%}
-            </div>
-            <div class="journal-card__meta"><span>{{ article.published_at | date: '%Y.%m.%d' }}</span>{%- if article.tags.size > 0 -%}<span>{{ article.tags.first }}</span>{%- endif -%}</div>
-            <h3 class="journal-card__title">{{ article.title }}</h3>
-          </a>
-        {%- endfor -%}
+    <div class="jcards">
+      {%- for article in blog.articles limit: 3 -%}
+        <a class="jcard reveal" data-delay="{{ forloop.index0 }}" href="{{ article.url }}">
+          <div class="jcard__media">
+            {%- if article.image -%}
+              {{ article.image | image_url: width: 1200 | image_tag: loading: 'lazy', sizes: '(max-width: 768px) 100vw, 33vw', widths: '400, 800, 1200', alt: article.title, class: 'cover-img' }}
+            {%- else -%}
+              <img class="cover-img" src="{{ fallbacks[forloop.index0] | asset_url }}" alt="" loading="lazy" width="2000" height="1333">
+            {%- endif -%}
+          </div>
+          <div class="jcard__meta">{{ article.published_at | date: '%Y.%m.%d' }}　{{ article.tags | first | upcase }}</div>
+          <div class="jcard__t">{{ article.title }}</div>
+        </a>
       {%- else -%}
-        {%- for i in (1..3) -%}
-          <div class="journal-card"><div class="media journal-card__media">{{ 'lifestyle-' | append: forloop.index | placeholder_svg_tag: 'cover-media' }}</div><div class="journal-card__meta"><span>2026.11.01</span><span>News</span></div><h3 class="journal-card__title">{{ 'sections.journal.sample' | t }}</h3></div>
+        {%- assign samples = '2026-2027 FW コレクション 発売のお知らせ|NEWS,白馬のバックカントリーで、新作をテストする|RIDERS,長く使えること。PU SPECIALIZED 3 LAYER FABRIC|COLUMN' | split: ',' -%}
+        {%- for smp in samples -%}
+          {%- assign p = smp | split: '|' -%}
+          <div class="jcard">
+            <div class="jcard__media"><img class="cover-img" src="{{ fallbacks[forloop.index0] | asset_url }}" alt="" loading="lazy" width="2000" height="1333"></div>
+            <div class="jcard__meta">2026.11.01　{{ p[1] }}</div>
+            <div class="jcard__t">{{ p[0] }}</div>
+          </div>
         {%- endfor -%}
-      {%- endif -%}
+      {%- endfor -%}
     </div>
   </div>
 </section>
 {% schema %}
 {
-  "name": "ジャーナル / News",
+  "name": "Journal（TOP）",
   "settings": [
-    { "type": "blog", "id": "blog", "label": "ブログ" },
-    { "type": "text", "id": "number", "label": "番号", "default": "(05)" },
-    { "type": "text", "id": "eyebrow", "label": "小見出し", "default": "Journal" },
-    { "type": "text", "id": "title", "label": "見出し", "default": "News" },
-    { "type": "text", "id": "link_label", "label": "リンクテキスト", "default": "All Articles" },
-    { "type": "range", "id": "limit", "label": "表示数", "min": 2, "max": 6, "step": 1, "default": 3 }
+    { "type": "text", "id": "heading", "label": "見出し", "default": "Journal" },
+    { "type": "text", "id": "sub", "label": "和文小見出し", "default": "お知らせ・読みもの" },
+    { "type": "blog", "id": "blog", "label": "ブログ", "info": "最新3件を表示。ブログが未作成の間はサンプルを表示" },
+    { "type": "text", "id": "link_label", "label": "リンク文言", "default": "ALL ARTICLES" }
   ],
-  "presets": [{ "name": "ジャーナル / News" }]
+  "presets": [{ "name": "Journal（TOP）" }]
 }
 {% endschema %}

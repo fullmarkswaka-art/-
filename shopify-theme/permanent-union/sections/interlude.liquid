@@ -1,0 +1,12 @@
+{%- comment -%} 映像の間: 写真が途切れて背景（LAYER 1）だけが見える区間。文字は置かない {%- endcomment -%}
+<div class="interlude" data-interlude data-header="light" style="--h:{{ section.settings.height }}vh" aria-hidden="true"></div>
+{% schema %}
+{
+  "name": "映像の間（背景だけ）",
+  "settings": [
+    { "type": "paragraph", "content": "章の区切りで背景だけを見せる「息つぎ」。STORY 03→04、06→07、07→Products の3か所に置きます。" },
+    { "type": "range", "id": "height", "label": "高さ（画面に対する割合）", "min": 30, "max": 100, "step": 5, "unit": "%", "default": 70 }
+  ],
+  "presets": [{ "name": "映像の間（背景だけ）" }]
+}
+{% endschema %}

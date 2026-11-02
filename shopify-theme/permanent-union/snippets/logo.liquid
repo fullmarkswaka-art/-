@@ -1,0 +1,19 @@
+{%- comment -%}
+  Usage: render 'logo', color: 'brown' | 'white', class: 'hd__logo-img', width: 400
+  テーマ設定のロゴ画像が未設定の場合はテーマ同梱の PNG を使用
+{%- endcomment -%}
+{%- liquid
+  assign w = width | default: 400
+  if color == 'white'
+    assign img = settings.logo_white
+    assign fallback = 'pu-logo-white.png'
+  else
+    assign img = settings.logo_brown
+    assign fallback = 'pu-logo-brown.png'
+  endif
+-%}
+{%- if img != blank -%}
+  {{ img | image_url: width: w | image_tag: class: class, alt: shop.name, loading: 'eager', width: img.width, height: img.height }}
+{%- else -%}
+  <img class="{{ class }}" src="{{ fallback | asset_url }}" alt="{{ shop.name }}" width="1959" height="225" loading="eager">
+{%- endif -%}

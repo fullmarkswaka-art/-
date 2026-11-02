@@ -1,0 +1,35 @@
+{%- liquid
+  comment
+    ファーストビュー: 写真（LAYER 2）を背景の上に約70%で重ねる。スクロールで写真が上へ流れて薄くなり、背景だけになる。
+  endcomment
+  assign s = section.settings
+-%}
+<section class="fv" data-fv data-header="{{ s.header_mode }}" style="--fv-opacity:{{ s.opacity | divided_by: 100.0 }};--fv-pos:{{ s.focal_x }}% {{ s.focal_y }}%;--fv-pos-sp:{{ s.focal_x_sp }}% {{ s.focal_y_sp }}%">
+  <div class="fv__photo" data-fv-photo>
+    {%- if s.image != blank -%}
+      {{ s.image | image_url: width: 2800 | image_tag: loading: 'eager', fetchpriority: 'high', sizes: '100vw', widths: '800, 1200, 1800, 2400, 2800', alt: s.image.alt | default: shop.name, class: 'fv__img' }}
+    {%- else -%}
+      <img class="fv__img" src="{{ 'pu-fv.jpg' | asset_url }}" alt="{{ shop.name }}" width="1800" height="1274" loading="eager" fetchpriority="high">
+    {%- endif -%}
+  </div>
+  {%- if s.show_scroll -%}
+    <div class="scroll-ind scroll-ind--{{ s.header_mode }}"><span>SCROLL</span><span class="rope rope--v {% if s.header_mode == 'dark' %}rope--brown{% else %}rope--white{% endif %}"></span></div>
+  {%- endif -%}
+</section>
+{% schema %}
+{
+  "name": "ファーストビュー（写真）",
+  "settings": [
+    { "type": "paragraph", "content": "LAYER 2 の写真。背景の上に半透明で重ね、スクロールで上に流れながら消えます。マーシーさんの写真が届いたらここで差し替えてください。" },
+    { "type": "image_picker", "id": "image", "label": "写真", "info": "横長・長辺2400px以上。未設定の場合はテーマ同梱の仮写真" },
+    { "type": "range", "id": "opacity", "label": "写真の不透明度", "min": 40, "max": 100, "step": 2, "unit": "%", "default": 72 },
+    { "type": "range", "id": "focal_x", "label": "トリミング位置 横（PC）", "min": 0, "max": 100, "step": 2, "unit": "%", "default": 50 },
+    { "type": "range", "id": "focal_y", "label": "トリミング位置 縦（PC）", "min": 0, "max": 100, "step": 2, "unit": "%", "default": 50 },
+    { "type": "range", "id": "focal_x_sp", "label": "トリミング位置 横（スマホ）", "min": 0, "max": 100, "step": 2, "unit": "%", "default": 72 },
+    { "type": "range", "id": "focal_y_sp", "label": "トリミング位置 縦（スマホ）", "min": 0, "max": 100, "step": 2, "unit": "%", "default": 50 },
+    { "type": "select", "id": "header_mode", "label": "ヘッダー・SCROLL の色", "options": [ { "value": "dark", "label": "ブラウン（明るい写真）" }, { "value": "light", "label": "白（暗い写真）" } ], "default": "dark" },
+    { "type": "checkbox", "id": "show_scroll", "label": "SCROLL（縄）を表示", "default": true }
+  ],
+  "presets": [{ "name": "ファーストビュー（写真）" }]
+}
+{% endschema %}

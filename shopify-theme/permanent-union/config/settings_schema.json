@@ -2,56 +2,74 @@
   {
     "name": "theme_info",
     "theme_name": "Permanent Union",
-    "theme_version": "1.0.0",
+    "theme_version": "2.0.0",
     "theme_author": "FULLMARKS",
     "theme_documentation_url": "https://full-marks.com/permanentunion/",
     "theme_support_url": "https://full-marks.com/permanentunion/"
   },
   {
-    "name": "カラー",
+    "name": "ロゴ",
     "settings": [
-      { "type": "color", "id": "color_background", "label": "背景", "default": "#F4F2EE" },
-      { "type": "color", "id": "color_text", "label": "テキスト", "default": "#1C1A18" },
-      { "type": "color", "id": "color_muted", "label": "サブテキスト", "default": "#6E6862" },
-      { "type": "color", "id": "color_line", "label": "罫線", "default": "#D9D3CA" },
-      { "type": "color", "id": "color_accent", "label": "アクセント（Slate Blue）", "default": "#5D6D7E" },
-      { "type": "color", "id": "color_dark", "label": "ダーク背景（Midnight）", "default": "#15171A" },
-      { "type": "color", "id": "color_dark_text", "label": "ダーク背景のテキスト", "default": "#F1EEE8" }
+      { "type": "image_picker", "id": "logo_brown", "label": "ロゴ（ブラウン）", "info": "透過PNGまたはSVG。未設定の場合はテーマ同梱のロゴを表示します" },
+      { "type": "image_picker", "id": "logo_white", "label": "ロゴ（白）", "info": "写真の上に表示する白いロゴ" },
+      { "type": "range", "id": "logo_width", "label": "ヘッダーのロゴ幅（PC）", "min": 100, "max": 240, "step": 2, "unit": "px", "default": 158 },
+      { "type": "range", "id": "logo_width_sp", "label": "ヘッダーのロゴ幅（スマホ）", "min": 80, "max": 160, "step": 2, "unit": "px", "default": 112 }
     ]
   },
   {
-    "name": "タイポグラフィ",
+    "name": "カラー",
     "settings": [
-      { "type": "paragraph", "content": "見出し・本文は明朝（Shippori Mincho）、英文は Cormorant Garamond、UIは DM Sans を使用します。Google Fonts から読み込みます。" },
+      { "type": "paragraph", "content": "デザインPDFの配色です。Paper = 背景、Ink = 文字・ボタン、Logo Brown = 見出し・ロゴ、Accent = NEW・残りわずかのみに使用。" },
+      { "type": "color", "id": "color_paper", "label": "Paper（背景）", "default": "#F2EEE7" },
+      { "type": "color", "id": "color_paper2", "label": "Paper 2（商品写真の背景）", "default": "#E8E2D8" },
+      { "type": "color", "id": "color_ink", "label": "Ink（文字・ボタン・フッター）", "default": "#2A211E" },
+      { "type": "color", "id": "color_brown", "label": "Logo Brown（見出し・罫線）", "default": "#4A3A34" },
+      { "type": "color", "id": "color_text", "label": "本文", "default": "#3D3430" },
+      { "type": "color", "id": "color_muted", "label": "サブテキスト", "default": "#8A7E76" },
+      { "type": "color", "id": "color_line", "label": "罫線", "default": "#D8D0C4" },
+      { "type": "color", "id": "color_accent", "label": "Accent（NEW・残りわずか）", "default": "#D8652C" }
+    ]
+  },
+  {
+    "name": "カラーチップ（商品のカラー名 → 色）",
+    "settings": [
+      { "type": "paragraph", "content": "商品一覧・商品詳細のカラーチップに使う色です。商品のバリエーション「Color」の値と同じ名前で登録してください。1行に「カラー名:カラーコード」。" },
+      { "type": "textarea", "id": "color_swatches", "label": "カラー名とカラーコード", "default": "Midnight:#2B3446\nSlate Blue:#7D8B9B\nWakaba:#8DAE6A\nBabaji:#B9A88A\nMuku:#E3DCCB\nKakishibu:#A85E35" },
+      { "type": "text", "id": "color_option_name", "label": "カラーのオプション名", "default": "Color", "info": "商品のオプション名（Color / カラー など）" },
+      { "type": "text", "id": "size_option_name", "label": "サイズのオプション名", "default": "Size" }
+    ]
+  },
+  {
+    "name": "書体",
+    "settings": [
+      { "type": "paragraph", "content": "和文：Shippori Mincho B1／見出し・カテゴリ名・商品名：Cormorant Garamond／英文：Jost／UI：Noto Sans JP。Google Fonts から読み込みます。" },
       { "type": "checkbox", "id": "load_google_fonts", "label": "Google Fonts を読み込む", "default": true }
     ]
   },
   {
-    "name": "レイアウト",
+    "name": "商品",
     "settings": [
-      { "type": "range", "id": "page_width", "label": "コンテンツ最大幅", "min": 1000, "max": 1800, "step": 20, "unit": "px", "default": 1280 },
-      { "type": "range", "id": "button_radius", "label": "ボタン角丸", "min": 0, "max": 30, "step": 1, "unit": "px", "default": 0 }
-    ]
-  },
-  {
-    "name": "商品カード",
-    "settings": [
-      { "type": "checkbox", "id": "card_hover_image", "label": "ホバーで2枚目の画像を表示", "default": true },
-      { "type": "checkbox", "id": "card_show_meta", "label": "カラー数 / タイプを表示", "default": true }
+      { "type": "range", "id": "low_stock_threshold", "label": "「残りわずか」を表示する在庫数", "min": 1, "max": 10, "step": 1, "default": 3, "info": "Ordify から同期された在庫数がこの数以下のとき表示します" },
+      { "type": "text", "id": "new_tag", "label": "NEW バッジを付けるタグ", "default": "new" },
+      { "type": "range", "id": "new_days", "label": "公開から何日間 NEW を表示するか", "min": 0, "max": 90, "step": 5, "default": 30, "info": "0 でタグのみ" },
+      { "type": "text", "id": "tax_label", "label": "価格の後ろの表記", "default": "（税込）" },
+      { "type": "url", "id": "size_guide_url", "label": "サイズガイドのリンク先", "info": "商品詳細の「サイズガイド」と導線カードで使用" }
     ]
   },
   {
     "name": "カート",
     "settings": [
-      { "type": "select", "id": "cart_type", "label": "カートの表示", "options": [ { "value": "drawer", "label": "ドロワー" }, { "value": "page", "label": "カートページへ移動" }, { "value": "notification", "label": "通知のみ" } ], "default": "drawer" }
+      { "type": "select", "id": "cart_type", "label": "カート追加後の動き", "options": [ { "value": "drawer", "label": "右からカートドロワーを開く" }, { "value": "page", "label": "カートページへ移動" } ], "default": "drawer" },
+      { "type": "text", "id": "cart_note", "label": "カート内の注記", "default": "送料・ギフトラッピングは購入手続きで選択できます" }
     ]
   },
   {
     "name": "SNS",
     "settings": [
-      { "type": "url", "id": "social_instagram", "label": "Instagram", "default": "https://www.instagram.com/permanentunion/" },
-      { "type": "url", "id": "social_facebook", "label": "Facebook" },
-      { "type": "url", "id": "social_youtube", "label": "YouTube" }
+      { "type": "text", "id": "instagram_handle", "label": "Instagram アカウント名", "default": "@permanentunion" },
+      { "type": "url", "id": "social_instagram", "label": "Instagram URL", "default": "https://www.instagram.com/permanentunion/" },
+      { "type": "url", "id": "social_facebook", "label": "Facebook URL", "default": "https://www.facebook.com/PermanentUnion/" },
+      { "type": "url", "id": "social_youtube", "label": "YouTube URL" }
     ]
   },
   {

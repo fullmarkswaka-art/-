@@ -1,0 +1,37 @@
+{%- liquid
+  comment
+    オープニング: 写真に白いベール → ロゴ fade in 0.8s → hold 1.2s → fade out 0.8s。
+    初回訪問時のみ（sessionStorage）。クリック・スクロール・キーでスキップ。視差効果を減らす設定では表示しない。
+  endcomment
+  assign s = section.settings
+-%}
+{%- if s.enabled -%}
+<div class="opening" data-opening data-fade-in="{{ s.fade_in }}" data-hold="{{ s.hold }}" data-fade-out="{{ s.fade_out }}" aria-hidden="true" style="--op-logo-w:{{ s.logo_width }}vw;--op-logo-w-sp:{{ s.logo_width_sp }}vw;--op-logo-max:{{ s.logo_max }}px">
+  <div class="opening__photo">
+    {%- if s.image != blank -%}
+      {{ s.image | image_url: width: 2400 | image_tag: loading: 'eager', fetchpriority: 'high', sizes: '100vw', widths: '800, 1200, 1800, 2400', alt: '', class: 'opening__img' }}
+    {%- else -%}
+      <img class="opening__img" src="{{ 'pu-fv.jpg' | asset_url }}" alt="" width="1800" height="1274" loading="eager" fetchpriority="high">
+    {%- endif -%}
+  </div>
+  <div class="opening__veil"></div>
+  <div class="opening__logo">{% render 'logo', color: 'brown', class: 'opening__logo-img', width: 1200 %}</div>
+</div>
+{%- endif -%}
+{% schema %}
+{
+  "name": "オープニング（ロゴ）",
+  "settings": [
+    { "type": "checkbox", "id": "enabled", "label": "オープニングを表示", "default": true },
+    { "type": "image_picker", "id": "image", "label": "写真", "info": "通常はファーストビューと同じ写真（マーシーさんの写真）。未設定の場合はテーマ同梱の仮写真" },
+    { "type": "range", "id": "logo_width", "label": "ロゴ幅（PC・画面幅に対する%）", "min": 20, "max": 50, "step": 1, "unit": "%", "default": 30 },
+    { "type": "range", "id": "logo_max", "label": "ロゴ最大幅（PC）", "min": 300, "max": 800, "step": 10, "unit": "px", "default": 440 },
+    { "type": "range", "id": "logo_width_sp", "label": "ロゴ幅（スマホ・画面幅に対する%）", "min": 40, "max": 80, "step": 1, "unit": "%", "default": 60 },
+    { "type": "range", "id": "fade_in", "label": "フェードイン", "min": 0.2, "max": 2, "step": 0.1, "unit": "s", "default": 0.8 },
+    { "type": "range", "id": "hold", "label": "表示を保つ時間", "min": 0.2, "max": 3, "step": 0.1, "unit": "s", "default": 1.2 },
+    { "type": "range", "id": "fade_out", "label": "フェードアウト", "min": 0.2, "max": 2, "step": 0.1, "unit": "s", "default": 0.8 },
+    { "type": "paragraph", "content": "初回訪問時のみ再生。同じセッション内の2回目以降は表示しません。クリック・スクロール・キー操作で即スキップ。" }
+  ],
+  "presets": [{ "name": "オープニング（ロゴ）" }]
+}
+{% endschema %}

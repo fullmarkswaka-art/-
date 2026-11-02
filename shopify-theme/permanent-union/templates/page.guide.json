@@ -1,0 +1,17 @@
+{
+  "sections": {
+    "main": { "type": "guide", "blocks": {
+      "g1": { "type": "section", "settings": { "title": "ご注文について" } },
+      "g2": { "type": "section", "settings": { "title": "お支払い方法" } },
+      "g3": { "type": "section", "settings": { "title": "配送・送料" } },
+      "g4": { "type": "section", "settings": { "title": "返品・交換" } },
+      "g5": { "type": "section", "settings": { "title": "会員登録・ポイント" } },
+      "q1": { "type": "faq", "settings": { "q": "サイズに迷ったときはどうすればいいですか？" } },
+      "q2": { "type": "faq", "settings": { "q": "在庫切れの商品は再入荷しますか？" } },
+      "q3": { "type": "faq", "settings": { "q": "店舗の在庫はオンラインで確認できますか？" } },
+      "q4": { "type": "faq", "settings": { "q": "修理の受付はしていますか？" } },
+      "q5": { "type": "faq", "settings": { "q": "海外への発送はできますか？" } }
+    }, "block_order": ["g1", "g2", "g3", "g4", "g5", "q1", "q2", "q3", "q4", "q5"], "settings": {} }
+  },
+  "order": ["main"]
+}

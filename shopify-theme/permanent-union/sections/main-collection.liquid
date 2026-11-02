@@ -1,84 +1,98 @@
-{%- assign s = section.settings -%}
-<section class="container container--wide">
-  <div class="page-title">
-    <nav class="breadcrumbs reveal"><a href="{{ routes.root_url }}">Home</a><span>/</span><a href="{{ routes.collections_url }}">Products</a><span>/</span><span>{{ collection.title }}</span></nav>
-    <h1 class="display mt-3 reveal" data-delay="1">{{ collection.title }}</h1>
-    {%- if collection.description != blank and s.show_description -%}<div class="page-title__desc body-copy reveal" data-delay="2">{{ collection.description }}</div>{%- endif -%}
+{%- liquid
+  assign s = section.settings
+  assign tabs = linklists[s.tabs_menu]
+  assign title = collection.title
+  if collection.handle == 'all' or collection == blank
+    assign title = s.all_title
+  endif
+  assign sub = collection.metafields.custom.subtitle | default: s.all_sub
+-%}
+<section class="lp container" data-header="dark">
+  <div class="crumb"><a href="{{ routes.root_url }}">HOME</a> ／ <a href="{{ routes.all_products_collection_url }}">PRODUCTS</a>{% unless collection.handle == 'all' %} ／ {{ collection.title | upcase }}{% endunless %}</div>
+  <div class="ptitle"><h1 class="ptitle__h">{{ title }}</h1><div class="ptitle__s">{{ sub }}</div></div>
+
+  <div class="ctrl">
+    <nav class="tabs" aria-label="{{ 'collections.general.categories' | t }}">
+      {%- if tabs.links.size > 0 -%}
+        {%- for link in tabs.links -%}
+          {%- assign on = false -%}
+          {%- if link.url == collection.url or link.url contains collection.handle and collection.handle != blank -%}{%- assign on = true -%}{%- endif -%}
+          <a class="tab{% if on %} is-on{% endif %}" href="{{ link.url }}">{{ link.title | upcase }}</a>
+        {%- endfor -%}
+      {%- else -%}
+        <a class="tab{% if collection.handle == 'all' %} is-on{% endif %}" href="{{ routes.all_products_collection_url }}">ALL</a>
+        {%- for c in collections limit: 8 -%}{%- unless c.handle == 'all' or c.handle == 'frontpage' -%}<a class="tab{% if c.handle == collection.handle %} is-on{% endif %}" href="{{ c.url }}">{{ c.title | upcase }}</a>{%- endunless -%}{%- endfor -%}
+      {%- endif -%}
+    </nav>
+    <div class="ctrl__right">
+      {%- if s.show_filters and collection.filters.size > 0 -%}
+        <button class="sel" type="button" data-facets-toggle aria-expanded="false">{{ 'collections.general.filter' | t }}　＋</button>
+      {%- endif -%}
+      <label class="sel sel--sort">
+        <span>{{ 'collections.general.sort' | t }}：</span>
+        <select data-sort-by aria-label="{{ 'collections.general.sort' | t }}">
+          {%- assign sort_by = collection.sort_by | default: collection.default_sort_by -%}
+          {%- for option in collection.sort_options -%}
+            <option value="{{ option.value }}"{% if option.value == sort_by %} selected{% endif %}>{{ option.name }}</option>
+          {%- endfor -%}
+        </select>
+        <span class="sel__caret">▾</span>
+      </label>
+    </div>
   </div>
+  <div class="ctrl__line"></div>
+
+  {%- if s.show_filters and collection.filters.size > 0 -%}
+    <form class="facets" data-facet-form>
+      {%- for filter in collection.filters -%}
+        <fieldset class="facet">
+          <legend class="lbl2">{{ filter.label }}</legend>
+          {%- case filter.type -%}
+            {%- when 'list' -%}
+              <div class="facet__values">
+                {%- for value in filter.values -%}
+                  <label class="facet__v{% if value.count == 0 and value.active == false %} is-dis{% endif %}">
+                    <input type="checkbox" name="{{ value.param_name }}" value="{{ value.value }}" {% if value.active %}checked{% endif %} {% if value.count == 0 and value.active == false %}disabled{% endif %}>
+                    <span>{{ value.label }}</span><small>{{ value.count }}</small>
+                  </label>
+                {%- endfor -%}
+              </div>
+            {%- when 'price_range' -%}
+              <div class="facet__price">
+                <input type="number" name="{{ filter.min_value.param_name }}" placeholder="¥ 0" min="0" value="{% if filter.min_value.value %}{{ filter.min_value.value | money_without_currency | replace: ',', '' }}{% endif %}">
+                <span>–</span>
+                <input type="number" name="{{ filter.max_value.param_name }}" placeholder="¥ {{ filter.range_max | money_without_currency }}" min="0" value="{% if filter.max_value.value %}{{ filter.max_value.value | money_without_currency | replace: ',', '' }}{% endif %}">
+              </div>
+          {%- endcase -%}
+        </fieldset>
+      {%- endfor -%}
+      <input type="hidden" name="sort_by" value="{{ collection.sort_by | default: collection.default_sort_by }}">
+      <div class="facets__actions"><button class="btn-o btn-o--s" type="submit">{{ 'collections.general.apply' | t }}</button><a class="facets__clear" href="{{ collection.url }}">{{ 'collections.general.clear' | t }}</a></div>
+    </form>
+  {%- endif -%}
 
   {%- paginate collection.products by s.per_page -%}
-  <div class="collection-toolbar">
-    <div>
-      {%- if s.show_filters and collection.filters.size > 0 -%}<button type="button" class="facets__toggle" data-facets-toggle>{{ 'collections.filter' | t }} +</button>{%- endif -%}
-      <span class="collection-toolbar__count">{{ 'collections.product_count' | t: count: collection.products_count }}</span>
-    </div>
-    <label>
-      <span class="visually-hidden">{{ 'collections.sort' | t }}</span>
-      <select data-sort-by>
-        {%- for option in collection.sort_options -%}
-          <option value="{{ option.value }}" {% if option.value == collection.sort_by %}selected{% endif %}>{{ option.name }}</option>
+    <div class="count">{{ 'collections.general.items_count' | t: count: collection.products_count }}</div>
+    {%- if collection.products.size > 0 -%}
+      <div class="cards cards--4">
+        {%- for product in collection.products -%}
+          {% render 'product-card', product: product, index: forloop.index0 %}
         {%- endfor -%}
-      </select>
-    </label>
-  </div>
-
-  <div class="collection-layout{% unless s.show_filters and collection.filters.size > 0 %} collection-layout--full{% endunless %}">
-    {%- if s.show_filters and collection.filters.size > 0 -%}
-      <aside class="facets">
-        <form data-facet-form method="get">
-          <input type="hidden" name="sort_by" value="{{ collection.sort_by }}">
-          {%- assign active = 0 -%}
-          {%- for filter in collection.filters -%}{%- assign active = active | plus: filter.active_values.size -%}{%- endfor -%}
-          {%- if active > 0 -%}
-            <div class="facets__active">
-              {%- for filter in collection.filters -%}
-                {%- for v in filter.active_values -%}<a href="{{ v.url_to_remove }}">{{ v.label }} ×</a>{%- endfor -%}
-              {%- endfor -%}
-              <a href="{{ collection.url }}">{{ 'collections.clear_all' | t }}</a>
-            </div>
-          {%- endif -%}
-          {%- for filter in collection.filters -%}
-            <details class="facet" {% if filter.active_values.size > 0 or forloop.index <= 2 %}open{% endif %}>
-              <summary>{{ filter.label }}</summary>
-              {%- case filter.type -%}
-                {%- when 'list' -%}
-                  <div class="facet__list">
-                    {%- for v in filter.values -%}
-                      <label><input type="checkbox" name="{{ v.param_name }}" value="{{ v.value }}" {% if v.active %}checked{% endif %} {% if v.count == 0 and v.active == false %}disabled{% endif %}> {{ v.label }} <span class="muted">({{ v.count }})</span></label>
-                    {%- endfor -%}
-                  </div>
-                {%- when 'price_range' -%}
-                  <div class="facet__price">
-                    <input type="number" name="{{ filter.min_value.param_name }}" placeholder="Min" min="0" value="{{ filter.min_value.value | money_without_currency | replace: ',', '' }}">
-                    <input type="number" name="{{ filter.max_value.param_name }}" placeholder="Max" min="0" value="{{ filter.max_value.value | money_without_currency | replace: ',', '' }}">
-                  </div>
-              {%- endcase -%}
-            </details>
-          {%- endfor -%}
-        </form>
-      </aside>
+      </div>
+    {%- else -%}
+      <div class="cart-empty cart-empty--page"><p>{{ 'collections.general.no_matches' | t }}</p></div>
     {%- endif -%}
-
-    <div>
-      {%- if collection.products.size > 0 -%}
-        <div class="product-grid" style="--cols: {{ s.columns }}">
-          {%- for product in collection.products -%}{% render 'product-card', product: product, index: forloop.index0 %}{%- endfor -%}
-        </div>
-      {%- else -%}
-        <div class="empty-state"><p class="lead">{{ 'collections.empty' | t }}</p></div>
-      {%- endif -%}
-      {% render 'pagination', paginate: paginate %}
-    </div>
-  </div>
+    {% render 'pagination', paginate: paginate %}
   {%- endpaginate -%}
 </section>
 {% schema %}
 {
-  "name": "コレクションページ",
+  "name": "商品一覧",
   "settings": [
-    { "type": "checkbox", "id": "show_description", "label": "説明文を表示", "default": true },
-    { "type": "checkbox", "id": "show_filters", "label": "フィルターを表示", "default": true },
-    { "type": "range", "id": "columns", "label": "列数（PC）", "min": 2, "max": 4, "step": 1, "default": 3 },
+    { "type": "text", "id": "all_title", "label": "全商品の見出し", "default": "All Products" },
+    { "type": "text", "id": "all_sub", "label": "和文小見出し（初期値）", "default": "商品一覧", "info": "コレクションごとに変えるにはメタフィールド custom.subtitle を使用" },
+    { "type": "link_list", "id": "tabs_menu", "label": "カテゴリタブのメニュー", "default": "main-menu", "info": "ALL / OUTERWEAR / TOPS … の並び" },
+    { "type": "checkbox", "id": "show_filters", "label": "絞り込み（FILTER）を表示", "default": true, "info": "Shopify の検索と絞り込み（Search & Discovery アプリ）で設定したフィルター" },
     { "type": "range", "id": "per_page", "label": "1ページの表示数", "min": 8, "max": 48, "step": 4, "default": 24 }
   ]
 }

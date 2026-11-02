@@ -1,8 +1,7 @@
-<section class="container not-found">
-  <p class="eyebrow">404</p>
-  <h1 class="display mt-2">{{ 'general.404.title' | t }}</h1>
-  <p class="lead mt-3">{{ 'general.404.text' | t }}</p>
-  <a class="button button--outline mt-4" href="{{ routes.root_url }}">{{ 'general.404.back' | t }}</a>
+<section class="lp container lp--404" data-header="dark">
+  <div class="ptitle ptitle--center"><h1 class="ptitle__h">404</h1><div class="ptitle__s">{{ 'general.404.subtitle' | t }}</div></div>
+  <p class="p404__t">{{ 'general.404.text' | t }}</p>
+  <div class="p404__links"><a class="more" href="{{ routes.root_url }}">HOME　→</a><a class="more" href="{{ routes.all_products_collection_url }}">PRODUCTS　→</a></div>
 </section>
 {% schema %}
 { "name": "404", "settings": [] }

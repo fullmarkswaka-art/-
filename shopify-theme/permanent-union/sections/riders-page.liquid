@@ -1,0 +1,53 @@
+{%- assign s = section.settings -%}
+<section class="lp container" data-header="dark">
+  <div class="crumb"><a href="{{ routes.root_url }}">HOME</a> ／ RIDERS</div>
+  <div class="ptitle"><h1 class="ptitle__h">{{ s.heading | default: page.title }}</h1><div class="ptitle__s">{{ s.sub }}</div></div>
+  <div class="rgrid">
+    {%- for block in section.blocks -%}
+      {%- assign b = block.settings -%}
+      <article class="rcard" {{ block.shopify_attributes }}>
+        <div class="rcard__ph{% if b.image == blank %} rcard__ph--empty{% endif %}" style="--pos:{{ b.focal_x }}% {{ b.focal_y }}%">
+          {%- if b.image != blank -%}
+            {{ b.image | image_url: width: 900 | image_tag: loading: 'lazy', sizes: '(max-width: 768px) 50vw, 25vw', widths: '300, 600, 900', alt: b.name, class: 'cover-img' }}
+          {%- else -%}
+            <span>{{ 'general.riders.photo_pending' | t }}</span>
+          {%- endif -%}
+        </div>
+        <div class="rcard__row"><span class="rcard__jp">{{ b.name }}</span><span class="rcard__role">{{ b.role }}</span></div>
+        <div class="rcard__en">{{ b.name_en }}</div>
+        {%- if b.profile != blank -%}<p class="rcard__p">{{ b.profile }}</p>{%- endif -%}
+        <div class="rcard__links">
+          {%- if b.web != blank -%}<a href="{{ b.web }}" target="_blank" rel="noopener">WEB</a>{%- endif -%}
+          {%- if b.fb != blank -%}<a href="{{ b.fb }}" target="_blank" rel="noopener">FB</a>{%- endif -%}
+          {%- if b.ig != blank -%}<a href="{{ b.ig }}" target="_blank" rel="noopener">IG</a>{%- endif -%}
+          {%- if b.yt != blank -%}<a href="{{ b.yt }}" target="_blank" rel="noopener">YT</a>{%- endif -%}
+        </div>
+      </article>
+    {%- endfor -%}
+  </div>
+</section>
+{% schema %}
+{
+  "name": "Riders（一覧）",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "見出し", "default": "Riders" },
+    { "type": "text", "id": "sub", "label": "和文小見出し", "default": "フィールドの声から、生まれる。" }
+  ],
+  "blocks": [
+    { "type": "rider", "name": "ライダー", "settings": [
+      { "type": "image_picker", "id": "image", "label": "写真（横長 3:2 推奨）" },
+      { "type": "range", "id": "focal_x", "label": "トリミング位置 横", "min": 0, "max": 100, "step": 5, "unit": "%", "default": 50 },
+      { "type": "range", "id": "focal_y", "label": "トリミング位置 縦", "min": 0, "max": 100, "step": 5, "unit": "%", "default": 30 },
+      { "type": "text", "id": "name", "label": "名前", "default": "山内 一志" },
+      { "type": "text", "id": "name_en", "label": "名前（英字）", "default": "Kazushi Yamauchi" },
+      { "type": "text", "id": "role", "label": "種目", "default": "SNOWBOARDER" },
+      { "type": "textarea", "id": "profile", "label": "プロフィール（100〜200字）" },
+      { "type": "url", "id": "web", "label": "WEB" },
+      { "type": "url", "id": "fb", "label": "Facebook" },
+      { "type": "url", "id": "ig", "label": "Instagram" },
+      { "type": "url", "id": "yt", "label": "YouTube" }
+    ] }
+  ],
+  "presets": [{ "name": "Riders（一覧）" }]
+}
+{% endschema %}

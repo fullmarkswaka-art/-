@@ -1,20 +1,54 @@
-<section class="container container--wide section">
-  <div class="page-title" style="padding-top:0"><p class="eyebrow reveal">Journal</p><h1 class="display mt-2 reveal" data-delay="1">{{ blog.title }}</h1></div>
-  {%- paginate blog.articles by 12 -%}
-    <div class="journal">
-      {%- for article in blog.articles -%}
-        <a class="journal-card reveal" data-delay="{{ forloop.index0 | modulo: 3 }}" href="{{ article.url }}">
-          <div class="media journal-card__media">{%- if article.image -%}{{ article.image | image_url: width: 1000 | image_tag: loading: 'lazy', alt: article.title }}{%- else -%}{{ 'lifestyle-1' | placeholder_svg_tag: 'cover-media' }}{%- endif -%}</div>
-          <div class="journal-card__meta"><span>{{ article.published_at | date: '%Y.%m.%d' }}</span>{%- if article.tags.size > 0 -%}<span>{{ article.tags.first }}</span>{%- endif -%}</div>
-          <h2 class="journal-card__title">{{ article.title }}</h2>
-        </a>
-      {%- else -%}
-        <p class="lead">{{ 'blogs.empty' | t }}</p>
+{%- liquid
+  assign s = section.settings
+  assign tags = blog.all_tags
+-%}
+<section class="lp container" data-header="dark">
+  <div class="crumb"><a href="{{ routes.root_url }}">HOME</a> ／ {{ blog.title | upcase }}</div>
+  <div class="ptitle"><h1 class="ptitle__h">{{ blog.title }}</h1><div class="ptitle__s">{{ s.sub }}</div></div>
+  {%- if tags.size > 0 -%}
+    <nav class="tabs" aria-label="{{ 'blogs.general.categories' | t }}">
+      <a class="tab{% unless current_tags %} is-on{% endunless %}" href="{{ blog.url }}">ALL</a>
+      {%- for tag in tags -%}
+        <a class="tab{% if current_tags contains tag %} is-on{% endif %}" href="{{ blog.url }}/tagged/{{ tag | handle }}">{{ tag | upcase }}</a>
       {%- endfor -%}
+    </nav>
+  {%- endif -%}
+
+  {%- paginate blog.articles by s.per_page -%}
+    {%- assign feat = blank -%}
+    {%- if s.feature_first and paginate.current_page == 1 and blog.articles.size > 0 -%}{%- assign feat = blog.articles.first -%}{%- endif -%}
+    <div class="jlist{% if feat == blank %} jlist--full{% endif %}">
+      {%- if feat != blank -%}
+        <a class="jfeat" href="{{ feat.url }}">
+          <div class="jfeat__media">{% if feat.image %}{{ feat.image | image_url: width: 1600 | image_tag: loading: 'eager', sizes: '(max-width: 900px) 100vw, 50vw', widths: '600, 900, 1200, 1600', alt: feat.title, class: 'cover-img' }}{% endif %}</div>
+          <div class="jcard__meta">{{ feat.published_at | date: '%Y.%m.%d' }}　{{ feat.tags | first | upcase }}</div>
+          <div class="jfeat__t">{{ feat.title }}</div>
+        </a>
+      {%- endif -%}
+      <div class="jlist__grid{% if feat == blank %} jlist__grid--full{% endif %}">
+        {%- for article in blog.articles -%}
+          {%- if feat != blank and forloop.first -%}{%- continue -%}{%- endif -%}
+          <a class="jcard" href="{{ article.url }}">
+            <div class="jcard__media">{% if article.image %}{{ article.image | image_url: width: 900 | image_tag: loading: 'lazy', sizes: '(max-width: 900px) 100vw, 25vw', widths: '400, 600, 900', alt: article.title, class: 'cover-img' }}{% endif %}</div>
+            <div class="jcard__meta">{{ article.published_at | date: '%Y.%m.%d' }}　{{ article.tags | first | upcase }}</div>
+            <div class="jcard__t">{{ article.title }}</div>
+          </a>
+        {%- else -%}
+          <p class="pd2__pending">{{ 'blogs.general.empty' | t }}</p>
+        {%- endfor -%}
+      </div>
     </div>
     {% render 'pagination', paginate: paginate %}
   {%- endpaginate -%}
 </section>
 {% schema %}
-{ "name": "ブログ一覧", "settings": [] }
+{
+  "name": "Journal（一覧）",
+  "settings": [
+    { "type": "text", "id": "sub", "label": "和文小見出し", "default": "お知らせ・読みもの" },
+    { "type": "checkbox", "id": "feature_first", "label": "最新記事を大きく表示", "default": true },
+    { "type": "range", "id": "per_page", "label": "1ページの記事数", "min": 5, "max": 25, "step": 1, "default": 9 },
+    { "type": "paragraph", "content": "カテゴリ（NEWS / RIDERS / COLUMN / EVENT）は記事のタグで分類します。" }
+  ]
+}
 {% endschema %}

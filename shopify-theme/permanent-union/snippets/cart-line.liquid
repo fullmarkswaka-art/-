@@ -1,0 +1,21 @@
+{%- comment -%} カート1行（ドロワー・カートページ共通）: render 'cart-line', item: item, line: forloop.index {%- endcomment -%}
+<div class="cart-line" data-line="{{ line }}">
+  <a class="cart-line__media" href="{{ item.url }}">
+    {%- if item.image -%}{{ item.image | image_url: width: 300 | image_tag: loading: 'lazy', alt: item.title, class: 'cart-line__img' }}{%- endif -%}
+  </a>
+  <div class="cart-line__body">
+    <a class="cart-line__title" href="{{ item.url }}">{{ item.product.title }}</a>
+    {%- unless item.product.has_only_default_variant -%}
+      <p class="cart-line__meta">{{ item.variant.title | replace: ' / ', ' ／ ' }}</p>
+    {%- endunless -%}
+    <div class="cart-line__row">
+      <div class="qty">
+        <button type="button" data-qty-change="-1" aria-label="{{ 'sections.cart.decrease' | t }}">−</button>
+        <input type="number" min="0" value="{{ item.quantity }}" data-line-qty="{{ line }}" aria-label="{{ 'sections.cart.quantity' | t }}">
+        <button type="button" data-qty-change="1" aria-label="{{ 'sections.cart.increase' | t }}">＋</button>
+      </div>
+      <span class="cart-line__price">{{ item.final_line_price | money }}</span>
+    </div>
+    <a href="{{ item.url_to_remove }}" class="cart-line__remove" data-line-remove="{{ line }}">{{ 'sections.cart.remove' | t }}</a>
+  </div>
+</div>

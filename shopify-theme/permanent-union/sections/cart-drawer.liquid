@@ -1,5 +1,38 @@
-{%- comment -%} Section wrapper so JS can re-fetch the drawer via ?section_id=cart-drawer {%- endcomment -%}
-{% render 'cart-drawer' %}
+{%- comment -%} カートドロワー（右から表示）。JS は ?section_id=cart-drawer で再取得する {%- endcomment -%}
+{%- if settings.cart_type == 'drawer' -%}
+<div id="CartDrawer" class="drawer drawer--right cart-drawer" aria-hidden="true" role="dialog" aria-label="{{ 'sections.cart.title' | t }}">
+  <div class="drawer__backdrop" data-drawer-close></div>
+  <div class="drawer__panel">
+    <div class="drawer__head">
+      <span class="drawer__title">{{ 'sections.cart.title' | t }}（{{ cart.item_count }}）</span>
+      <button class="drawer__close" type="button" data-drawer-close aria-label="{{ 'accessibility.close' | t }}">× CLOSE</button>
+    </div>
+    <div class="drawer__body">
+      {%- if cart.item_count == 0 -%}
+        <div class="cart-empty">
+          <p>{{ 'sections.cart.empty' | t }}</p>
+          <a class="more" href="{{ routes.all_products_collection_url }}">{{ 'general.continue_shopping' | t }}　→</a>
+        </div>
+      {%- else -%}
+        {%- for item in cart.items -%}
+          {% render 'cart-line', item: item, line: forloop.index %}
+        {%- endfor -%}
+      {%- endif -%}
+    </div>
+    {%- if cart.item_count > 0 -%}
+    <div class="drawer__foot">
+      <div class="cart-total"><span>{{ 'sections.cart.subtotal' | t }}</span><b>{{ cart.total_price | money }}</b></div>
+      {%- if settings.cart_note != blank -%}<p class="cart-note">{{ settings.cart_note }}</p>{%- endif -%}
+      <form action="{{ routes.cart_url }}" method="post">
+        <button type="submit" name="checkout" class="btn-d">{{ 'sections.cart.checkout' | t }}</button>
+      </form>
+      <a class="btn-o" href="{{ routes.cart_url }}">{{ 'sections.cart.view_cart' | t }}</a>
+      <button class="cart-continue" type="button" data-drawer-close>{{ 'general.continue_shopping' | t }}</button>
+    </div>
+    {%- endif -%}
+  </div>
+</div>
+{%- endif -%}
 {% schema %}
-{ "name": "Cart drawer", "settings": [] }
+{ "name": "カートドロワー", "settings": [ { "type": "paragraph", "content": "カート追加後に右から開くドロワーです。文言は 言語の編集、動きは テーマ設定 > カート で変更できます。" } ] }
 {% endschema %}
