@@ -115,7 +115,7 @@ def create_campaign(gclient, apply: bool = False) -> dict:
     r.ad_group = ag_rn; r.status = st; r.resource_name = agcs.ad_group_criterion_path(cid, ag_id, -1)
     r.listing_group.type_ = lg.SUBDIVISION; ops.append(op); root_rn = r.resource_name
     op = client.get_type("AdGroupCriterionOperation"); u = op.create
-    u.ad_group = ag_rn; u.status = st
+    u.ad_group = ag_rn; u.status = st; u.cpc_bid_micros = CPC_CEILING * 1_000_000  # 自動入札でも項目は必須
     u.listing_group.type_ = lg.UNIT; u.listing_group.parent_ad_group_criterion = root_rn
     u.listing_group.case_value.product_custom_attribute.index = idx.INDEX2
     u.listing_group.case_value.product_custom_attribute.value = LABEL; ops.append(op)
