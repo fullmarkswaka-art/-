@@ -1,10 +1,10 @@
 {
   "_comment": "月間運用目標（FULLMARKS分、税抜）。weekly_report がペース監視に使用。年間計画はExcel「広告予算計画_2026-09改訂.xlsx」参照",
-  "monthly_budget_ex_tax": 801761,
-  "normal_budget_ex_tax": 801761,
-  "normal_budget_note": "10月の通常運用（FULLMARKS のみ、税抜）。予算計画の10月 801,761円（9/28 に約80万へ組み直し、9月の使い残しを反映）。イベント枠は使った分だけを別に計上する",
+  "monthly_budget_ex_tax": 1141672,
+  "normal_budget_ex_tax": 1141672,
+  "normal_budget_note": "11月の通常運用（FULLMARKS のみ、税抜）。予算計画の11月 1,141,672円（10月の使い残し 4,932円を上乗せ後、2026-11-01 確定）。イベント枠は使った分だけを別に計上する",
   "event_reserve": 0,
-  "event_reserve_note": "10月はEC企画なし。11月のブラックフライデー予備費は10万（予算計画のイベント予備費）",
+  "event_reserve_note": "11月はダブルポイント（〜11/3）とブラックフライデー予備費10万（イベント枠・別計上）",
   "min_roas": 10,
   "event_campaign_ids": [
     "52613872650335"

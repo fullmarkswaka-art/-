@@ -90,6 +90,7 @@ for _st in S.values():
 BRANDS = [("HOUDINI", ["フーディ", "houdini"]), ("NORRØNA", ["ノローナ", "norrona", "norrøna"]),
           ("POC", ["ポック", "poc"]), ("ACLIMA", ["アクリマ", "aclima"]),
           ("HESTRA", ["ヘストラ", "hestra"]), ("SAIL RACING", ["セイル", "sail"]),
+          ("Permanent Union", ["pu_shell", "permanent"]),
           ("PLUS ONE WORKS", ["plus one", "pu store"]), ("KANG", ["kang"]), ("POW", ["pow"])]
 
 
@@ -117,7 +118,7 @@ def frame_of(name: str) -> str:
         return "ショッピング"
     if "TECHINS" in n:
         return "商品の特集（カルーセル）"
-    if "CVS_HESTRA" in n:
+    if "CVS_HESTRA" in n or "CVS_PU_SHELL" in n:
         return "新規向け（静止画）"
     if "CVS" in n or "カタログ" in n or "DPA" in n:
         return "カタログ"
@@ -716,7 +717,7 @@ def cap_signal(mtd) -> tuple | None:
         return ("×", "Meta の利用上限", res, "上限に達していて、Instagram・Facebook の広告が止まっている。")
     if proj > cap and rate:
         hit = mtd["until"] + timedelta(days=int((cap - spent) / rate) + 1)
-        return ("△", "Meta の利用上限", res, f"今のペースだと {hit.month}/{hit.day} ごろに上限に届き、広告が止まる見込み。月末前に相談。")
+        return ("△", "Meta の利用上限", res, f"今のペースだと {hit.month}/{hit.day} ごろに上限に届き、広告が止まる見込み。届く前に上限を見直す。")
     return ("○", "Meta の利用上限", res, f"今のペースなら月末まで止まらない（月末に約 {man(proj)}）。")
 
 
@@ -727,6 +728,8 @@ def sec_event(meta_client, google_client, today):
     for ev in load_events():
         if date.fromisoformat(ev["start"]) > today - timedelta(days=1):
             continue
+        if date.fromisoformat(ev["end"]) < today - timedelta(days=7):
+            continue  # 対象週より前に終わった企画は載せない
         sm = event_summary(meta_client, google_client, ev, today - timedelta(days=1))
         data = [["媒体", "キャンペーン／アセット", "広告費", "表示", "クリック", "購入", "売上", "ROAS"]]
         for r in sm["rows"]:
@@ -743,6 +746,9 @@ def sec_event(meta_client, google_client, today):
                 f"（{sm['meta_spend'] / sm['reserve']:.0%}）。" if sm["reserve"] else "") + sm["note"]
         out += [KeepTogether([Paragraph(title, S["h2"]), tb]), Paragraph(note, S["note"])]
     return out
+
+
+AB_LABEL = {"A_カルーセル3枚": "A：3枚を横に並べた広告", "B_1枚ずつ3本": "B：2枚セット＋1枚の広告"}
 
 
 def sec_adset_compare(meta_client, since, until):
@@ -762,7 +768,10 @@ def sec_adset_compare(meta_client, since, until):
         if len(lst) < 2 or cid in EVENT_IDS:
             continue
         for x in sorted(lst, key=lambda x: -x["spend"]):
-            who = "全員向け（Meta が自動で探す）" if "全員" in x["adset"] else "サイト訪問者など（絞った配信）"
+            if "_AB_" in x["adset"]:  # 画像の見せ方の比べ合い（A/B テスト）
+                who = AB_LABEL.get(x["adset"].split("_AB_")[-1], x["adset"].split("_AB_")[-1])
+            else:
+                who = "全員向け（Meta が自動で探す）" if "全員" in x["adset"] else "サイト訪問者など（絞った配信）"
             label = f"{plain_name(x['camp'], short=True)}<br/><font size='6.5' color='{GREY.hexval()}'>配信先: {who}</font>"
             data.append([mark_cell(judge(x)), Paragraph(label, S["cell"]), yen(x["spend"]), f"{x['freq']:.1f}回",
                          f"{x['cv']:.0f}件", yen(x["rev"]) if x["rev"] else "—", f"{roas(x):.1f}円"])
