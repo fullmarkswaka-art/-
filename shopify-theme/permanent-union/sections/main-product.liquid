@@ -37,7 +37,8 @@
             {%- case media.media_type -%}
               {%- when 'image' -%}
                 {%- if forloop.first -%}{%- assign ld = 'eager' -%}{%- else -%}{%- assign ld = 'lazy' -%}{%- endif -%}
-                {{ media | image_url: width: 1800 | image_tag: loading: ld, sizes: '(max-width: 900px) 100vw, 45vw', widths: '600, 900, 1200, 1800', alt: media.alt | default: product.title, class: 'pd__img' }}
+                {%- assign m_alt = media.alt | default: product.title -%}
+                {{ media | image_url: width: 1800 | image_tag: loading: ld, sizes: '(max-width: 900px) 100vw, 45vw', widths: '600, 900, 1200, 1800', alt: m_alt, class: 'pd__img' }}
               {%- when 'video' -%}
                 {{ media | video_tag: controls: true, muted: true, playsinline: true, class: 'pd__img' }}
               {%- when 'external_video' -%}

@@ -31,7 +31,7 @@
   style="--pos:{{ s.focal_x }}% {{ s.focal_y }}%;--pos-sp:{{ s.focal_x_sp }}% {{ s.focal_y_sp }}%;--dim:{{ s.dim | divided_by: 100.0 }};--chapter:{{ chapter_hex }}">
   <div class="story__media{% if s.parallax %} story__media--parallax{% endif %}" data-parallax>
     {%- if s.image != blank -%}
-      {{ s.image | image_url: width: 2800 | image_tag: loading: 'lazy', sizes: '100vw', widths: '800, 1200, 1800, 2400, 2800', alt: s.image.alt | default: '', class: 'story__img' }}
+      {{ s.image | image_url: width: 2800 | image_tag: loading: 'lazy', sizes: '100vw', widths: '800, 1200, 1800, 2400, 2800', alt: '', class: 'story__img' }}
     {%- else -%}
       <img class="story__img" src="{{ fallback | asset_url }}" alt="" loading="lazy" width="2000" height="1333">
     {%- endif -%}

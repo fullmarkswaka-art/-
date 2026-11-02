@@ -7,7 +7,8 @@
 <section class="fv" data-fv data-header="{{ s.header_mode }}" style="--fv-opacity:{{ s.opacity | divided_by: 100.0 }};--fv-pos:{{ s.focal_x }}% {{ s.focal_y }}%;--fv-pos-sp:{{ s.focal_x_sp }}% {{ s.focal_y_sp }}%">
   <div class="fv__photo" data-fv-photo>
     {%- if s.image != blank -%}
-      {{ s.image | image_url: width: 2800 | image_tag: loading: 'eager', fetchpriority: 'high', sizes: '100vw', widths: '800, 1200, 1800, 2400, 2800', alt: s.image.alt | default: shop.name, class: 'fv__img' }}
+      {%- assign fv_alt = s.image.alt | default: shop.name -%}
+      {{ s.image | image_url: width: 2800 | image_tag: loading: 'eager', fetchpriority: 'high', sizes: '100vw', widths: '800, 1200, 1800, 2400, 2800', alt: fv_alt, class: 'fv__img' }}
     {%- else -%}
       <img class="fv__img" src="{{ 'pu-fv.jpg' | asset_url }}" alt="{{ shop.name }}" width="1800" height="1274" loading="eager" fetchpriority="high">
     {%- endif -%}

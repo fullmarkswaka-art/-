@@ -24,7 +24,7 @@
         {%- for block in section.blocks -%}
           {%- if block.type == 'region' -%}{%- assign region = block.id -%}{%- continue -%}{%- endif -%}
           {%- assign b = block.settings -%}
-          {%- if b.pref != blank -%}
+          {%- if b.pref != blank and b.pref != "none" -%}
             <button type="button" class="pin" data-pin="{{ b.pref }}" data-shop="{{ block.id }}" data-region="{{ region }}" aria-label="{{ b.name }}"></button>
           {%- endif -%}
         {%- endfor -%}
@@ -85,7 +85,7 @@
     { "type": "shop", "name": "店舗", "settings": [
       { "type": "text", "id": "name", "label": "店舗名", "default": "店舗名" },
       { "type": "select", "id": "pref", "label": "都道府県（地図のピン）", "default": "20", "options": [
-        { "value": "", "label": "ピンなし" }, { "value": "1", "label": "北海道" }, { "value": "2", "label": "青森" }, { "value": "3", "label": "岩手" }, { "value": "4", "label": "宮城" }, { "value": "5", "label": "秋田" }, { "value": "6", "label": "山形" }, { "value": "7", "label": "福島" },
+        { "value": "none", "label": "ピンなし" }, { "value": "1", "label": "北海道" }, { "value": "2", "label": "青森" }, { "value": "3", "label": "岩手" }, { "value": "4", "label": "宮城" }, { "value": "5", "label": "秋田" }, { "value": "6", "label": "山形" }, { "value": "7", "label": "福島" },
         { "value": "8", "label": "茨城" }, { "value": "9", "label": "栃木" }, { "value": "10", "label": "群馬" }, { "value": "11", "label": "埼玉" }, { "value": "12", "label": "千葉" }, { "value": "13", "label": "東京" }, { "value": "14", "label": "神奈川" },
         { "value": "15", "label": "新潟" }, { "value": "16", "label": "富山" }, { "value": "17", "label": "石川" }, { "value": "18", "label": "福井" }, { "value": "19", "label": "山梨" }, { "value": "20", "label": "長野" }, { "value": "21", "label": "岐阜" }, { "value": "22", "label": "静岡" }, { "value": "23", "label": "愛知" },
         { "value": "24", "label": "三重" }, { "value": "25", "label": "滋賀" }, { "value": "26", "label": "京都" }, { "value": "27", "label": "大阪" }, { "value": "28", "label": "兵庫" }, { "value": "29", "label": "奈良" }, { "value": "30", "label": "和歌山" },
