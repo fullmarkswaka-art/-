@@ -3,6 +3,7 @@
     You may also like: Shopify のおすすめ商品 API（Section Rendering）で取得。初回表示はコレクション内の商品で代替。
   endcomment
   assign s = section.settings
+  assign limit = s.limit | plus: 0
   assign list = recommendations.products
   if recommendations.performed == false or list.size == 0
     assign col = product.collections.first
@@ -19,7 +20,7 @@
     endif
   endif
 -%}
-<section class="lp lp--related container" data-related data-url="{{ routes.product_recommendations_url }}?section_id={{ section.id }}&product_id={{ product.id }}&limit={{ s.limit | plus: 1 }}" data-header="dark">
+<section class="lp lp--related container" data-related data-url="{{ routes.product_recommendations_url }}?section_id={{ section.id }}&product_id={{ product.id }}&limit={{ limit | plus: 1 }}" data-header="dark">
   <div class="sec__head sec__head--s">
     <h2 class="sec-h sec-h--xs">{{ s.heading }}</h2>
     <a class="more" href="{{ routes.all_products_collection_url }}">{{ s.link_label }}　→</a>
@@ -28,7 +29,7 @@
     {%- assign n = 0 -%}
     {%- for p in list -%}
       {%- if p.id == product.id -%}{%- continue -%}{%- endif -%}
-      {%- if n >= s.limit -%}{%- break -%}{%- endif -%}
+      {%- if n >= limit -%}{%- break -%}{%- endif -%}
       {% render 'product-card', product: p, index: n %}
       {%- assign n = n | plus: 1 -%}
     {%- endfor -%}
@@ -40,7 +41,7 @@
   "settings": [
     { "type": "text", "id": "heading", "label": "見出し", "default": "You may also like" },
     { "type": "text", "id": "link_label", "label": "リンク文言", "default": "VIEW ALL" },
-    { "type": "range", "id": "limit", "label": "表示数", "min": 4, "max": 8, "step": 4, "default": 4 }
+    { "type": "select", "id": "limit", "label": "表示数", "options": [ { "value": "4", "label": "4点" }, { "value": "8", "label": "8点" } ], "default": "4" }
   ]
 }
 {% endschema %}

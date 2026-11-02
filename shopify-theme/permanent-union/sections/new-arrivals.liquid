@@ -7,6 +7,7 @@
   if col == blank
     assign col = collections.all
   endif
+  assign limit = s.limit | plus: 0
   assign prods = col.products
   if s.sort_newest
     assign prods = col.products | sort: 'published_at' | reverse
@@ -19,7 +20,7 @@
       {%- if s.link_label != blank -%}<a class="more" href="{{ col.url | default: routes.all_products_collection_url }}">{{ s.link_label }}　→</a>{%- endif -%}
     </div>
     <div class="cards cards--4">
-      {%- for product in prods limit: s.limit -%}
+      {%- for product in prods limit: limit -%}
         {% render 'product-card', product: product, index: forloop.index0 %}
       {%- else -%}
         {%- for i in (1..4) -%}
@@ -37,7 +38,7 @@
     { "type": "text", "id": "sub", "label": "和文小見出し", "default": "新着アイテム" },
     { "type": "collection", "id": "collection", "label": "コレクション", "info": "未設定なら全商品から。Ordify から同期された商品が自動で入ります" },
     { "type": "checkbox", "id": "sort_newest", "label": "公開日の新しい順に並べる", "default": true },
-    { "type": "range", "id": "limit", "label": "表示数", "min": 4, "max": 8, "step": 4, "default": 4 },
+    { "type": "select", "id": "limit", "label": "表示数", "options": [ { "value": "4", "label": "4点" }, { "value": "8", "label": "8点" } ], "default": "4" },
     { "type": "text", "id": "link_label", "label": "右上のリンク文言", "default": "VIEW ALL" }
   ],
   "presets": [{ "name": "New Arrivals（新着）" }]
