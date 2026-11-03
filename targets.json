@@ -62,7 +62,8 @@
       "utm_campaign": "doublepoint2026",
       "image": "copy/creatives/doublepoint2026/doublepoint_1080x1080.jpg",
       "offer": "対象商品のお買い物ポイントが2倍",
-      "ads_start": "2026-10-19"
+      "ads_start": "2026-10-19",
+      "ended": true
     }
   ],
   "_events_note": "イベント広告は通常運用と別枠。events[] で企画ごとに予算・Metaキャンペーン・Googleアセットを管理し、scripts/event_report.py と週次レポートの「イベント枠」で集計する。event_campaign_ids は月間ペースの除外用（events の meta_campaign_ids と同じ）"
