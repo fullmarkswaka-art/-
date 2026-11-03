@@ -637,3 +637,7 @@ FULLMARKS（fullmarksstore.jp）の広告運用ツール。Meta/Google広告のA
   Meta キャンペーン 52613872650335 を PAUSED。targets.json の doublepoint2026 に ended: true（event_campaign_ids は11月末まで残す）。
   速報（event_report、11/3 分は途中）: Meta 51,967円（予備 51,000 の102%）・購入9・14.4万（2.8）。コールアウトが出た検索広告（参考、費用は通常運用）73,288円・購入46・83.0万。
   次: 確定後に `scripts/event_pdf_report.py --key doublepoint2026`、build_ad_budget_plan.py の EVENTS に Meta 使用分を入れて 2027-04 から差し引き、pycel で確認。
+- 【2026-11-04 03:15 JST 11月予算案を反映（ユーザー「11月の予算案を反映して」）】`apply_budget_plan.py copy/budgets/2026-11.json --apply`: 指名_ポック 800→1,200 / 指名_ノローナ 1,000→1,500 /
+  指名_HESTRA 2,500→3,000 / PLA_v2 500→1,500 / カタログ 5,000→6,000 / RTG ポック 2,000→1,000 / アクリマ 1,000→1,500 / HESTRA 写真 3,000→4,000（計 30,800→34,700円/日、反映を再確認済み）。
+  Meta 利用上限 47万→76万（使用額 67,532円）。予約: 11/7 00:10 RTG フーディニ 3,500→5,000（trig_01Sunvra3wfFZ7C1HeT3XsA7）、11/10 00:10 カタログ 6,000→7,000（trig_01FmfCep1EEmio3g5A3xCi5F）。
+  BF 4日間の約1.5倍は日程確定後に別途。
