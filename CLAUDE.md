@@ -652,3 +652,7 @@ FULLMARKS（fullmarksstore.jp）の広告運用ツール。Meta/Google広告のA
   下書き更新: copy/blackfriday2026_meta.json（BF 予備費10万を 11/23〜26 8,000/8,000/8,000/10,000・27 18,000・28 22,000・29 26,000、11/29 23:50 停止）、
   copy/blackfriday2026_message.txt、copy/blackfriday2026_google.json（コールアウト「BLACK FRIDAY 11/29まで」「セール品さらに10%OFF」案）。
   通常運用の約1.5倍は元の4日案。7日間にするかは要確認（7日×1.5倍だと11月の通常運用 約+12万）。
+- 【2026-11-05 ユーザー指示「27〜29日の3日間だけ1.5倍で」】BF 期間の通常運用の増額は 11/27〜29 の3日間のみ（その時点の日予算×1.5、100円単位）。copy/budgets/2026-11.json の schedule を更新。
+  予約: 11/24 10:20 ペース確認（月末見込み・Meta 上限76万に届くかを出して必要なら承認依頼、trig_01S5KqRn1Uum3FUThvz13spD）/ 11/27 00:05 1.5倍（変更前を reports/bf_budget_before_20261126.json に保存、
+  trig_01T2UbwkEogQ2soEbfQYbUjT）/ 11/30 00:05 元に戻す（trig_01UNNsmK6MLY5VMiVgLAJZMz）。概算 +5.7万（うち Meta +3.2万）で、Meta は上限76万を少し超える見込み。
+  BF 画像の素材はユーザーがチャットに7枚貼ったが、ファイルとしては届いていない（/root/.claude/uploads に無い）。ファイル添付（zip 可）を依頼中。
