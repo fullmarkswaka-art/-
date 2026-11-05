@@ -35,10 +35,14 @@ SEP_MTD = 637_248          # 9月 通常運用の確定実績（Google 329,101 +
 SEP_MTD_DAYS = 30
 SEP_NORMAL = 637_248       # 9月 通常運用の確定実績（予算65万に対し98%。使い残し 12,752円は10〜4月へ）
 # 9月のイベントは「使った分だけ」を通常運用と別に計上する（2026-09-25 ユーザー指示）。予備費 税込10万のうち使用分。
-EVENTS = {"2026-09": ("SW企画 実績（予備費 税込10万のうち使用分）", 48_422),
-          "2026-11": ("ブラックフライデー（他社と同日程・約4日間。11月の通常運用から10万を移す）", 100_000),
-          "2026-12": ("年末年始企画", 100_000),
-          "2027-02": ("冬セール", 250_000), "2027-03": ("イベント告知予備", 50_000)}
+# (月, 内容, 金額, 4月から差し引くか)。計画時からの予備費は False（10〜4月の総額から先に除く）。
+# 期中に追加した企画は True（2027-04 の調整月からだけ差し引き、11〜3月の配分は変えない）。
+EVENTS = [("2026-09", "SW企画 実績（予備費 税込10万のうち使用分）", 48_422, False),
+          ("2026-10", "秋のダブルポイント 10月分（実績、4月から差し引く）", 36_730, True),
+          ("2026-11", "秋のダブルポイント 11/1〜3分（実績、4月から差し引く）", 15_266, True),
+          ("2026-11", "ブラックフライデー（他社と同日程・約4日間。11月の通常運用から10万を移す）", 100_000, False),
+          ("2026-12", "年末年始企画", 100_000, False),
+          ("2027-02", "冬セール", 250_000, False), ("2027-03", "イベント告知予備", 50_000, False)]
 MONTHS_OCT = ["2026-10", "2026-11", "2026-12", "2027-01", "2027-02", "2027-03", "2027-04"]
 # 2026-09-28 ユーザー承認の方針: 10月は冬物の立ち上がり前なので約80万に抑え、差分（約25万）を11月+15万・12月+10万の
 # 通常品の冬物強化に回す（イベントで動くのはセール品＝粗利が薄いため、イベント広告には回さない）。4月は残額調整。
@@ -130,18 +134,24 @@ def build(out: str) -> None:
     ws["A18"] = "イベント予備費（通常運用と別枠。終わった企画は使った分だけを計上）"; ws["A18"].font = bold
     for c_, h in enumerate(["月", "内容", "金額"], 1):
         cell = ws.cell(row=19, column=c_, value=h); cell.font = wb_; cell.fill = hdr; cell.alignment = center
-    ev_rows = {}
-    for i, (m, (name, amt)) in enumerate(EVENTS.items(), 20):
+    ev_rows, plan_cells, extra_cells = {}, [], []
+    for i, (m, name, amt, extra) in enumerate(EVENTS, 20):
         ws.cell(row=i, column=1, value=m).font = black; ws.cell(row=i, column=2, value=name).font = black
         cell = ws.cell(row=i, column=3, value=amt); cell.font = blue; cell.number_format = YEN
-        cell.fill = grey if m == "2026-09" else yellow  # 9月は実績（使った分）、以降は仮置き
-        ev_rows[m] = i
+        cell.fill = grey if (m == "2026-09" or extra) else yellow  # 実績（使った分）は灰色、以降は仮置き
+        ev_rows.setdefault(m, []).append(i)
+        (extra_cells if extra else plan_cells).append(f"C{i}")
     ev_end = 19 + len(EVENTS)
     ws.cell(row=ev_end + 1, column=1, value="計").font = bold
     cell = ws.cell(row=ev_end + 1, column=3, value=f"=SUM(C20:C{ev_end})"); cell.font = bold; cell.number_format = YEN
-    K_EV = f"前提!$C${ev_end+1}"
+    ws.cell(row=ev_end + 2, column=1, value="うち期中に追加（4月から差し引く）").font = black
+    cell = ws.cell(row=ev_end + 2, column=3, value="=" + ("+".join(extra_cells) or "0")); cell.number_format = YEN
+    K_EV_EXTRA = f"前提!$C${ev_end+2}"
+    K_EV = f"(前提!$C${ev_end+1}-{K_EV_EXTRA})"
+    def ev_ref(m):
+        return "=" + "+".join(f"前提!C{r}" for r in ev_rows[m])
     # 10〜4月の月別比率
-    r0 = ev_end + 4
+    r0 = ev_end + 5
     ws.cell(row=r0 - 1, column=1, value="10〜4月 通常運用の月別配分比率（繁忙期に厚く。4月は残額調整）").font = bold
     for c_, h in enumerate(["月", "比率"], 1):
         cell = ws.cell(row=r0, column=c_, value=h); cell.font = wb_; cell.fill = hdr; cell.alignment = center
@@ -209,7 +219,7 @@ def build(out: str) -> None:
     ws2.cell(row=row, column=3, value=f"={K_SEP}").font = green
     for c_ in (4, 5, 6, 7): ws2.cell(row=row, column=c_, value=0)
     ws2.cell(row=row, column=8, value=f"=C{row}+D{row}+E{row}+F{row}+G{row}")
-    ws2.cell(row=row, column=9, value=f"=前提!C{ev_rows['2026-09']}").font = green
+    ws2.cell(row=row, column=9, value=ev_ref("2026-09")).font = green
     ws2.cell(row=row, column=10, value=f"=H{row}+I{row}")
     ws2.cell(row=row, column=11, value=f"=K{row-1}+J{row}")
     ws2.cell(row=row, column=12, value=f"={K_ANNUAL}-K{row}")
@@ -224,14 +234,14 @@ def build(out: str) -> None:
         elif m in ("2026-11", "2026-12"):
             h_val = f"={K_ALLOC}*前提!$B${w_rows[m]}+{K_OCT_LEFT}*前提!$B${w_rows[m]}/({wn}+{wd})"
         elif m == "2027-04":
-            h_val = f"={K_ALLOC}-SUM(H{month_rows['2026-10']}:H{row-1})"
+            h_val = f"={K_ALLOC}-SUM(H{month_rows['2026-10']}:H{row-1})-{K_EV_EXTRA}"
         else:
             h_val = f"={K_ALLOC}*前提!$B${w_rows[m]}"
         ws2.cell(row=row, column=8, value=h_val)
         for c_ in (4, 5, 6): ws2.cell(row=row, column=c_, value=f"=ROUND(H{row}*{K_STORE},0)")
         ws2.cell(row=row, column=3, value=f"=H{row}-D{row}-E{row}-F{row}")
         ws2.cell(row=row, column=7, value=0)
-        ws2.cell(row=row, column=9, value=(f"=前提!C{ev_rows[m]}" if m in ev_rows else 0))
+        ws2.cell(row=row, column=9, value=(ev_ref(m) if m in ev_rows else 0))
         if m in ev_rows: ws2.cell(row=row, column=9).font = green
         ws2.cell(row=row, column=10, value=f"=H{row}+I{row}")
         ws2.cell(row=row, column=11, value=f"=K{row-1}+J{row}")

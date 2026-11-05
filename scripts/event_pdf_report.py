@@ -179,6 +179,7 @@ def google_event(gc, ev, since, until):
 # ---------------- ページ構成 ----------------
 
 def build(ev, meta, goog, since, until, out):
+    GL = ev.get("google_label", "プロモーション表示")
     ads = meta["adsets"]
     spend = sum(a["spend"] for a in ads); pur = sum(a["pur"] for a in ads); rev = sum(a["rev"] for a in ads)
     pur_c = sum(a["pur_click"] for a in ads); pur_v = sum(a["pur_view"] for a in ads)
@@ -201,7 +202,7 @@ def build(ev, meta, goog, since, until, out):
     pts = [f"広告費 {yen(spend)} で、Meta の計測上 {pur:.0f}件・{yen(rev)} の購入がありました。",
            f"このうち確度の高いクリック経由は {pur_c:.0f}件・{yen(rev_c)} で、ROAS は {rev_c / spend:.1f} です。" if spend else "",
            f"成果の大半は「{best['name']}」の配信から出ています。" if best else "",
-           "Google の指名検索には割引の告知（プロモーション表示）を追加費用なしで付けました。"]
+           ev.get("google_summary", "Google の指名検索には割引の告知（プロモーション表示）を追加費用なしで付けました。")]
     for s_ in pts:
         if s_:
             story.append(Paragraph(s_, S["bullet"], bulletText="■"))
@@ -246,15 +247,15 @@ def build(ev, meta, goog, since, until, out):
                                table(data, [44 * mm, 20 * mm, 26 * mm, 20 * mm, 20 * mm, 14 * mm, 22 * mm])]))
 
     if goog and goog["promo"]:
-        story.append(P("Google 指名検索のプロモーション表示", "h2"))
+        story.append(P(f"Google 指名検索の{GL}", "h2"))
         data = [["キャンペーン", "表示", "クリック", "広告費", "購入", "売上"]]
         for k, v in sorted(goog["promo"].items(), key=lambda kv: -kv[1]["imp"]):
             data.append([k.replace("UC_SK_1_", ""), f"{v['imp']:,}", f"{v['clicks']:,}", yen(v["spend"]),
                          f"{v['cv']:.1f}", yen(v["rev"]) if v["rev"] else "—"])
         story.append(table(data, [50 * mm, 20 * mm, 20 * mm, 24 * mm, 18 * mm, 28 * mm]))
-        story.append(P("プロモーション表示は追加費用なし。広告費・購入は「表示が付いた検索広告」全体の数字で、"
-                       "割引表示が生んだ効果ではありません（指名検索はもともと買う意思の強い人が多い）。"
-                       "審査のため表示開始は 9/20 頃から。", "note"))
+        story.append(P(f"{GL}は追加費用なし。広告費・購入は「表示が付いた検索広告」全体の数字で、"
+                       f"{GL}が生んだ効果ではありません（指名検索はもともと買う意思の強い人が多い）。"
+                       + ev.get("google_note", "審査のため表示開始は 9/20 頃から。"), "note"))
 
     # 3. 計測の精度
     story.append(P("3. 広告計測の精度", "h1"))
@@ -292,23 +293,23 @@ def build(ev, meta, goog, since, until, out):
              P("iPhoneの追跡制限や広告ブロックで一部の購入が記録されない。実際の購入は計測より多い可能性" if not server else "記録漏れは少ない")],
             [P("利用者の照合（Meta）"), P("自動詳細マッチング: " + ("オフ" if not info.get("enable_automatic_matching") else "オン")),
              P("オフだと広告を見た人と購入者の照合率が下がり、広告経由の購入が少なめに出る")],
-            [P("売上金額"), P("注文金額（税込）をピクセルが記録"), P("広告費は税抜のため、税抜で比べるとROASは約1割低い。クーポン値引き後の金額かはEC側で要確認")],
+            [P("売上金額"), P("注文金額（税込）をピクセルが記録"), P("広告費は税抜のため、税抜で比べるとROASは約1割低い。" + ev.get("price_note", "クーポン値引き後の金額かはEC側で要確認"))],
             [P("Google の配分"), P(f"{goog['conv']['name']}：データドリブン、クリック後{goog['conv']['window']}日" if goog and goog["conv"] else "—"),
              P("1件の購入を複数の広告に分けて数えるため小数になる")],
             [P("媒体間の重複"), P("未確認"), P("同じ注文を Meta と Google の両方が数えている可能性")],
-            [P("計測の遅れ"), P("配信終了翌日に集計"), P("クリック後7日以内の購入は後から増えることがある。9/24時点で変化なし")]]
+            [P("計測の遅れ"), P("配信終了翌日に集計"), P("クリック後7日以内の購入は後から増えることがある。" + ev.get("lag_note", "9/24時点で変化なし"))]]
     story.append(KeepTogether([P("精度に影響する要因", "h2"), table(rows, [32 * mm, 58 * mm, 72 * mm], right_from=9)]))
 
     data = [["数字", "信頼度", "理由"],
             ["広告費 " + yen(spend), "高い", "媒体の請求額そのもの（税抜）"],
             [f"クリック経由の購入 {pur_c:.0f}件・{yen(rev_c)}", "中〜高", "広告クリック後の購入。ただし記録漏れで実数はやや多い可能性"],
             [f"ビュー経由の購入 {pur_v:.0f}件・{yen(rev - rev_c)}", "低い", "広告がなくても買っていた可能性を含む"],
-            ["Google プロモーション表示の成果", "参考値", "表示が付いた広告の成果で、割引表示の効果ではない"]]
+            [f"Google {GL}の成果", "参考値", f"表示が付いた広告の成果で、{GL}だけの効果ではない"]]
     t = table(data, [58 * mm, 18 * mm, 86 * mm], right_from=9)
     t.setStyle(TableStyle([("TEXTCOLOR", (1, 1), (1, 1), GOOD), ("TEXTCOLOR", (1, 2), (1, 2), WARN),
                            ("TEXTCOLOR", (1, 3), (1, 3), BAD), ("TEXTCOLOR", (1, 4), (1, 4), GREY)]))
     story.append(KeepTogether([P("総合評価", "h2"), t]))
-    story.append(P("実際の効果を確定するには、EC側の「企画期間中のクーポン利用件数・注文金額」と突き合わせるのが確実です。"
+    story.append(P(f"実際の効果を確定するには、EC側の「{ev.get('ec_check', '企画期間中のクーポン利用件数・注文金額')}」と突き合わせるのが確実です。"
                    "データをいただければ、広告計測との差（計測漏れ・重複）を数字で出せます。", "note"))
 
     # 4. 分析
@@ -317,15 +318,18 @@ def build(ev, meta, goog, since, until, out):
         story.append(Paragraph(s_, S["bullet"], bulletText="■"))
 
     # 5. 設定
-    story.append(KeepTogether([P("5. 設定の記録", "h1"), table([
-        ["項目", "内容"],
-        ["Meta キャンペーン", P("UC_DN_3_CVS_SW2026_AUTUMN_JOURNEY（購入最適化、キャンペーン予算）")],
-        ["配信先", P("① 訪問者・購入者30日（9/20〜21、成果なしで停止）② 全員向け Advantage+（9/20〜23）。日本・25〜65歳")],
-        ["予算", P("日予算 15,000円 → 20,000円（9/20 変更）。イベント予算 税込10万円（税抜 " + yen(reserve) + "）")],
-        ["終了", P("9/23 23:50 に停止（締切直前の流入はクーポンを使えないため）")],
-        ["Google", P("指名検索4本にプロモーション表示「対象のOUTLET商品 最大10%OFF」。9/23 23:50 に外した")],
-        ["リンク先", P("トップページ（Google は utm_campaign=sw2026_autumn_journey 付き）")],
-    ], [36 * mm, 126 * mm], right_from=9)]))
+    sw_settings = [
+        ("Meta キャンペーン", ("UC_DN_3_CVS_SW2026_AUTUMN_JOURNEY（購入最適化、キャンペーン予算）")),
+        ("配信先", ("① 訪問者・購入者30日（9/20〜21、成果なしで停止）② 全員向け Advantage+（9/20〜23）。日本・25〜65歳")),
+        ("予算", ("日予算 15,000円 → 20,000円（9/20 変更）。イベント予算 税込10万円（税抜 " + yen(reserve) + "）")),
+        ("終了", ("9/23 23:50 に停止（締切直前の流入はクーポンを使えないため）")),
+        ("Google", ("指名検索4本にプロモーション表示「対象のOUTLET商品 最大10%OFF」。9/23 23:50 に外した")),
+        ("リンク先", ("トップページ（Google は utm_campaign=sw2026_autumn_journey 付き）")),
+    ]
+    settings = [[k, P(v)] for k, v in ev.get("settings", [])] or [[k, P(v)] for k, v in sw_settings]
+    story.append(KeepTogether([P("5. 設定の記録", "h1"), table([["項目", "内容"]] + settings,
+        [36 * mm, 126 * mm], right_from=9)]))
+
 
     def _footer(canvas, doc):
         canvas.saveState(); canvas.setFont(FONT, 7.5); canvas.setFillColor(GREY)
