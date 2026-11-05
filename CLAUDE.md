@@ -656,3 +656,7 @@ FULLMARKS（fullmarksstore.jp）の広告運用ツール。Meta/Google広告のA
   予約: 11/24 10:20 ペース確認（月末見込み・Meta 上限76万に届くかを出して必要なら承認依頼、trig_01S5KqRn1Uum3FUThvz13spD）/ 11/27 00:05 1.5倍（変更前を reports/bf_budget_before_20261126.json に保存、
   trig_01T2UbwkEogQ2soEbfQYbUjT）/ 11/30 00:05 元に戻す（trig_01UNNsmK6MLY5VMiVgLAJZMz）。概算 +5.7万（うち Meta +3.2万）で、Meta は上限76万を少し超える見込み。
   BF 画像の素材はユーザーがチャットに7枚貼ったが、ファイルとしては届いていない（/root/.claude/uploads に無い）。ファイル添付（zip 可）を依頼中。
+- 【2026-11-05 BF 画像の案】ユーザー提供の素材2枚（zip、雪煙の写真 Tamok/Bibs＝Adobe RGB を sRGB に変換、POC FW26 Arcus の白黒滑走写真＝sRGB）から
+  `scripts/build_bf2026_images.py <素材> <出力>` で案A（雪煙・黒文字・ロゴと文字を右上の空に右揃え）と案B（白黒・白文字・左下）を 1:1・4:5・9:16 で作成
+  → copy/creatives/blackfriday2026/bf_A_powder_*.jpg / bf_B_bw_*.jpg。ロゴはサイトの store_logo.svg / store_logo_wt.svg を Chromium で PNG 化。フォント Inter Black。
+  文字は「BLACK FRIDAY」「11.23 (Mon) — 11.29 (Sun)」のみ。ユーザーの選択待ち（推奨A）。
