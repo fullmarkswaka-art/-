@@ -1,11 +1,21 @@
-{"_comment": "ブラックフライデー2026 の Meta 企画専用キャンペーン（下書き・未作成）。日程・割引・画像はユーザー確認待ち。予算は BF 予備費 10万（イベント枠・別計上）を最終日に厚く配分。全員向け（購入者も含める）、23:50 停止、utm_campaign=blackfriday2026。作成は `python -m ads_manager meta event-ad --json copy/blackfriday2026_meta.json`（--apply は承認後）",
+{
+ "_comment": "ブラックフライデー2026 の Meta 企画専用キャンペーン（下書き・未作成）。2026-11-05 ユーザー確定: 11/23（月）〜11/29（日）、対象品目全品＋通常の割引率からさらに10%OFF、画像の文字は BLACK FRIDAY と日付だけ、FULLMARKS STORE として1枚の広告（3サイズを配置別）。予算は BF 予備費 10万（イベント枠・別計上）を後半に厚く。全員向け（購入者も含める）、11/29 23:50 停止、utm_campaign=blackfriday2026。作成は `python -m ads_manager meta event-ad --json copy/blackfriday2026_meta.json`（--apply は承認後）",
  "name": "BLACKFRIDAY2026",
  "image": "copy/creatives/blackfriday2026/bf_1080x1080.jpg",
  "message_file": "copy/blackfriday2026_message.txt",
- "headline": "BLACK FRIDAY｜11/30（月）まで（仮）",
+ "headline": "BLACK FRIDAY｜11/29（日）まで",
  "link": "https://www.fullmarksstore.jp/?utm_source=meta&utm_medium=paid_social&utm_campaign=blackfriday2026",
- "daily_budget": 20000,
- "daily_plan": {"2026-11-27": 20000, "2026-11-28": 22000, "2026-11-29": 25000, "2026-11-30": 33000},
- "start_date": "2026-11-27",
- "end_date": "2026-11-30",
- "include_purchasers": true}
+ "daily_budget": 8000,
+ "daily_plan": {
+  "2026-11-23": 8000,
+  "2026-11-24": 8000,
+  "2026-11-25": 8000,
+  "2026-11-26": 10000,
+  "2026-11-27": 18000,
+  "2026-11-28": 22000,
+  "2026-11-29": 26000
+ },
+ "start_date": "2026-11-23",
+ "end_date": "2026-11-29",
+ "include_purchasers": true
+}

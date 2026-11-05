@@ -647,3 +647,8 @@ FULLMARKS（fullmarksstore.jp）の広告運用ツール。Meta/Google広告のA
   予算計画: build_ad_budget_plan.py の EVENTS を (月, 内容, 金額, 4月から差し引くか) のリストに変更。期中追加の企画（True）は 2027-04 からだけ差し引き、
   11〜3月の配分は不変（4月 772,253→720,257、年間 10,909,091・残り0 を pycel で確認）。event_pdf_report.py は SW 固有の文言を events[] の
   settings / google_label / google_summary / google_note / ec_check / price_note / lag_note で上書きできるようにした（SW の PDF も再生成で崩れなし）。
+- 【2026-11-05 ユーザー確定】**ブラックフライデーは 11/23（月）〜11/29（日）の7日間**、対象品目全品＋通常の割引率からさらに10%OFF。画像の文字は「BLACK FRIDAY」と日付だけ、
+  FULLMARKS STORE として Meta 広告1本（3サイズ配置別）。素材はユーザーの PC（ダウンロード/素材）にあり、クラウドからは開けないため添付かフォルダ接続を依頼中。
+  下書き更新: copy/blackfriday2026_meta.json（BF 予備費10万を 11/23〜26 8,000/8,000/8,000/10,000・27 18,000・28 22,000・29 26,000、11/29 23:50 停止）、
+  copy/blackfriday2026_message.txt、copy/blackfriday2026_google.json（コールアウト「BLACK FRIDAY 11/29まで」「セール品さらに10%OFF」案）。
+  通常運用の約1.5倍は元の4日案。7日間にするかは要確認（7日×1.5倍だと11月の通常運用 約+12万）。
