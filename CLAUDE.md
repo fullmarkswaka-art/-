@@ -660,3 +660,5 @@ FULLMARKS（fullmarksstore.jp）の広告運用ツール。Meta/Google広告のA
   `scripts/build_bf2026_images.py <素材> <出力>` で案A（雪煙・黒文字・ロゴと文字を右上の空に右揃え）と案B（白黒・白文字・左下）を 1:1・4:5・9:16 で作成
   → copy/creatives/blackfriday2026/bf_A_powder_*.jpg / bf_B_bw_*.jpg。ロゴはサイトの store_logo.svg / store_logo_wt.svg を Chromium で PNG 化。フォント Inter Black。
   文字は「BLACK FRIDAY」「11.23 (Mon) — 11.29 (Sun)」のみ。ユーザーの選択待ち（推奨A）。
+- 【2026-11-07 00:16 JST 予約どおり】Meta RTG フーディニ 52597385880935 を 3,500→5,000円/日（読み直しで確認）。TIH 特集 52614789162135 は stop_time（11/6 23:50）経過後も ACTIVE 表示だったので
+  PAUSED にした。TIH 通算 10/23〜11/6: 21,140円・リンククリック450・ページ閲覧342・カート4・購入13・347,534円（16.4、TIH 以外の購入を含む。ビュー経由込み）。
