@@ -1,5 +1,5 @@
 {
- "_comment": "ブラックフライデー2026 の Google（下書き・未作成）。指名検索5本に付与、追加費用なし。11/23〜11/29、11/29 23:50 に紐付けを外す。「さらに10%OFF」はプロモーション アセットの形式（○%OFF）だと通常の10%引きに見えるため、コールアウト2つで出す案",
+ "_comment": "ブラックフライデー2026 の Google（下書き・未作成）。指名検索5本に付与、追加費用なし。11/23〜11/30、11/30 23:50 に紐付けを外す。「さらに10%OFF」はプロモーション アセットの形式（○%OFF）だと通常の10%引きに見えるため、コールアウト2つで出す案",
  "campaign_ids": [
   "272310512",
   "20299964805",
@@ -11,10 +11,10 @@
  "percent_off": null,
  "up_to": true,
  "start_date": "2026-11-23",
- "end_date": "2026-11-29",
+ "end_date": "2026-11-30",
  "final_url": "https://www.fullmarksstore.jp/?utm_source=google&utm_medium=cpc&utm_campaign=blackfriday2026",
  "callouts": [
-  "BLACK FRIDAY 11/29まで",
+  "BLACK FRIDAY 11/30まで",
   "セール品さらに10%OFF"
  ]
 }

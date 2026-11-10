@@ -20,7 +20,7 @@ F_TITLE = INTER + "Inter-Black.otf"
 F_DATE = INTER + "Inter-SemiBold.otf"
 F_DOW = INTER + "Inter-Medium.otf"
 SIZES = {"1080x1080": (1080, 1080), "1080x1350": (1080, 1350), "1080x1920": (1080, 1920)}
-DATE = ("11.23", "(Mon)", "11.29", "(Sun)")
+DATE = ("11.23", "(Mon)", "11.30", "(Mon)")
 
 
 def to_srgb(im: Image.Image) -> Image.Image:
