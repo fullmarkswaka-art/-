@@ -195,13 +195,15 @@ def google_remove_promotion_asset(gclient, asset_id: str, apply: bool = False) -
 def meta_create_event_campaign_placement(client: MetaAdsClient, name: str, images: dict[str, str], message: str,
                                          headline: str, link: str, daily_budget: int, end_date: str,
                                          template_adset: str, end_hm: str = "23:50",
-                                         apply: bool = False) -> dict:
+                                         start_date: str | None = None, apply: bool = False) -> dict:
     """企画用の CBO キャンペーン＋全員向け（Advantage+、除外なし＝既存客も含む）広告セット＋配置別画像の広告を作る。
     images: {"1x1": path, "4x5": path, "9x16": path}。template_adset の地域・年齢をそのまま使う。"""
     from .creative_swap import create_placement_creative, upload
     acct = client.config.ad_account_id
     end_time = f"{end_date}T{end_hm}:00+0900"
+    start_time = f"{start_date}T00:00:00+0900" if start_date else None  # 予約開始（審査は作成時に始まる）
     plan = {"apply": apply, "campaign": f"UC_DN_3_CVS_{name}", "daily_budget": daily_budget, "end_time": end_time,
+            "start_time": start_time,
             "adset": f"UCDN3_CVS_{name}_全員_Advantage+", "headline": headline, "message": message, "link": link,
             "images": images}
     if not apply:
@@ -218,6 +220,7 @@ def meta_create_event_campaign_placement(client: MetaAdsClient, name: str, image
                         billing_event="IMPRESSIONS", optimization_goal="OFFSITE_CONVERSIONS",
                         promoted_object=json.dumps({"pixel_id": PIXEL_ID, "custom_event_type": "PURCHASE"}),
                         targeting=json.dumps(t, ensure_ascii=False), end_time=end_time,
+                        **({"start_time": start_time} if start_time else {}),
                         attribution_spec=json.dumps([{"event_type": "CLICK_THROUGH", "window_days": 7},
                                                      {"event_type": "VIEW_THROUGH", "window_days": 1}]))
     ad = client.post(f"{acct}/ads", name=f"{name.lower()}_placement", adset_id=adset["id"],

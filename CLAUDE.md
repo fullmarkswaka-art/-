@@ -672,3 +672,7 @@ FULLMARKS（fullmarksstore.jp）の広告運用ツール。Meta/Google広告のA
 - 【2026-11-10 ユーザー指示「ブラックフライデー終わりの日を11/30にして」】BF は **11/23（月）〜11/30（月）の8日間**。画像（A・B 両案、文字「11.23 (Mon) — 11.30 (Mon)」）を再生成、
   copy/blackfriday2026_meta.json（見出し「BLACK FRIDAY｜11/30（月）まで」、10万を 7,000×3・8,000・14,000・16,000・18,000・23,000、11/30 23:50 停止）・message・google（コールアウト「BLACK FRIDAY 11/30まで」）を更新。
   通常運用の1.5倍（11/27〜29）と 11/30 00:05 の戻し予約（trig_01UNNsmK6MLY5VMiVgLAJZMz）は未変更。最終日を含めて 11/30 まで延ばすかはユーザー確認中。
+- 【2026-11-10 ユーザー指示「30日まで延ばして、画像はA案で」】通常運用の1.5倍は **11/27〜30 の4日間**。予約を更新: 11/27 00:05 増額（trig_01T2UbwkEogQ2soEbfQYbUjT）、
+  戻しは **12/1 00:05**（trig_01UNNsmK6MLY5VMiVgLAJZMz、run_once_at を変更）。BF 画像は **A案（雪煙）** に決定。copy/blackfriday2026_meta.json に images（A の3サイズ）・
+  template_adset 52613872652335（DP の全員向け、JP・25〜65歳）を設定。event_ads.meta_create_event_campaign_placement に start_date（予約開始）を追加。
+  BF 専用キャンペーンと Google コールアウトの作成は承認待ち（11/23 00:00 開始の予約で作成し、審査を前もって通す案）。

@@ -1,7 +1,6 @@
 {
- "_comment": "ブラックフライデー2026 の Meta 企画専用キャンペーン（下書き・未作成）。2026-11-05 ユーザー確定: 11/23（月）〜11/30（月）、対象品目全品＋通常の割引率からさらに10%OFF、画像の文字は BLACK FRIDAY と日付だけ、FULLMARKS STORE として1枚の広告（3サイズを配置別）。予算は BF 予備費 10万（イベント枠・別計上）を後半に厚く。全員向け（購入者も含める）、11/30 23:50 停止、utm_campaign=blackfriday2026。作成は `python -m ads_manager meta event-ad --json copy/blackfriday2026_meta.json`（--apply は承認後）。2026-11-10 ユーザー指示で終了日を 11/30 に変更",
+ "_comment": "ブラックフライデー2026 の Meta 企画専用キャンペーン（下書き・未作成）。2026-11-05 ユーザー確定: 11/23（月）〜11/30（月）、対象品目全品＋通常の割引率からさらに10%OFF、画像の文字は BLACK FRIDAY と日付だけ、FULLMARKS STORE として1枚の広告（3サイズを配置別）。予算は BF 予備費 10万（イベント枠・別計上）を後半に厚く。全員向け（購入者も含める）、11/30 23:50 停止、utm_campaign=blackfriday2026。作成は `python -m ads_manager meta event-ad --json copy/blackfriday2026_meta.json`（--apply は承認後）。2026-11-10 ユーザー指示で終了日を 11/30 に変更。2026-11-10 画像はA案（雪煙）に決定。作成は ads_manager.event_ads.meta_create_event_campaign_placement（start_date=11/23 で予約、承認後）",
  "name": "BLACKFRIDAY2026",
- "image": "copy/creatives/blackfriday2026/bf_1080x1080.jpg",
  "message_file": "copy/blackfriday2026_message.txt",
  "headline": "BLACK FRIDAY｜11/30（月）まで",
  "link": "https://www.fullmarksstore.jp/?utm_source=meta&utm_medium=paid_social&utm_campaign=blackfriday2026",
@@ -18,5 +17,11 @@
  },
  "start_date": "2026-11-23",
  "end_date": "2026-11-30",
- "include_purchasers": true
+ "include_purchasers": true,
+ "images": {
+  "1x1": "copy/creatives/blackfriday2026/bf_A_powder_1080x1080.jpg",
+  "4x5": "copy/creatives/blackfriday2026/bf_A_powder_1080x1350.jpg",
+  "9x16": "copy/creatives/blackfriday2026/bf_A_powder_1080x1920.jpg"
+ },
+ "template_adset": "52613872652335"
 }
