@@ -7,7 +7,8 @@
   "event_reserve_note": "11月はダブルポイント（〜11/3）とブラックフライデー予備費10万（イベント枠・別計上）",
   "min_roas": 10,
   "event_campaign_ids": [
-    "52613872650335"
+    "52613872650335",
+    "52618732335535"
   ],
   "events": [
     {
@@ -119,6 +120,27 @@
       "price_note": "ポイントは値引きではないので、注文金額はそのまま",
       "lag_note": "11/5 時点（終了2日後）で Meta の数字は確定済み",
       "google_note": "表示期間は 10/19〜11/3。"
+    },
+    {
+      "key": "blackfriday2026",
+      "label": "ブラックフライデー",
+      "start": "2026-11-23",
+      "end": "2026-11-30",
+      "reserve_ex_tax": 100000,
+      "reserve_note": "BF 予備費10万（11月の通常運用から移した分）。使った分だけをイベント枠として計上",
+      "meta_campaign_ids": [
+        "52618732335535"
+      ],
+      "google_asset_ids": [
+        "437897327729",
+        "438004895281"
+      ],
+      "utm_campaign": "blackfriday2026",
+      "image": "copy/creatives/blackfriday2026/bf_A_powder_1080x1080.jpg",
+      "offer": "対象品目全品が、いつもの割引率からさらに10%OFF",
+      "ads_start": "2026-11-23",
+      "google_label": "一言（コールアウト）表示",
+      "google_summary": "Google の指名検索に一言「BLACK FRIDAY 11/30まで」「セール品さらに10%OFF」（コールアウト）を追加費用なしで付けました。"
     }
   ],
   "_events_note": "イベント広告は通常運用と別枠。events[] で企画ごとに予算・Metaキャンペーン・Googleアセットを管理し、scripts/event_report.py と週次レポートの「イベント枠」で集計する。event_campaign_ids は月間ペースの除外用（events の meta_campaign_ids と同じ）"

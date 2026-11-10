@@ -676,3 +676,10 @@ FULLMARKS（fullmarksstore.jp）の広告運用ツール。Meta/Google広告のA
   戻しは **12/1 00:05**（trig_01UNNsmK6MLY5VMiVgLAJZMz、run_once_at を変更）。BF 画像は **A案（雪煙）** に決定。copy/blackfriday2026_meta.json に images（A の3サイズ）・
   template_adset 52613872652335（DP の全員向け、JP・25〜65歳）を設定。event_ads.meta_create_event_campaign_placement に start_date（予約開始）を追加。
   BF 専用キャンペーンと Google コールアウトの作成は承認待ち（11/23 00:00 開始の予約で作成し、審査を前もって通す案）。
+- 【2026-11-10 17:40 JST BF 広告を作成（ユーザー「今のうちに作って良い」）】Meta キャンペーン UC_DN_3_CVS_BLACKFRIDAY2026 **52618732335535**（CBO 7,000円/日・stop 11/30 23:50）、
+  広告セット 52618732339735（全員向け Advantage+・除外なし・JP 25〜65、start 11/23 00:00 / end 11/30 23:50）、広告 52618732363935（A案3サイズ配置別、審査中 IN_PROCESS）、クリエイティブ 1611503757118024。
+  Google コールアウト「BLACK FRIDAY 11/30まで」asset 437897327729・「セール品さらに10%OFF」438004895281 を指名検索5本に（表示期間 11/23〜11/30）。
+  targets.json events[] に blackfriday2026、event_campaign_ids に 52618732335535 を追加。予約: 審査確認 11/10 21:40（trig_011bWkCJdjRcWrtWRbvnTqM3）/
+  日予算切り替え 11/26 00:02 から毎日（trig_01LijoapndZckB83LD8kFNtP、8,000→14,000→16,000→18,000→23,000）/ 終了 11/30 23:50（trig_017nxvNDwjPuTo3ykzjLu1hh）。
+  消化率（11/1〜9）: 通常運用 358,326円（Google 162,169 / Meta 196,157）＝11月予算 1,141,672 の31%（日数30%）、月末見込み 約120万＋BF 1.5倍4日 約7.6万 → 約127万（111%）。
+  イベント枠 DP 15,266円。年間: 5〜10月 4,315,991 ＋ 11月分 373,592 ＝ 4,689,583（10,909,091 の43.0%、計画ペースとほぼ同じ）。Meta 利用 207,342/760,000。
