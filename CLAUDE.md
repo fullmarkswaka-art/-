@@ -690,3 +690,7 @@ FULLMARKS（fullmarksstore.jp）の広告運用ツール。Meta/Google広告のA
 - 【2026-11-11 ユーザー指示「この配分を反映して」】build_ad_budget_plan.py に SHIFT を追加し、**3〜4月から12〜1月へ20万**を移した
   （12月 +10万・1月 +10万・3月 −10万、4月は残額調整で −10万）。通常運用: 12月 1,399,781 / 1月 1,083,793 / 2月 1,124,266 / 3月 708,064 / 4月 620,257。
   年間 10,909,091・残り0 を pycel で確認。11月の超過（見込み 約13万）も4月から差し引くため、4月は 約49万になる見込み。
+- 【2026-11-11 ユーザー提供】**会社の「WEB広告 年間スケジュール」**（copy/schedule/WEB広告_年間スケジュール_FY2026.xls、書き起こし web_ad_schedule_FY2026.json）。
+  写真広告のテーマはこれに沿う。11月: NORRØNA lofoten シェル / HOUDINI Mid Layer / POC ゴーグル / ACLIMA WARMWOOL / HESTRA Short Cuff、
+  12月: NORRØNA tamok・more / HOUDINI Insulation / POC ヘルメット・ACLIMA HOTWOOL・HESTRA Long Cuff（中旬〜1月中旬）、1月下旬〜2月中旬 WINTER SALE。
+  NEW ARRIVAL の次（11月中〜下旬）の写真広告はこのテーマで差し替える案をユーザーに提示（画像の手配は未定）。

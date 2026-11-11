@@ -1,0 +1,10 @@
+{
+  "_comment": "会社の「WEB広告 年間スケジュール」（2026-11-11 ユーザー提供の xls、元ファイルは同じフォルダ）を書き起こしたもの。1か月を上旬・中旬・下旬に分けた表。写真広告のテーマ選びに使う",
+  "2026-11": {"NORRØNA": "シェル lofoten メイン", "HOUDINI": "Mid Layer", "POC": "スノーゴーグル メイン（〜12月上旬）", "ACLIMA": "WARMWOOL（〜12月上旬）", "HESTRA": "Short Cuff 系の製品（〜12月上旬）", "PU": "NEW ARRIVAL（10〜11月）", "イベント": "BLACK FRIDAY（下旬）"},
+  "2026-12": {"NORRØNA": "シェル tamok / more", "HOUDINI": "Insulation", "POC": "スノーヘルメット メイン（中旬〜1月中旬）", "ACLIMA": "HOTWOOL（中旬〜1月中旬）", "HESTRA": "Long Cuff 系の製品（中旬〜1月中旬）", "PU": "ブランド担当と要検討（〜1月中旬）"},
+  "2027-01": {"NORRØNA": "Insulation / Mid Layer（上〜中旬）", "HOUDINI": "シェル Fall in（上〜中旬）", "全ブランド": "WINTER SALE（下旬〜2月中旬）", "イベント": "WINTER SALE"},
+  "2027-02": {"NORRØNA": "Insulation / Mid Layer（下旬）", "HOUDINI": "フリース & Base Layer（下旬〜3月中旬）", "POC": "春らしいイメージ BC推し製品（下旬〜3月）", "ACLIMA": "MORIUS（下旬〜3月）", "HESTRA": "スプリングシーズンのイメージ、適した製品（下旬〜3月）", "PU": "ブランド担当と要検討（下旬〜3月）"},
+  "2027-03": {"NORRØNA": "BC lyngen / falketind", "HOUDINI": "NEW ARRIVAL（下旬〜4月）"},
+  "2027-04": {"NORRØNA": "NEW ARRIVAL", "POC": "NEW ARRIVAL", "ACLIMA": "NEW ARRIVAL", "HESTRA": "配信停止期間", "PU": "配信停止期間", "イベント": "W POINT（上〜中旬）/ FINAL SALE（下旬）"},
+  "2026-05_to_10_past": "5月 トレラン（senja / Pace）・Cycle・LIGHT WOOL → 6月 パンツ → 7月 Tee・Eye Wear・SUMMER SALE → 8月 Trekking・Pace Flow & Lykan・WOOLNET → 10月 NEW ARRIVAL（全ブランド）・W POINT。HESTRA・PU は5〜9月 配信停止"
+}
