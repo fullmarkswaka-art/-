@@ -694,3 +694,8 @@ FULLMARKS（fullmarksstore.jp）の広告運用ツール。Meta/Google広告のA
   写真広告のテーマはこれに沿う。11月: NORRØNA lofoten シェル / HOUDINI Mid Layer / POC ゴーグル / ACLIMA WARMWOOL / HESTRA Short Cuff、
   12月: NORRØNA tamok・more / HOUDINI Insulation / POC ヘルメット・ACLIMA HOTWOOL・HESTRA Long Cuff（中旬〜1月中旬）、1月下旬〜2月中旬 WINTER SALE。
   NEW ARRIVAL の次（11月中〜下旬）の写真広告はこのテーマで差し替える案をユーザーに提示（画像の手配は未定）。
+- 【2026-11-16 高価格冬物ショッピングの2週間判定（定例、11/2〜15）】UC_PL_7 24426699052: 表示45,040・クリック1,083・平均13.4円・費用14,541円・購入6・156,221円（10.7）、
+  予算による損失64%。4万円以上の購入あり（11/10 105,600円の注文、クリックは lofoten Gore-Tex insulated Jacket (W)／senja Gore-Tex Jacket (W)）。SAIL RACING AMPLITUDE 経由3件・43,371円、
+  PU MONSTER DOWN 1件（金額0）。クリック最多は PU MONSTER DOWN 219。検索語は「ノローナ ジャケット」「パタゴニア ダウン」「パーマネント ユニオン」「フーディニ」など。
+  PLA_v2 同期間: 費用19,855円・クリック1,186・16.7円・購入6・165,688円（8.3）、損失90%（改善前は4週間で購入1）。→ 基準上は停止せず続行。
+  提案（承認待ち）: 高価格冬物 1,000→2,000円/日、PLA_v2 1,500 据え置き、入札方式の切替は30日で購入15件たまってから（11月末に再確認）。
