@@ -276,7 +276,11 @@ def plain_name(name: str, short=False) -> str:
     if fr == "商品の特集（カルーセル）":
         return "Tech Insulation Houdi の特集広告（インスタ）"
     if fr == "ショッピング":
-        return "Googleショッピング（通常品の写真と価格）" if "outlet" not in n.lower() else "Googleショッピング（アウトレット）"
+        if "outlet" in n.lower():
+            return "Googleショッピング（アウトレット）"
+        if "高価格" in n:
+            return "Googleショッピング（4万円以上の冬物だけ）"
+        return "Googleショッピング（通常品の写真と価格）"
     if fr == "カタログ":
         if "SW" in n.upper() or "JOURNEY" in n.upper():
             return f"イベント広告（{n}）"
