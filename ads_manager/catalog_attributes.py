@@ -159,6 +159,11 @@ def check_product_pages(ids: list[str], workers: int = 8) -> set[str]:
         return {pid for pid, code in ex.map(status, ids) if code != 200}
 
 
+def is_sale_id(pid: str) -> bool:
+    """商品コードが 7 始まり11桁ならセール品（アウトレット）。"""
+    return len(pid) == 11 and pid.startswith("7") and pid.isdigit()
+
+
 def build_attribute_rows(feed_path: str | None = None, check_pages: bool = True) -> list[dict]:
     """フィード全商品に brand / custom_label_0 / custom_label_1 / product_type を付ける。
 
@@ -176,6 +181,10 @@ def build_attribute_rows(feed_path: str | None = None, check_pages: bool = True)
     outlet: set[str] = set()
     for cat in OUTLET_CATEGORIES:
         outlet.update(crawl_category(cat))
+    # サイトの OUTLET 一覧は企画（ブラックフライデー等）の準備で空になったり SALE 一覧へ移ったりする
+    # （2026-11-20 に発覚。一覧だけに頼るとセール品が通常品扱いになり広告に出てしまう）。
+    # 商品コードが 7 始まり11桁のものは全てセール品（2026-09-28 ユーザー確認）なので、一覧に無くても outlet とする。
+    outlet.update(pid for pid in feed if is_sale_id(pid))
 
     rows = []
     for pid, f in feed.items():
@@ -193,6 +202,14 @@ def build_attribute_rows(feed_path: str | None = None, check_pages: bool = True)
             "availability": f["availability"],
             "title": f["title"],
         })
+    # 歯止め: 前回の CSV よりアウトレット判定が大きく減っていたら止める（一覧の取りこぼしで広告に出るのを防ぐ）
+    if SUPPLEMENT_CSV.exists():
+        with open(SUPPLEMENT_CSV, encoding="utf-8") as fh:
+            prev = sum(1 for r in csv.DictReader(fh) if r.get("custom_label_0") == LABEL_OUTLET)
+        now = sum(1 for r in rows if r["custom_label_0"] == LABEL_OUTLET)
+        if prev >= 50 and now < prev * 0.6:
+            raise RuntimeError(f"アウトレット判定が急減しました（前回 {prev} → 今回 {now}）。"
+                               "サイトの一覧の変更が疑われるため、CSV を更新しません。")
     return rows
 
 
