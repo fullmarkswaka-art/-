@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """ブラックフライデー2026 の Meta 広告画像（1:1・4:5・9:16）を作る。
 
-使い方: python scripts/build_bf2026_images.py <素材フォルダ> <出力フォルダ>
+使い方: python scripts/build_bf2026_images.py <素材フォルダ> <出力フォルダ> [--pre]（--pre は事前告知用 COMING SOON 入り）
   素材フォルダには powder.jpg（雪煙の写真）・bw.jpg（白黒の滑走写真）・store_logo.png・store_logo_wt.png を置く。
   画像の文字は「BLACK FRIDAY」と日付だけ（2026-11-05 ユーザー指示）。左上に FULLMARKS ロゴ。
   9:16 は上 250px・下 340px に文字を置かない（アカウント名やボタンが重なるため）。
@@ -62,7 +62,7 @@ def draw_tracked(d, xy, s, f, fill, track=0):
         x += d.textlength(ch, font=f) + track
 
 
-def title_block(canvas: Image.Image, x: int, y: int, width: int, color, align="left", shadow=False):
+def title_block(canvas: Image.Image, x: int, y: int, width: int, color, align="left", shadow=False, tag: str | None = None):
     """BLACK / FRIDAY の2行と日付。width に合わせて文字の大きさを決める。戻り値は下端の y。"""
     d = ImageDraw.Draw(canvas)
     size = 200
@@ -77,6 +77,11 @@ def title_block(canvas: Image.Image, x: int, y: int, width: int, color, align="l
     fw = ImageFont.truetype(F_DOW, round(size * 0.17))
     lines = []
     ty = y
+    tag_item = None
+    if tag:  # 事前告知用の小見出し（例: COMING SOON）
+        ft = ImageFont.truetype(F_DATE, round(size * 0.20))
+        tag_item = (tag, ft, ty, round(size * 0.04))
+        ty += round(size * 0.34)
     for s in ("BLACK", "FRIDAY"):
         lines.append((s, f, ty, track))
         ty += round(size * 0.92)
@@ -87,7 +92,7 @@ def title_block(canvas: Image.Image, x: int, y: int, width: int, color, align="l
     dw = sum(d.textlength(s, font=ff) for s, ff in parts)
     layer = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
     ld = ImageDraw.Draw(layer)
-    for s, ff, yy, tr in lines:
+    for s, ff, yy, tr in ([tag_item] if tag_item else []) + lines:
         xx = x if align == "left" else x + width - text_w(ld, s, ff, tr)
         draw_tracked(ld, (xx, yy), s, ff, color, tr)
     xx = x if align == "left" else x + width - dw
@@ -100,6 +105,23 @@ def title_block(canvas: Image.Image, x: int, y: int, width: int, color, align="l
         canvas.paste(Image.new("RGB", canvas.size, (0, 0, 0)), (0, 0), sh)
     canvas.paste(layer, (0, 0), layer)
     return base + fd.getmetrics()[1]
+
+
+def build_pre(src: Path, out: Path):
+    """事前告知（11/21〜22）用: A案と同じ写真・配置に「COMING SOON」を足す。"""
+    out.mkdir(parents=True, exist_ok=True)
+    powder = to_srgb(Image.open(src / "powder.jpg"))
+    black = (17, 17, 17)
+    for key, (w, h) in SIZES.items():
+        top = 250 if h == 1920 else 64
+        m = 72
+        cy = {"1080x1080": 0.55, "1080x1350": 0.5, "1080x1920": 0.5}[key]
+        a = cover(powder, (w, h), 0.55, cy)
+        lg = logo(src / "store_logo.png", 300)
+        a.paste(lg, (w - m - lg.width, top), lg)
+        tw = {"1080x1080": 560, "1080x1350": 620, "1080x1920": 760}[key]
+        title_block(a, w - m - tw, top + lg.height + 40, tw, black, align="right", tag="COMING SOON")
+        a.save(out / f"bf_pre_A_powder_{key}.jpg", quality=92, subsampling=0)
 
 
 def build(src: Path, out: Path):
@@ -131,4 +153,7 @@ def build(src: Path, out: Path):
 
 
 if __name__ == "__main__":
-    build(Path(sys.argv[1]), Path(sys.argv[2]))
+    if len(sys.argv) > 3 and sys.argv[3] == "--pre":
+        build_pre(Path(sys.argv[1]), Path(sys.argv[2]))
+    else:
+        build(Path(sys.argv[1]), Path(sys.argv[2]))

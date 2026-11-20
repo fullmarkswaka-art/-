@@ -709,3 +709,10 @@ FULLMARKS（fullmarksstore.jp）の広告運用ツール。Meta/Google広告のA
   サイズ在庫は全2,389中1,280（54%）、19モデルが残り25%以下。ただし主力（HELI SKI・WAKAYAMA・FALL LINE・ERGO GRIP）は 7〜9 サイズが残っている → 在庫は主因ではない。
   サイトに BF の告知はまだ無い。考えられる理由: 11/2 週の突出の反動＋ブラックフライデー待ち（他社の先行セール含む）＋一部モデルのサイズ欠け。Google の遅れ計上で 11/12〜15 は少し増える可能性。
   確認方法: EC の HESTRA 注文（日別）で広告計測と実売を突き合わせる（ユーザーに依頼）。サイズ在庫の調べ方は product page の itemDetail-cart-matrix-subVariation-stock（× が在庫なし）。
+- 【2026-11-20 BF 事前告知を作成（ユーザー「21日土曜日から事前広告を配信、画像と配信設定を」）】LP 担当の指定: 期間前・期間中の LP は https://www.fullmarksstore.jp/topics_detail.html?info_id=26146、
+  セール対象の一覧は /category/SALE/ とブランド別 /category/{NORRONA,HOUDINI,POC,HESTRA,ACLIMA,SAILRACING}_SALE/（期間中も同じ。開始まで商品ページで購入不可、公開後は割引率・上代・割引後価格を表示）。
+  画像: A案（雪煙）に「COMING SOON」を足した bf_pre_A_powder_*.jpg（`scripts/build_bf2026_images.py <素材> <出力> --pre`）。設定 copy/blackfriday2026_pre_meta.json・本文 copy/blackfriday2026_pre_message.txt
+  （見出し「BLACK FRIDAY｜11/23（月）スタート」、本文に「ご購入は 11/23 0時から」）。Meta キャンペーン UC_DN_3_CVS_BLACKFRIDAY2026_PRE **52621232399735**（CBO 3,000円/日・stop 11/22 23:59）、
+  広告セット 52621232429935（全員向け・除外なし、start 11/21 00:00）、広告 52621232461135（3サイズ配置別、作成時 IN_PROCESS）。リンク先は LP（utm_campaign=blackfriday2026_pre）。
+  targets.json の blackfriday2026 の meta_campaign_ids と event_campaign_ids に追加（イベント枠、約6,000円）。審査確認の予約 trig_01JMWK5cVd8jJQhofCzVhSV2。
+  本番の BF 広告 52618732363935 のリンク先はトップページのまま（LP へ変えるかはユーザー確認中）。

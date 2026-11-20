@@ -1,0 +1,18 @@
+{
+ "_comment": "ブラックフライデー2026 の事前告知（2026-11-20 ユーザー指示「21日土曜日から事前広告を配信」）。11/21 00:00〜11/22 23:59、本番キャンペーンとは別のキャンペーン（CBO 3,000円/日、イベント枠）。リンク先は LP 担当指定の BF ページ（期間前・期間中とも同じ）。画像はA案（雪煙）に COMING SOON を足したもの（scripts/build_bf2026_images.py --pre）。セール開始までは商品ページで購入できないため、本文に「ご購入は 11/23 0時から」を入れる。",
+ "name": "BLACKFRIDAY2026_PRE",
+ "message_file": "copy/blackfriday2026_pre_message.txt",
+ "headline": "BLACK FRIDAY｜11/23（月）スタート",
+ "link": "https://www.fullmarksstore.jp/topics_detail.html?info_id=26146&utm_source=meta&utm_medium=paid_social&utm_campaign=blackfriday2026_pre",
+ "daily_budget": 3000,
+ "start_date": "2026-11-21",
+ "end_date": "2026-11-22",
+ "end_hm": "23:59",
+ "images": {
+  "1x1": "copy/creatives/blackfriday2026/bf_pre_A_powder_1080x1080.jpg",
+  "4x5": "copy/creatives/blackfriday2026/bf_pre_A_powder_1080x1350.jpg",
+  "9x16": "copy/creatives/blackfriday2026/bf_pre_A_powder_1080x1920.jpg"
+ },
+ "template_adset": "52613872652335",
+ "sale_lists": ["https://www.fullmarksstore.jp/category/SALE/", "https://www.fullmarksstore.jp/category/NORRONA_SALE/", "https://www.fullmarksstore.jp/category/HOUDINI_SALE/", "https://www.fullmarksstore.jp/category/POC_SALE/", "https://www.fullmarksstore.jp/category/HESTRA_SALE/", "https://www.fullmarksstore.jp/category/ACLIMA_SALE/", "https://www.fullmarksstore.jp/category/SAILRACING_SALE/"]
+}
