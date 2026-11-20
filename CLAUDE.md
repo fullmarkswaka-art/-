@@ -716,3 +716,6 @@ FULLMARKS（fullmarksstore.jp）の広告運用ツール。Meta/Google広告のA
   広告セット 52621232429935（全員向け・除外なし、start 11/21 00:00）、広告 52621232461135（3サイズ配置別、作成時 IN_PROCESS）。リンク先は LP（utm_campaign=blackfriday2026_pre）。
   targets.json の blackfriday2026 の meta_campaign_ids と event_campaign_ids に追加（イベント枠、約6,000円）。審査確認の予約 trig_01JMWK5cVd8jJQhofCzVhSV2。
   本番の BF 広告 52618732363935 のリンク先はトップページのまま（LP へ変えるかはユーザー確認中）。
+- 【2026-11-20 実施（ユーザー「本番のリンク先もBFページに変えて、11/23からBLACK FRIDAY という一言を出す」）】本番 BF 広告セット 52618732339735 に、リンク先を BF ページ
+  （topics_detail.html?info_id=26146&utm_campaign=blackfriday2026）にした新広告 **52621233691535**（同じA案画像・本文・見出し、作成時 IN_PROCESS）を追加。旧広告 52618732363935（リンク先トップ）は
+  新広告の審査通過後に停止（trig_01JMWK5cVd8jJQhofCzVhSV2 が確認して実行）。Google コールアウト「11/23からBLACK FRIDAY」asset **441338307093** を指名検索5本に（表示期間 11/21〜11/22、日付で自動終了）。

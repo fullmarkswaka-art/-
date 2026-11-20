@@ -16,5 +16,11 @@
  "callouts": [
   "BLACK FRIDAY 11/30まで",
   "セール品さらに10%OFF"
- ]
+ ],
+ "pre_callout": {
+  "text": "11/23からBLACK FRIDAY",
+  "asset_id": "441338307093",
+  "start_date": "2026-11-21",
+  "end_date": "2026-11-22"
+ }
 }
