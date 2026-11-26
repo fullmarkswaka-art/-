@@ -64,6 +64,7 @@ def launch(client: MetaAdsClient, conf_path: str, apply: bool = False) -> dict:
     conf_path = Path(conf_path)
     conf = json.loads(conf_path.read_text(encoding="utf-8"))
     img_dir = conf_path.parent
+    tag = conf.get("tag", "202610")
     aud = ensure_purchaser_audience(client, apply=apply)
     plan = {"apply": apply, "purchasers_180": aud or "(作成予定)", "ads": [], "exclusions": []}
     acct = client.config.ad_account_id
@@ -72,7 +73,7 @@ def launch(client: MetaAdsClient, conf_path: str, apply: bool = False) -> dict:
                  "headline": a["headline"]}
         if apply:
             hashes = {k: upload(client, img_dir / f"{a['file']}-newarrival_{w}x{h}.jpg") for k, (w, h) in SIZES.items()}
-            cr = create_placement_creative(client, f"{a['file']}-newarrival-202610", hashes, a["message"],
+            cr = create_placement_creative(client, f"{a['file']}-newarrival-{tag}", hashes, a["message"],
                                            a["headline"], a["link"])
             adsets = a.get("adsets") or []
             if a.get("new_campaign"):
@@ -81,7 +82,7 @@ def launch(client: MetaAdsClient, conf_path: str, apply: bool = False) -> dict:
                 adsets = [sid]
             entry["ad_ids"] = []
             for i, sid in enumerate(adsets):
-                name = f"{a['file']}-newarrival-202610" + (f"_{i + 1}" if len(adsets) > 1 else "")
+                name = f"{a['file']}-newarrival-{tag}" + (f"_{i + 1}" if len(adsets) > 1 else "")
                 ad = client.post(f"{acct}/ads", name=name, adset_id=sid,
                                  creative=json.dumps({"creative_id": cr}), status="ACTIVE")
                 entry["ad_ids"].append(ad["id"])
